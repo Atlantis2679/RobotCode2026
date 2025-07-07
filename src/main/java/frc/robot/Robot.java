@@ -15,7 +15,7 @@ import org.littletonrobotics.junction.wpilog.WPILOGReader;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 
 import team2679.atlantiskit.logfields.LogFieldsTable;
-import team2679.atlantiskit.networkalerts.NetworkAlertsManager;
+import team2679.atlantiskit.periodicalerts.PeriodicAlertsManager;
 import team2679.atlantiskit.tunables.TunablesManager;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -102,7 +102,7 @@ public class Robot extends LoggedRobot {
     public void robotPeriodic() {
         LogFieldsTable.updateAllTables();
         TunablesManager.update();
-        NetworkAlertsManager.update();
+        PeriodicAlertsManager.update();
         CommandScheduler.getInstance().run();
         Logger.recordOutput("Tuning Mode", TunablesManager.isEnabled());
     }
