@@ -31,7 +31,12 @@ public class SwerveModuleSim extends SwerveModuleIO {
     }
 
     @Override
-    protected double getAngleRotations() {
+    protected double getAbsoluteAngleRotations() {
+        return angleRotaions;
+    }
+
+    @Override
+    protected double getRelativeAngleRotations() {
         return angleRotaions;
     }
 

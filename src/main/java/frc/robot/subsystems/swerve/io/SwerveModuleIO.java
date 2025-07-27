@@ -6,13 +6,16 @@ import team2679.atlantiskit.logfields.IOBase;
 import team2679.atlantiskit.logfields.LogFieldsTable;
 
 public abstract class SwerveModuleIO extends IOBase {
-    public final DoubleSupplier angleRotations = fields.addDouble("angleRotations", this::getAngleRotations);
+    public final DoubleSupplier absoluteAngleRotations = fields.addDouble("absoluteAngleRotations", this::getAbsoluteAngleRotations);
+    public final DoubleSupplier relativeAngleRotations = fields.addDouble("relativeAngleRotaions", this::getRelativeAngleRotations);
 
     public SwerveModuleIO(LogFieldsTable fieldsTable) {
         super(fieldsTable);
     }
 
-    protected abstract double getAngleRotations();
+    protected abstract double getAbsoluteAngleRotations();
+
+    protected abstract double getRelativeAngleRotations();
 
     public abstract void setDriveMotorVoltage(int voltage);
 

@@ -2,7 +2,6 @@ package frc.robot.subsystems;
 
 import static frc.robot.subsystems.swerve.SwerveConstants.*;
 
-import edu.wpi.first.math.controller.PIDController;
 import frc.robot.Robot;
 import frc.robot.subsystems.swerve.io.SwerveModuleIO;
 import frc.robot.subsystems.swerve.io.SwerveModuleIOFalcon;
@@ -15,9 +14,7 @@ import team2679.atlantiskit.tunables.TunableBuilder;
 public class SwerveModule implements Tunable {
     private final LogFieldsTable fieldsTable;
     private final SwerveModuleIO io;
-    private final RotationalSensorHelper angleDegreesCW;
-    private final PIDController drivePIDController;
-    private final PIDController turnPIDController;
+    private final RotationalSensorHelper absoluteAngleDegreesCw;
 
     public SwerveModule(LogFieldsTable swerveFieldsTable, int moudleNum, int driveMotorID, int turnMotorID, int canCoderID) {
         fieldsTable = swerveFieldsTable.getSubTable("Module " + moudleNum + " " + getModuleName(moudleNum));
@@ -27,21 +24,16 @@ public class SwerveModule implements Tunable {
     
         fieldsTable.update();
         
-        angleDegreesCW = new RotationalSensorHelper(io.angleRotations.getAsDouble() * 360);
-        angleDegreesCW.enableContinuousWrap(0, 360);
-
-        drivePIDController = new PIDController(DRIVE_MOTOR_KP, DRIVE_MOTOR_KI, DRIVE_MOTOR_KD);
-        turnPIDController = new PIDController(TURN_MOTOR_KP, TURN_MOTOR_KI, TURN_MOTOR_KD);
+        absoluteAngleDegreesCw = new RotationalSensorHelper(io.absoluteAngleRotations.getAsDouble() * 360);
+        absoluteAngleDegreesCw.enableContinuousWrap(0, 360);
     }
 
     public void periodic() {
-        angleDegreesCW.update(io.angleRotations.getAsDouble() * 360);
-        fieldsTable.recordOutput("angleDegreesCW", angleDegreesCW.getAngle());
+        absoluteAngleDegreesCw.update(io.absoluteAngleRotations.getAsDouble() * 360);
+        fieldsTable.recordOutput("absoluteAngleDegreesCW", absoluteAngleDegreesCw.getAngle());
     }
 
     @Override
     public void initTunable(TunableBuilder builder) {
-        builder.addChild("driveMotorPID", drivePIDController);
-        builder.addChild("turnMotorPID", turnPIDController);
     }
 }

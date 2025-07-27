@@ -18,8 +18,13 @@ public class SwerveModuleIOFalcon extends SwerveModuleIO {
     }
 
     @Override
-    protected double getAngleRotations() {
+    protected double getAbsoluteAngleRotations() {
         return canCoder.getAbsolutePosition().getValueAsDouble();
+    }
+
+    @Override
+    protected double getRelativeAngleRotations() {
+        return canCoder.getPosition().getValueAsDouble();
     }
 
     @Override
