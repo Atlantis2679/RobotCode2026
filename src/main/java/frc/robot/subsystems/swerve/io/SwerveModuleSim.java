@@ -5,6 +5,7 @@ import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.wpilibj.simulation.FlywheelSim;
 import team2679.atlantiskit.logfields.LogFieldsTable;
 
+import static frc.robot.subsystems.swerve.SwerveConstants.MAX_VOLTAGE;
 import static frc.robot.subsystems.swerve.SwerveConstants.Sim.*;
 
 public class SwerveModuleSim extends SwerveModuleIO {
@@ -36,18 +37,22 @@ public class SwerveModuleSim extends SwerveModuleIO {
     }
 
     @Override
-    protected double getRelativeAngleRotations() {
-        return angleRotaions;
-    }
-
-    @Override
-    public void setDriveMotorVoltage(int voltage) {
+    public void setDriveVoltage(double voltage) {
         driveMotor.setInputVoltage(voltage);
     }
 
     @Override
-    public void setTurnMotorVoltage(int voltage) {
+    public void setTurnVoltage(double voltage) {
         turnMotor.setInputVoltage(voltage);
     }
-    
+
+    @Override
+    public void setDrivePercentageSpeed(double speed) {
+        driveMotor.setInputVoltage(speed * MAX_VOLTAGE);
+    }
+
+    @Override
+    public void setTurnPercentageSpeed(double speed) {
+        turnMotor.setInputVoltage(speed * MAX_VOLTAGE);
+    }    
 }

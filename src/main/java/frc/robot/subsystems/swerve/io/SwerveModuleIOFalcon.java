@@ -23,17 +23,22 @@ public class SwerveModuleIOFalcon extends SwerveModuleIO {
     }
 
     @Override
-    protected double getRelativeAngleRotations() {
-        return canCoder.getPosition().getValueAsDouble();
-    }
-
-    @Override
-    public void setDriveMotorVoltage(int voltage) {
+    public void setDriveVoltage(double voltage) {
         driveMotor.setVoltage(voltage);
     }
 
     @Override
-    public void setTurnMotorVoltage(int voltage) {
+    public void setTurnVoltage(double voltage) {
         turnMotor.setVoltage(voltage);
+    }
+
+    @Override
+    public void setDrivePercentageSpeed(double speed) {
+        driveMotor.set(speed);
+    }
+
+    @Override
+    public void setTurnPercentageSpeed(double speed) {
+        turnMotor.set(speed);
     }   
 }
