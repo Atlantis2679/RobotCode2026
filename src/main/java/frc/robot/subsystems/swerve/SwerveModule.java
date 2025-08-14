@@ -1,4 +1,4 @@
-package frc.robot.subsystems;
+package frc.robot.subsystems.swerve;
 
 import static frc.robot.subsystems.swerve.SwerveConstants.*;
 
@@ -30,25 +30,27 @@ public class SwerveModule implements Tunable {
         this.moduleNum = moudleNum;
         
         angleDegreesCw = new RotationalSensorHelper(io.absoluteAngleRotations.getAsDouble() * 360);
-        angleDegreesCw.enableContinuousWrap(0, 360);
+        angleDegreesCw.enableContinuousWrap(-180, 180);
     }
 
     public void periodic() {
         angleDegreesCw.update(io.absoluteAngleRotations.getAsDouble() * 360);
-        fieldsTable.recordOutput("absoluteAngleDegreesCW", angleDegreesCw.getAngle());
+        fieldsTable.recordOutput("Absolute Angle Degrees CW", getDegreesCW());
     }
 
     public void setTargetState(SwerveModuleState targetState, boolean optimize, boolean useVoltage) {
         if (optimize)
-            targetState.optimize(new Rotation2d(Math.toRadians(getAngleDegrees())));
+            targetState.optimize(new Rotation2d(Math.toRadians(getDegreesCW())));
     
         if (useVoltage)
             io.setDriveVoltage((targetState.speedMetersPerSecond / MAX_SPEED_MPS) * MAX_VOLTAGE);
         else
-            io.setTurnPercentageSpeed(targetState.speedMetersPerSecond / MAX_SPEED_MPS);
+            io.setDrivePercentageSpeed(targetState.speedMetersPerSecond / MAX_SPEED_MPS);
+        
+        io.set(targetState.angle.getRotations());
     }
 
-    public double getAngleDegrees() {
+    public double getDegreesCW() {
         return io.absoluteAngleRotations.getAsDouble();
     }
 

@@ -1,20 +1,71 @@
 package frc.robot.subsystems.swerve.io;
 
+import static frc.robot.subsystems.swerve.SwerveConstants.*;
+
+import com.ctre.phoenix6.StatusCode;
+import com.ctre.phoenix6.configs.CANcoderConfiguration;
+import com.ctre.phoenix6.configs.Slot0Configs;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.DutyCycleOut;
+import com.ctre.phoenix6.controls.PositionVoltage;
+import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 
+import frc.robot.utils.AlertsFactory;
 import team2679.atlantiskit.logfields.LogFieldsTable;
+import team2679.atlantiskit.periodicalerts.PeriodicAlertsGroup;
 
 public class SwerveModuleIOFalcon extends SwerveModuleIO {
     private final TalonFX driveMotor;
     private final TalonFX turnMotor;
     private final CANcoder canCoder;
 
+    private final VoltageOut driveVoltageControl = new VoltageOut(0);
+    private final DutyCycleOut drivePercentageControl = new DutyCycleOut(0);
+    
+    private final PositionVoltage turnVoltageControl = new PositionVoltage(0);
+
+    private StatusCode driveMotorStatus;
+    private StatusCode turnMotorStatus;
+    private StatusCode canCoderStatus;
+
+    private final Slot0Configs turnSlotConfigs;
+
     public SwerveModuleIOFalcon(LogFieldsTable fieldsTable, int moduleNum, int driveMotorID, int turnMotorID, int canCoderID) {
         super(fieldsTable);
         driveMotor = new TalonFX(driveMotorID);
         turnMotor = new TalonFX(turnMotorID);
         canCoder = new CANcoder(canCoderID);
+
+        TalonFXConfiguration driveMotorConfig = new TalonFXConfiguration();
+
+        driveMotorConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+        driveMotorConfig.Feedback.SensorToMechanismRatio = DRIVE_GEAR_RATIO;
+
+        TalonFXConfiguration turnMotorConfig = new TalonFXConfiguration();
+        
+        turnMotorConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+        turnMotorConfig.Feedback.SensorToMechanismRatio = TURN_GEAR_RATIO;
+
+        turnSlotConfigs = turnMotorConfig.Slot0;
+        turnSlotConfigs.kP = TURN_MOTOR_KP;
+        turnSlotConfigs.kI = TURN_MOTOR_KI;
+        turnSlotConfigs.kD = TURN_MOTOR_KD;
+
+        CANcoderConfiguration canCoderConfig = new CANcoderConfiguration();
+
+        driveMotorStatus = driveMotor.getConfigurator().apply(driveMotorConfig);
+        turnMotorStatus = turnMotor.getConfigurator().apply(turnMotorConfig);
+        canCoderStatus = canCoder.getConfigurator().apply(canCoderConfig);
+
+        AlertsFactory.phoenixMotor(PeriodicAlertsGroup.defaultInstance,
+            () -> driveMotorStatus, "Module " + moduleNum + " " + getModuleName(moduleNum) + " " + " Drive Motor Status");
+        AlertsFactory.phoenixMotor(PeriodicAlertsGroup.defaultInstance,
+            () -> turnMotorStatus, "Module " + moduleNum + " " + getModuleName(moduleNum) + " " + " Drive Motor Status");
+        AlertsFactory.phoenixMotor(PeriodicAlertsGroup.defaultInstance,
+            () -> canCoderStatus, "Module " + moduleNum + " " + getModuleName(moduleNum) + " " + " Drive Motor Status");
     }
 
     @Override
@@ -24,21 +75,16 @@ public class SwerveModuleIOFalcon extends SwerveModuleIO {
 
     @Override
     public void setDriveVoltage(double voltage) {
-        driveMotor.setVoltage(voltage);
-    }
-
-    @Override
-    public void setTurnVoltage(double voltage) {
-        turnMotor.setVoltage(voltage);
+        driveMotor.setControl(driveVoltageControl.withOutput(voltage));
     }
 
     @Override
     public void setDrivePercentageSpeed(double speed) {
-        driveMotor.set(speed);
+        driveMotor.setControl(drivePercentageControl.withOutput(speed));
     }
 
     @Override
-    public void setTurnPercentageSpeed(double speed) {
-        turnMotor.set(speed);
-    }   
+    public void setTurnAngleRotations(double rotations) {
+        turnMotor.setControl(turnVoltageControl.withPosition(rotations));
+    }
 }
