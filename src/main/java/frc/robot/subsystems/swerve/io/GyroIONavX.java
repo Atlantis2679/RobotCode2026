@@ -1,6 +1,5 @@
 package frc.robot.subsystems.swerve.io;
 
-
 import com.studica.frc.AHRS;
 
 import team2679.atlantiskit.logfields.LogFieldsTable;

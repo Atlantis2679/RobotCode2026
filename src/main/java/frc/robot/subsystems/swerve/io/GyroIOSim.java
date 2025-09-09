@@ -7,7 +7,7 @@ public class GyroIOSim extends GyroIO {
         super(fieldsTable);
     }
 
-    @Override 
+    @Override
     protected double getYawDegreesCW() {
         return 0;
     }

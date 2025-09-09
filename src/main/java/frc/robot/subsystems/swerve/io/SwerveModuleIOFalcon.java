@@ -1,11 +1,12 @@
 package frc.robot.subsystems.swerve.io;
 
-import static frc.robot.subsystems.swerve.SwerveConstants.*;
+import static frc.robot.subsystems.swerve.SwerveConstants.Modules.*;
 
 import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.CoastOut;
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
@@ -24,7 +25,7 @@ public class SwerveModuleIOFalcon extends SwerveModuleIO {
 
     private final VoltageOut driveVoltageControl = new VoltageOut(0);
     private final DutyCycleOut drivePercentageControl = new DutyCycleOut(0);
-    
+
     private final PositionVoltage turnVoltageControl = new PositionVoltage(0);
 
     private StatusCode driveMotorStatus;
@@ -33,7 +34,8 @@ public class SwerveModuleIOFalcon extends SwerveModuleIO {
 
     private final Slot0Configs turnSlotConfigs;
 
-    public SwerveModuleIOFalcon(LogFieldsTable fieldsTable, int moduleNum, int driveMotorID, int turnMotorID, int canCoderID) {
+    public SwerveModuleIOFalcon(LogFieldsTable fieldsTable, int moduleNum, int driveMotorID, int turnMotorID,
+            int canCoderID) {
         super(fieldsTable);
         driveMotor = new TalonFX(driveMotorID);
         turnMotor = new TalonFX(turnMotorID);
@@ -45,7 +47,7 @@ public class SwerveModuleIOFalcon extends SwerveModuleIO {
         driveMotorConfig.Feedback.SensorToMechanismRatio = DRIVE_GEAR_RATIO;
 
         TalonFXConfiguration turnMotorConfig = new TalonFXConfiguration();
-        
+
         turnMotorConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
         turnMotorConfig.Feedback.SensorToMechanismRatio = TURN_GEAR_RATIO;
 
@@ -60,16 +62,18 @@ public class SwerveModuleIOFalcon extends SwerveModuleIO {
         turnMotorStatus = turnMotor.getConfigurator().apply(turnMotorConfig);
         canCoderStatus = canCoder.getConfigurator().apply(canCoderConfig);
 
+        String moduleAlertPrefix = "Module " + moduleNum + " " + getModuleName(moduleNum) + " ";
+
         AlertsFactory.phoenixMotor(PeriodicAlertsGroup.defaultInstance,
-            () -> driveMotorStatus, "Module " + moduleNum + " " + getModuleName(moduleNum) + " " + " Drive Motor Status");
+                () -> driveMotorStatus, moduleAlertPrefix + "Drive Motor Status");
         AlertsFactory.phoenixMotor(PeriodicAlertsGroup.defaultInstance,
-            () -> turnMotorStatus, "Module " + moduleNum + " " + getModuleName(moduleNum) + " " + " Drive Motor Status");
+                () -> turnMotorStatus, moduleAlertPrefix + "Turn Motor Status");
         AlertsFactory.phoenixMotor(PeriodicAlertsGroup.defaultInstance,
-            () -> canCoderStatus, "Module " + moduleNum + " " + getModuleName(moduleNum) + " " + " Drive Motor Status");
+                () -> canCoderStatus, moduleAlertPrefix + "Can Coder Status");
     }
 
     @Override
-    protected double getAbsoluteAngleRotations() {
+    protected double getAbsoluteTurnAngleRotations() {
         return canCoder.getAbsolutePosition().getValueAsDouble();
     }
 
@@ -86,5 +90,16 @@ public class SwerveModuleIOFalcon extends SwerveModuleIO {
     @Override
     public void setTurnAngleRotations(double rotations) {
         turnMotor.setControl(turnVoltageControl.withPosition(rotations));
+    }
+
+    @Override
+    protected double getDriveDistanceRotations() {
+        return driveMotor.getPosition().getValueAsDouble();
+    }
+
+    @Override
+    public void setCoast() {
+        driveMotor.setControl(new CoastOut());
+        turnMotor.setControl(new CoastOut());
     }
 }

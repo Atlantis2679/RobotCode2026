@@ -1,4 +1,4 @@
-package frc;
+package frc.robot;
 
 public final class RobotMap {
   public static final class Module0 {
@@ -23,5 +23,9 @@ public final class RobotMap {
     public final static int DRIVE_MOTOR_ID = 26;
     public final static int TURN_MOTOR_ID = 27;
     public final static int CAN_CODER_ID = 53;
+  }
+
+  public static final class Controllers {
+    public static final int DRIVER_PORT = 0;
   }
 }
