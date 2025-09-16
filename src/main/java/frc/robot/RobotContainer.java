@@ -1,5 +1,6 @@
 package frc.robot;
 
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -19,7 +20,7 @@ public class RobotContainer {
             RobotMap.Controllers.DRIVER_PORT);
 
     public RobotContainer() {
-        new Trigger(DriverStation::isDisabled).whileTrue(swerveCommands.stop());
+        new Trigger(DriverStation::isDisabled).onTrue(swerveCommands.stop());
 
         configureBindings();
     }
@@ -32,7 +33,7 @@ public class RobotContainer {
                 driverController.leftBumper().negate()::getAsBoolean,
                 driverController.rightBumper()::getAsBoolean);
 
-        swerve.setDefaultCommand(driveCommand);
+        swerve.setDefaultCommand(swerve.run(() -> swerve.driveChassisSpeeds(new ChassisSpeeds(driverController.getLeftX(), driverController.getLeftY(), 0.0), true)));
 
         TunablesManager.add("Swerve/drive command", driveCommand.fullTunable());
 

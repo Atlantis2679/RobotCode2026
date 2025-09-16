@@ -57,7 +57,7 @@ public class SwerveModule implements Tunable {
         }
 
         if (optimize)
-            targetState.optimize(new Rotation2d(Math.toRadians(getDegreesCW())));
+            targetState.optimize(Rotation2d.fromDegrees(-getDegreesCW()));
 
         if (useVoltage)
             io.setDriveVoltage((targetState.speedMetersPerSecond / MAX_SPEED_MPS) * MAX_VOLTAGE);

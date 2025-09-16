@@ -13,7 +13,6 @@ import frc.robot.RobotMap.Module0;
 import frc.robot.RobotMap.Module1;
 import frc.robot.RobotMap.Module2;
 import frc.robot.RobotMap.Module3;
-import frc.robot.subsystems.swerve.SwerveConstants.Modules;
 import frc.robot.subsystems.swerve.io.GyroIO;
 import frc.robot.subsystems.swerve.io.GyroIONavX;
 import frc.robot.subsystems.swerve.io.GyroIOSim;
@@ -110,9 +109,9 @@ public class Swerve extends SubsystemBase {
   public void driveChassisSpeeds(ChassisSpeeds speeds, boolean useVoltage) {
     SwerveModuleState[] swerveModuleStates = kinematics.toSwerveModuleStates(speeds);
 
-    SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, Modules.MAX_SPEED_MPS);
+    // SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, Modules.MAX_SPEED_MPS);
 
-    setModulesState(swerveModuleStates, true, true, useVoltage);
+    setModulesState(swerveModuleStates, true, false, useVoltage);
   }
 
   public void setModulesState(SwerveModuleState[] moduleStates, boolean optimize, boolean preventJittering,
