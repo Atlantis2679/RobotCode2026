@@ -32,7 +32,7 @@ public class RobotContainer {
                 driverController.leftBumper().negate()::getAsBoolean,
                 driverController.rightBumper()::getAsBoolean);
 
-        swerve.setDefaultCommand(swerveCommands.driveForwardVoltage(() -> driverController.getLeftY() * 0.3));
+        swerve.setDefaultCommand(driveCommand);
 
         TunablesManager.add("Swerve/drive command", driveCommand.fullTunable());
 
@@ -43,6 +43,8 @@ public class RobotContainer {
                         driverController::getLeftX,
                         driverController::getLeftY,
                         driverController::getRightY).fullTunable());
+
+        
     }
 
     public Command getAutonomousCommand() {

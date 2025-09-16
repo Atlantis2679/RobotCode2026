@@ -33,8 +33,8 @@ public class SwerveModule implements Tunable {
 
         this.moduleNum = moudleNum;
 
-        angleDegreesCw = new RotationalSensorHelper(io.absoluteTurnAngleRotations.getAsDouble() * 360);
-        angleDegreesCw.enableContinuousWrap(0, 366);
+        angleDegreesCw = new RotationalSensorHelper(io.absoluteTurnAngleRotations.getAsDouble() * 360, OFFSETS[moudleNum]);
+        angleDegreesCw.enableContinuousWrap(0, 360);
     }
 
     public void periodic() {

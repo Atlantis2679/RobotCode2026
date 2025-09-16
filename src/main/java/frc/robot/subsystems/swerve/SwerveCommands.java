@@ -27,7 +27,7 @@ public class SwerveCommands {
         isFieldRelativeSupplier, isSensetiveMode);
   }
 
-  public Command driveForwardVoltage(DoubleSupplier forwardPrecentageSupplier) {
+  public Command driveForward(DoubleSupplier forwardPrecentageSupplier) {
     return swerve.run(
       () -> swerve.drive(forwardPrecentageSupplier.getAsDouble() * MAX_VOLTAGE, 0.0, 0.0, false, true));
   }

@@ -1,6 +1,7 @@
 package frc.robot.subsystems.swerve;
 
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.util.Units;
 
 public final class SwerveConstants {
     public static final class Modules {
@@ -19,19 +20,26 @@ public final class SwerveConstants {
             }
         }
 
-        public static final double TURN_MOTOR_KP = 0;
+        public static final double TURN_MOTOR_KP = 1.8 * 12;
         public static final double TURN_MOTOR_KI = 0;
         public static final double TURN_MOTOR_KD = 0;
 
         public static final double MAX_VOLTAGE = 12.5;
-        public static final double MAX_SPEED_MPS = 0;
+        public static final double MAX_SPEED_MPS = 0.432;
 
         public static final double PREVENT_JITTERING_MULTIPLAYER = 0.01;
 
-        public static final double DRIVE_GEAR_RATIO = 0;
-        public static final double TURN_GEAR_RATIO = 0;
+        public static final double DRIVE_GEAR_RATIO = 6.756;
+        public static final double TURN_GEAR_RATIO = 12.8;
 
-        public static final double WHEEL_CIRCUMFERENCE_METERS = 0;
+        public static final double WHEEL_CIRCUMFERENCE_METERS = Units.inchesToMeters(2);
+
+        public static final double[] OFFSETS = {
+            341.039,
+            125.771,
+            37.617,
+            81.387,
+        };
     }
 
     public final class Sim {
@@ -53,7 +61,7 @@ public final class SwerveConstants {
             new Translation2d(TRACK_LENGTH_METERS / 2, TRACK_WIDTH_METERS / 2),
     };
 
-    public static final double GYRO_CONNECTED_DEBUNCER_SECONDS = 0;
+    public static final double GYRO_CONNECTED_DEBUNCER_SECONDS = 0.1;
 
     public static final class DriverController {
         public static final double DRIVER_MAX_ANGULAR_VELOCITY_RPS = 8;
