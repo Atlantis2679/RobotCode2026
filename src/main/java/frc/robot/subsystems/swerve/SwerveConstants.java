@@ -24,8 +24,8 @@ public final class SwerveConstants {
         public static final double TURN_MOTOR_KI = 0;
         public static final double TURN_MOTOR_KD = 0;
 
-        public static final double MAX_VOLTAGE = 12.5;
-        public static final double MAX_SPEED_MPS = 0.432;
+        public static final double MAX_VOLTAGE = 12;
+        public static final double MAX_SPEED_MPS = 0.2;
 
         public static final double PREVENT_JITTERING_MULTIPLAYER = 0.01;
 
@@ -35,9 +35,9 @@ public final class SwerveConstants {
         public static final double WHEEL_CIRCUMFERENCE_METERS = Units.inchesToMeters(2);
 
         public static final double[] OFFSETS = {
-            341.039,
-            125.771,
-            37.617,
+            341.039 - 180,
+            125.771 + 180,
+            37.617 + 180,
             81.387,
         };
     }

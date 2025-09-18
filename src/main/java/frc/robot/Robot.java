@@ -143,6 +143,7 @@ public class Robot extends LoggedRobot {
     public void testInit() {
         CommandScheduler.getInstance().disable();
         TunablesManager.enable();
+        robotContainer.enterSwerveIntoTest();
     }
 
     @Override

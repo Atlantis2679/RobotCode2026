@@ -109,9 +109,9 @@ public class Swerve extends SubsystemBase {
   public void driveChassisSpeeds(ChassisSpeeds speeds, boolean useVoltage) {
     SwerveModuleState[] swerveModuleStates = kinematics.toSwerveModuleStates(speeds);
 
-    // SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, Modules.MAX_SPEED_MPS);
+    SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, Modules.MAX_SPEED_MPS);
 
-    setModulesState(swerveModuleStates, true, false, useVoltage);
+    setModulesState(swerveModuleStates, false, true, useVoltage);
   }
 
   public void setModulesState(SwerveModuleState[] moduleStates, boolean optimize, boolean preventJittering,
@@ -120,5 +120,11 @@ public class Swerve extends SubsystemBase {
 
     for (SwerveModule module : modules)
       module.setTargetState(moduleStates[module.getModuleNumber()], optimize, preventJittering, useVoltage);
+  }
+
+  public void costAll() {
+    for (SwerveModule module : modules) {
+      module.setCoast();
+    }
   }
 }

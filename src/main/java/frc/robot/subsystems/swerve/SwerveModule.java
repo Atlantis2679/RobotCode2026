@@ -88,6 +88,10 @@ public class SwerveModule implements Tunable {
                 Rotation2d.fromDegrees(getDegreesCW()));
     }
 
+    public void setCoast() {
+        io.setCoast();
+    }
+
     @Override
     public void initTunable(TunableBuilder builder) {
     }
