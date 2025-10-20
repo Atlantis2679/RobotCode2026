@@ -1,6 +1,5 @@
 package frc.robot;
 
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -33,7 +32,7 @@ public class RobotContainer {
                 driverController.leftBumper().negate()::getAsBoolean,
                 driverController.rightBumper()::getAsBoolean);
 
-        swerve.setDefaultCommand(swerveCommands.driveForward(driverController::getLeftY));
+        swerve.setDefaultCommand(swerveCommands.driverController(driverController::getLeftY, driverController::getLeftX, driverController::getRightY, () -> true, () -> true));
 
         TunablesManager.add("Swerve/drive command", driveCommand.fullTunable());
 

@@ -25,7 +25,7 @@ public final class SwerveConstants {
         public static final double TURN_MOTOR_KD = 0;
 
         public static final double MAX_VOLTAGE = 12;
-        public static final double MAX_SPEED_MPS = 0.2;
+        public static final double MAX_SPEED_MPS = 0.00000000001;
 
         public static final double PREVENT_JITTERING_MULTIPLAYER = 0.01;
 
@@ -56,9 +56,9 @@ public final class SwerveConstants {
 
     public static final Translation2d[] MODULES_LOCATIONS = {
             new Translation2d(TRACK_LENGTH_METERS / 2, TRACK_WIDTH_METERS / 2),
-            new Translation2d(TRACK_LENGTH_METERS / 2, TRACK_WIDTH_METERS / 2),
-            new Translation2d(TRACK_LENGTH_METERS / 2, TRACK_WIDTH_METERS / 2),
-            new Translation2d(TRACK_LENGTH_METERS / 2, TRACK_WIDTH_METERS / 2),
+            new Translation2d(TRACK_LENGTH_METERS / 2, -TRACK_WIDTH_METERS / 2),
+            new Translation2d(-TRACK_LENGTH_METERS / 2, TRACK_WIDTH_METERS / 2),
+            new Translation2d(TRACK_LENGTH_METERS / 2, -TRACK_WIDTH_METERS / 2),
     };
 
     public static final double GYRO_CONNECTED_DEBUNCER_SECONDS = 0.1;

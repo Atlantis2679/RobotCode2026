@@ -87,6 +87,8 @@ public class Swerve extends SubsystemBase {
         vAngleRandiansPS, Rotation2d.fromDegrees(-getYawDegreesCW()))
         : new ChassisSpeeds(vxSpeedMPS, vySpeedMPS, vAngleRandiansPS);
 
+    fieldsTable.recordOutput("Modules Target Chassis Speeds", targetChassisSpeeds);
+
     driveChassisSpeeds(targetChassisSpeeds, useVoltage);
   }
 
@@ -116,7 +118,7 @@ public class Swerve extends SubsystemBase {
 
   public void setModulesState(SwerveModuleState[] moduleStates, boolean optimize, boolean preventJittering,
       boolean useVoltage) {
-    fieldsTable.recordOutput("Module Target States", moduleStates);
+    fieldsTable.recordOutput("Modules Target States", moduleStates);
 
     for (SwerveModule module : modules)
       module.setTargetState(moduleStates[module.getModuleNumber()], optimize, preventJittering, useVoltage);
