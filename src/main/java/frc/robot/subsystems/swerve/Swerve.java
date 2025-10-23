@@ -87,8 +87,6 @@ public class Swerve extends SubsystemBase {
         vAngleRandiansPS, Rotation2d.fromDegrees(-getYawDegreesCW()))
         : new ChassisSpeeds(vxSpeedMPS, vySpeedMPS, vAngleRandiansPS);
 
-    fieldsTable.recordOutput("Modules Target Chassis Speeds", targetChassisSpeeds);
-
     driveChassisSpeeds(targetChassisSpeeds, useVoltage);
   }
 
@@ -109,11 +107,13 @@ public class Swerve extends SubsystemBase {
   }
 
   public void driveChassisSpeeds(ChassisSpeeds speeds, boolean useVoltage) {
+    fieldsTable.recordOutput("Modules Target Chassis Speeds", speeds);
+
     SwerveModuleState[] swerveModuleStates = kinematics.toSwerveModuleStates(speeds);
 
     SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, Modules.MAX_SPEED_MPS);
 
-    setModulesState(swerveModuleStates, false, true, useVoltage);
+    setModulesState(swerveModuleStates, true, false, useVoltage);
   }
 
   public void setModulesState(SwerveModuleState[] moduleStates, boolean optimize, boolean preventJittering,
