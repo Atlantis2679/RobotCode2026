@@ -48,6 +48,11 @@ public class SwerveModuleSim extends SwerveModuleIO {
     }
 
     @Override
+    protected double getIntegratedTurnAngleRotations() {
+        return angleRotaions;
+    }
+
+    @Override
     public void setDriveVoltage(double voltage) {
         driveMotor.setInputVoltage(voltage);
     }

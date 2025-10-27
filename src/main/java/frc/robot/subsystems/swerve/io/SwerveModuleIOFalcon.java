@@ -76,6 +76,11 @@ public class SwerveModuleIOFalcon extends SwerveModuleIO {
     protected double getAbsoluteTurnAngleRotations() {
         return canCoder.getAbsolutePosition().getValueAsDouble();
     }
+    
+    @Override
+    protected double getIntegratedTurnAngleRotations() {
+        return turnMotor.getPosition().getValueAsDouble();
+    }
 
     @Override
     public void setDriveVoltage(double voltage) {

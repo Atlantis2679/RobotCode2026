@@ -26,6 +26,7 @@ public final class SwerveConstants {
 
         public static final double MAX_VOLTAGE = 12;
         public static final double MAX_SPEED_MPS = 10;
+        // Also used as a refrence for percantage speed calculation - so lowering this MAY cause the modules to faster - always calibrate
 
         public static final double PREVENT_JITTERING_MULTIPLAYER = 0.01;
 
@@ -35,10 +36,10 @@ public final class SwerveConstants {
         public static final double WHEEL_CIRCUMFERENCE_METERS = Units.inchesToMeters(2);
 
         public static final double[] OFFSETS = {
-            341.039 - 180,
-            125.771 + 180,
-            37.617 + 180,
-            81.387,
+            151.436,
+            182.285,
+            209.883,
+            295.578,
         };
     }
 

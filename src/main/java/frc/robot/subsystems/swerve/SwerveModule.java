@@ -17,7 +17,7 @@ import team2679.atlantiskit.tunables.TunableBuilder;
 public class SwerveModule implements Tunable {
     private final LogFieldsTable fieldsTable;
     private final SwerveModuleIO io;
-    private final RotationalSensorHelper angleDegreesCw;
+    private final RotationalSensorHelper absoluteAngleDegreesCw;
     private final int moduleNum;
 
     private double lastDriveDistanceMeters;
@@ -33,12 +33,12 @@ public class SwerveModule implements Tunable {
 
         this.moduleNum = moudleNum;
 
-        angleDegreesCw = new RotationalSensorHelper(io.absoluteTurnAngleRotations.getAsDouble() * 360, OFFSETS[moudleNum]);
-        angleDegreesCw.enableContinuousWrap(0, 360);
+        absoluteAngleDegreesCw = new RotationalSensorHelper(io.absoluteTurnAngleRotations.getAsDouble() * 360, OFFSETS[moudleNum]);
+        absoluteAngleDegreesCw.enableContinuousWrap(0, 360);
     }
 
     public void periodic() {
-        angleDegreesCw.update(io.absoluteTurnAngleRotations.getAsDouble() * 360);
+        absoluteAngleDegreesCw.update(io.absoluteTurnAngleRotations.getAsDouble() * 360);
         lastDriveDistanceMeters = currentDriveDistanceMeters;
         currentDriveDistanceMeters = getDriveDistanceMeters();
 
@@ -68,7 +68,7 @@ public class SwerveModule implements Tunable {
     }
 
     public double getDegreesCW() {
-        return angleDegreesCw.getAngle();
+        return absoluteAngleDegreesCw.getAngle();
     }
 
     public int getModuleNumber() {
@@ -86,6 +86,10 @@ public class SwerveModule implements Tunable {
     public SwerveModulePosition getModulePositionDelta() {
         return new SwerveModulePosition(getDriveDistanceMeters() - lastDriveDistanceMeters,
                 Rotation2d.fromDegrees(getDegreesCW()));
+    }
+
+    public double getIntegratedDegreesCW() {
+        return io.intergatedTurnAngleRotations.getAsDouble() * 360;
     }
 
     public void setCoast() {

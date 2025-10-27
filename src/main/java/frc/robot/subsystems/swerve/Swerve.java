@@ -81,6 +81,8 @@ public class Swerve extends SubsystemBase {
 
   public void drive(double vxSpeedMPS, double vySpeedMPS, double vAngleRandiansPS, boolean isFieldRelative,
       boolean useVoltage) {
+    fieldsTable.recordOutput("vxSpeedMPS", vxSpeedMPS);
+    fieldsTable.recordOutput("vySpeedMPS", vySpeedMPS);
     ChassisSpeeds targetChassisSpeeds = isFieldRelative ? ChassisSpeeds.fromFieldRelativeSpeeds(
         isRedAlliance() ? -vxSpeedMPS : vxSpeedMPS,
         isRedAlliance() ? -vySpeedMPS : vySpeedMPS,
@@ -113,7 +115,7 @@ public class Swerve extends SubsystemBase {
 
     SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, Modules.MAX_SPEED_MPS);
 
-    setModulesState(swerveModuleStates, true, false, useVoltage);
+    setModulesState(swerveModuleStates, false, false, useVoltage);
   }
 
   public void setModulesState(SwerveModuleState[] moduleStates, boolean optimize, boolean preventJittering,

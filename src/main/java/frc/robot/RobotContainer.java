@@ -34,7 +34,7 @@ public class RobotContainer {
                 driverController.leftBumper().negate()::getAsBoolean,
                 driverController.rightBumper()::getAsBoolean);
 
-        swerve.setDefaultCommand(driveCommand);
+        swerve.setDefaultCommand(swerveCommands.driveForward(driverController::getLeftY));
         TunablesManager.add("Swerve/drive command", driveCommand.fullTunable());
 
         driverController.x().onTrue(swerveCommands.xWheelLock());
