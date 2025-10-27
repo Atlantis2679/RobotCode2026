@@ -2,6 +2,7 @@ package frc.robot.subsystems.swerve;
 
 import static frc.robot.subsystems.swerve.SwerveConstants.Modules.*;
 
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
@@ -17,11 +18,13 @@ import team2679.atlantiskit.tunables.TunableBuilder;
 public class SwerveModule implements Tunable {
     private final LogFieldsTable fieldsTable;
     private final SwerveModuleIO io;
-    private final RotationalSensorHelper absoluteAngleDegreesCw;
+    private final RotationalSensorHelper absoluteAngleDegreesCW;
     private final int moduleNum;
 
     private double lastDriveDistanceMeters;
     private double currentDriveDistanceMeters;
+
+    private double currentAngleDegreesCW;
 
     public SwerveModule(LogFieldsTable swerveFieldsTable, int moudleNum, int driveMotorID, int turnMotorID,
             int canCoderID) {
@@ -33,16 +36,21 @@ public class SwerveModule implements Tunable {
 
         this.moduleNum = moudleNum;
 
-        absoluteAngleDegreesCw = new RotationalSensorHelper(io.absoluteTurnAngleRotations.getAsDouble() * 360, OFFSETS[moudleNum]);
-        absoluteAngleDegreesCw.enableContinuousWrap(0, 360);
+        absoluteAngleDegreesCW = new RotationalSensorHelper(io.absoluteTurnAngleRotations.getAsDouble() * 360, OFFSETS[moudleNum]);
+        absoluteAngleDegreesCW.enableContinuousWrap(0, 360);
+
+        resetIntegratedAngleToAbsolute();
     }
 
     public void periodic() {
-        absoluteAngleDegreesCw.update(io.absoluteTurnAngleRotations.getAsDouble() * 360);
+        absoluteAngleDegreesCW.update(io.absoluteTurnAngleRotations.getAsDouble() * 360);
         lastDriveDistanceMeters = currentDriveDistanceMeters;
         currentDriveDistanceMeters = getDriveDistanceMeters();
 
-        fieldsTable.recordOutput("Absolute Angle Degrees CW", getDegreesCW());
+        currentAngleDegreesCW = getIntegratedDegreesCW();
+
+        fieldsTable.recordOutput("Absolute Angle Degrees CW", getAbsoluteDegreesCW());
+        fieldsTable.recordOutput("Integrated Angles Degrees CW", getIntegratedDegreesCW());
         fieldsTable.recordOutput("Drive Distance Meters", getDriveDistanceMeters());
         fieldsTable.recordOutput("Module Position", getModulePosition());
         fieldsTable.recordOutput("Module Position Delta", getModulePositionDelta());
@@ -57,7 +65,7 @@ public class SwerveModule implements Tunable {
         }
 
         if (optimize)
-            targetState.optimize(Rotation2d.fromDegrees(-getDegreesCW()));
+            targetState.optimize(Rotation2d.fromDegrees(-currentAngleDegreesCW));
 
         if (useVoltage)
             io.setDriveVoltage((targetState.speedMetersPerSecond / MAX_SPEED_MPS) * MAX_VOLTAGE);
@@ -67,8 +75,8 @@ public class SwerveModule implements Tunable {
         io.setTurnAngleRotations(targetState.angle.getRotations());
     }
 
-    public double getDegreesCW() {
-        return absoluteAngleDegreesCw.getAngle();
+    public double getAbsoluteDegreesCW() {
+        return absoluteAngleDegreesCW.getAngle();
     }
 
     public int getModuleNumber() {
@@ -80,23 +88,44 @@ public class SwerveModule implements Tunable {
     }
 
     public SwerveModulePosition getModulePosition() {
-        return new SwerveModulePosition(getDriveDistanceMeters(), Rotation2d.fromDegrees(getDegreesCW()));
+        return new SwerveModulePosition(getDriveDistanceMeters(), Rotation2d.fromDegrees(getAbsoluteDegreesCW()));
     }
 
     public SwerveModulePosition getModulePositionDelta() {
         return new SwerveModulePosition(getDriveDistanceMeters() - lastDriveDistanceMeters,
-                Rotation2d.fromDegrees(getDegreesCW()));
+                Rotation2d.fromDegrees(getAbsoluteDegreesCW()));
     }
 
     public double getIntegratedDegreesCW() {
         return io.intergatedTurnAngleRotations.getAsDouble() * 360;
     }
 
+    public void resetIntegratedAngleToAbsolute() {
+        currentAngleDegreesCW = getAbsoluteDegreesCW();
+        io.resetIntegratedAngle(currentAngleDegreesCW);
+    }
+
     public void setCoast() {
         io.setCoast();
     }
 
+    public void setTurnPID(PIDController pidController) {
+        io.setTurnKP(pidController.getP());
+        io.setTurnKI(pidController.getI());
+        io.setTurnKD(pidController.getD());
+    }
+
+    public PIDController getTurnPID() {
+        return new PIDController(io.turnKP.getAsDouble(), io.turnKI.getAsDouble(), io.turnKD.getAsDouble());
+    }
+
     @Override
     public void initTunable(TunableBuilder builder) {
+        builder.addDoubleProperty("Integrated Angle Degrees CW", this::getIntegratedDegreesCW, null);
+        builder.addDoubleProperty("Absolute Angle Degrees CW", this::getAbsoluteDegreesCW, null);
+        builder.addDoubleProperty("Tunable Offset", absoluteAngleDegreesCW::getOffset, newOffset -> {
+            absoluteAngleDegreesCW.setOffset(newOffset);
+            resetIntegratedAngleToAbsolute();
+        });
     }
 }

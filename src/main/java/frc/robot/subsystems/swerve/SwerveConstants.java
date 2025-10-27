@@ -25,7 +25,7 @@ public final class SwerveConstants {
         public static final double TURN_MOTOR_KD = 0;
 
         public static final double MAX_VOLTAGE = 12;
-        public static final double MAX_SPEED_MPS = 10;
+        public static final double MAX_SPEED_MPS = 5;
         // Also used as a refrence for percantage speed calculation - so lowering this MAY cause the modules to faster - always calibrate
 
         public static final double PREVENT_JITTERING_MULTIPLAYER = 0.01;

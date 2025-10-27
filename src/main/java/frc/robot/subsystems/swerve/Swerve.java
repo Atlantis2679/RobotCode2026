@@ -6,32 +6,36 @@ import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Robot;
-import frc.robot.RobotMap.Module0;
-import frc.robot.RobotMap.Module1;
-import frc.robot.RobotMap.Module2;
-import frc.robot.RobotMap.Module3;
+import frc.robot.RobotMap.ModuleFL;
+import frc.robot.RobotMap.ModuleFR;
+import frc.robot.RobotMap.ModuleBL;
+import frc.robot.RobotMap.ModuleBR;
+import frc.robot.subsystems.swerve.SwerveConstants.Modules;
 import frc.robot.subsystems.swerve.io.GyroIO;
 import frc.robot.subsystems.swerve.io.GyroIONavX;
 import frc.robot.subsystems.swerve.io.GyroIOSim;
 import team2679.atlantiskit.helpers.RotationalSensorHelper;
 import team2679.atlantiskit.logfields.LogFieldsTable;
 import team2679.atlantiskit.periodicalerts.PeriodicAlertsGroup;
+import team2679.atlantiskit.tunables.Tunable;
+import team2679.atlantiskit.tunables.TunableBuilder;
 
 import static frc.robot.subsystems.swerve.SwerveConstants.*;
 
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
-public class Swerve extends SubsystemBase {
+public class Swerve extends SubsystemBase implements Tunable {
   private LogFieldsTable fieldsTable = new LogFieldsTable(getName());
 
   private SwerveModule[] modules = {
-      new SwerveModule(fieldsTable, 0, Module0.DRIVE_MOTOR_ID, Module0.TURN_MOTOR_ID, Module0.CAN_CODER_ID),
-      new SwerveModule(fieldsTable, 1, Module1.DRIVE_MOTOR_ID, Module1.TURN_MOTOR_ID, Module1.CAN_CODER_ID),
-      new SwerveModule(fieldsTable, 2, Module2.DRIVE_MOTOR_ID, Module2.TURN_MOTOR_ID, Module2.CAN_CODER_ID),
-      new SwerveModule(fieldsTable, 3, Module3.DRIVE_MOTOR_ID, Module3.TURN_MOTOR_ID, Module3.CAN_CODER_ID),
+      new SwerveModule(fieldsTable, 0, ModuleFL.DRIVE_MOTOR_ID, ModuleFL.TURN_MOTOR_ID, ModuleFL.CAN_CODER_ID),
+      new SwerveModule(fieldsTable, 1, ModuleFR.DRIVE_MOTOR_ID, ModuleFR.TURN_MOTOR_ID, ModuleFR.CAN_CODER_ID),
+      new SwerveModule(fieldsTable, 2, ModuleBL.DRIVE_MOTOR_ID, ModuleBL.TURN_MOTOR_ID, ModuleBL.CAN_CODER_ID),
+      new SwerveModule(fieldsTable, 3, ModuleBR.DRIVE_MOTOR_ID, ModuleBR.TURN_MOTOR_ID, ModuleBR.CAN_CODER_ID),
   };
 
   private SwerveDriveKinematics kinematics = new SwerveDriveKinematics(MODULES_LOCATIONS);
@@ -130,5 +134,15 @@ public class Swerve extends SubsystemBase {
     for (SwerveModule module : modules) {
       module.setCoast();
     }
+  }
+
+  @Override
+  public void initTunable(TunableBuilder builder) {
+    builder.addChild("Swerve Subsystem", (Sendable) this);
+
+    builder.addChild("Module 0 FL", modules[0]);
+    builder.addChild("Module 1 FR", modules[1]);
+    builder.addChild("Module 2 BL", modules[2]);
+    builder.addChild("Module 3 BR", modules[3]);
   }
 }

@@ -15,13 +15,14 @@ public class SwerveModuleSim extends SwerveModuleIO {
     private double angleRotaions = 0;
     private double driveMotorRotations = 0;
 
-    private final PIDController turnPIDController = new PIDController(SIM_TURN_MOTOR_KP, SIM_TURN_MOTOR_KI,
+    private PIDController turnPIDController = new PIDController(SIM_TURN_MOTOR_KP, SIM_TURN_MOTOR_KI,
             SIM_TURN_MOTOR_KD);
 
     public SwerveModuleSim(LogFieldsTable fieldsTable) {
         super(fieldsTable);
 
         DCMotor motorsModel = DCMotor.getFalcon500(1);
+
         driveMotor = new FlywheelSim(
                 LinearSystemId.createFlywheelSystem(motorsModel, DRIVE_MOTOR_MOMENT_OF_INERTIA, DRIVE_GEAR_RATIO),
                 motorsModel);
@@ -74,5 +75,39 @@ public class SwerveModuleSim extends SwerveModuleIO {
 
     @Override
     public void setCoast() {
+    }
+
+    @Override
+    public void resetIntegratedAngle(double newAngle) {
+    }
+
+    @Override
+    protected double getTurnKP() {
+        return turnPIDController.getP();
+    }
+
+    @Override
+    protected double getTurnKI() {
+        return turnPIDController.getI();
+    }
+
+    @Override
+    protected double getTurnKD() {
+        return turnPIDController.getD();
+    }
+
+    @Override
+    public void setTurnKP(double kP) {
+        turnPIDController.setP(kP);
+    }
+
+    @Override
+    public void setTurnKI(double kI) {
+        turnPIDController.setI(kI);
+    }
+
+    @Override
+    public void setTurnKD(double kD) {
+        turnPIDController.setD(kD);
     }
 }

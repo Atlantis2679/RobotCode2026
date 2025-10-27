@@ -107,4 +107,39 @@ public class SwerveModuleIOFalcon extends SwerveModuleIO {
         driveMotor.setControl(new CoastOut());
         turnMotor.setControl(new CoastOut());
     }
+
+    @Override
+    public void resetIntegratedAngle(double newAngle) {
+        turnMotor.setPosition(newAngle);
+    }
+
+    @Override
+    protected double getTurnKP() {
+        return turnSlotConfigs.kP;
+    }
+
+    @Override
+    protected double getTurnKI() {
+        return turnSlotConfigs.kI;
+    }
+
+    @Override
+    protected double getTurnKD() {
+        return turnSlotConfigs.kD;
+    }
+
+    @Override
+    public void setTurnKP(double kP) {
+        turnSlotConfigs.kP = kP;
+    }
+
+    @Override
+    public void setTurnKI(double kI) {
+        turnSlotConfigs.kI = kI;
+    }
+
+    @Override
+    public void setTurnKD(double kD) {
+        turnSlotConfigs.kD = kD;
+    }
 }

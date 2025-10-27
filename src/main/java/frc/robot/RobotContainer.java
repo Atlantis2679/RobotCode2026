@@ -1,7 +1,5 @@
 package frc.robot;
 
-import org.opencv.features2d.FlannBasedMatcher;
-
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -34,7 +32,7 @@ public class RobotContainer {
                 driverController.leftBumper().negate()::getAsBoolean,
                 driverController.rightBumper()::getAsBoolean);
 
-        swerve.setDefaultCommand(swerveCommands.driveForward(driverController::getLeftY));
+        swerve.setDefaultCommand(driveCommand);
         TunablesManager.add("Swerve/drive command", driveCommand.fullTunable());
 
         driverController.x().onTrue(swerveCommands.xWheelLock());
