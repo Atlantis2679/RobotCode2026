@@ -19,7 +19,7 @@ public class RobotContainer {
             RobotMap.Controllers.DRIVER_PORT);
 
     public RobotContainer() {
-        new Trigger(DriverStation::isDisabled).onTrue(swerveCommands.stop());
+        new Trigger(DriverStation::isDisabled).whileTrue(swerveCommands.stop());
 
         configureBindings();
     }

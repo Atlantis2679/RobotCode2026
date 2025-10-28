@@ -78,7 +78,7 @@ public class SwerveModuleSim extends SwerveModuleIO {
     }
 
     @Override
-    public void resetIntegratedAngle(double newAngle) {
+    public void resetIntegratedAngleRotations(double newAngle) {
     }
 
     @Override

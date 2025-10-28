@@ -41,5 +41,5 @@ public abstract class SwerveModuleIO extends IOBase {
     public abstract void setTurnKI(double kI);
     public abstract void setTurnKD(double kD);
 
-    public abstract void resetIntegratedAngle(double newAngle);
+    public abstract void resetIntegratedAngleRotations(double newAngle);
 }

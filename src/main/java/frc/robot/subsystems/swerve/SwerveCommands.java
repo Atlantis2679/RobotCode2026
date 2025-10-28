@@ -41,7 +41,7 @@ public class SwerveCommands {
       moduleStates[3] = new SwerveModuleState(0, Rotation2d.fromDegrees(-135));
 
       swerve.setModulesState(moduleStates, true, false, false);
-    });
+    }).withName("wheel lock");
   }
 
   public TunableCommand controlModules(DoubleSupplier turnXSupplier, DoubleSupplier turnYSupplier,
@@ -70,6 +70,6 @@ public class SwerveCommands {
   }
 
   public Command stop() {
-    return swerve.run(swerve::stop).ignoringDisable(true);
+    return swerve.run(swerve::stop).ignoringDisable(true).withName("stop");
   }
 }

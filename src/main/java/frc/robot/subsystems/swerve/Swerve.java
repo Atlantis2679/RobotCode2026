@@ -8,6 +8,7 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Robot;
 import frc.robot.RobotMap.ModuleFL;
@@ -23,6 +24,8 @@ import team2679.atlantiskit.logfields.LogFieldsTable;
 import team2679.atlantiskit.periodicalerts.PeriodicAlertsGroup;
 import team2679.atlantiskit.tunables.Tunable;
 import team2679.atlantiskit.tunables.TunableBuilder;
+import team2679.atlantiskit.tunables.TunablesManager;
+import team2679.atlantiskit.valueholders.DoubleHolder;
 
 import static frc.robot.subsystems.swerve.SwerveConstants.*;
 
@@ -51,12 +54,20 @@ public class Swerve extends SubsystemBase implements Tunable {
   public Swerve() {
     fieldsTable.update();
 
-    isRedAlliance.addDefaultOption("blue", false);
-    isRedAlliance.addOption("red", true);
+    TunablesManager.add("Swerve", (Tunable) this);
+
+    isRedAlliance.addDefaultOption("red", true);
+    isRedAlliance.addOption("blue", false);
+
+    isRedAlliance.getSendableChooser().onChange((str) -> {
+      resetYaw(isRedAlliance() ? 180 : 0);
+    });
 
     yawDegreesCW.enableContinuousWrap(0, 360);
 
     PeriodicAlertsGroup.defaultInstance.addErrorAlert(() -> "Gyro Disconnected!", () -> !isGyroConnected());
+
+    resetYaw(isRedAlliance() ? 180 : 0);
   }
 
   @Override
@@ -64,6 +75,7 @@ public class Swerve extends SubsystemBase implements Tunable {
     for (SwerveModule module : modules) {
       module.periodic();
     }
+
     if (isGyroConnected()) {
       yawDegreesCW.update(gyroIO.angleDegreesCw.getAsDouble() * 360);
     } else {
@@ -105,7 +117,7 @@ public class Swerve extends SubsystemBase implements Tunable {
   }
 
   public boolean isRedAlliance() {
-    return isRedAlliance.get().booleanValue();
+    return isRedAlliance.get() != null && isRedAlliance.get();
   }
 
   public boolean isGyroConnected() {
@@ -119,7 +131,16 @@ public class Swerve extends SubsystemBase implements Tunable {
 
     SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, Modules.MAX_SPEED_MPS);
 
-    setModulesState(swerveModuleStates, false, false, useVoltage);
+    setModulesState(swerveModuleStates, true, true, useVoltage);
+  }
+
+  public void resetYaw(double newAngle) {
+    yawDegreesCW.resetAngle(newAngle);
+  }
+
+  public void resetModulesToAbsoulte() {
+    for (SwerveModule module : modules)
+      module.resetIntegratedAngleToAbsolute();
   }
 
   public void setModulesState(SwerveModuleState[] moduleStates, boolean optimize, boolean preventJittering,
@@ -144,5 +165,23 @@ public class Swerve extends SubsystemBase implements Tunable {
     builder.addChild("Module 1 FR", modules[1]);
     builder.addChild("Module 2 BL", modules[2]);
     builder.addChild("Module 3 BR", modules[3]);
+
+    builder.addChild("Reset moudles to absoulte", new InstantCommand(this::resetModulesToAbsoulte).ignoringDisable(true));
+
+    builder.addChild("Reset modules to absoulte", (Tunable) (resetBuilder) -> {
+      DoubleHolder angleToReset = new DoubleHolder(0);
+      resetBuilder.addDoubleProperty("Angle to reset", angleToReset::get, angleToReset::set);
+      resetBuilder.addChild("reset!", new InstantCommand(() -> {
+        for (SwerveModule module : modules) {
+          module.resetAngleDegrees(angleToReset.get());
+        }
+      }).ignoringDisable(true));
+    });
+
+    builder.addChild("Reset Yaw", (Tunable) (resetBuilder) -> {
+      DoubleHolder angleToReset = new DoubleHolder(0);
+      resetBuilder.addDoubleProperty("Angle to reset", angleToReset::get, angleToReset::set);
+      resetBuilder.addChild("reset!", new InstantCommand(() -> this.resetYaw(angleToReset.get())).ignoringDisable(true));
+    });
   }
 }

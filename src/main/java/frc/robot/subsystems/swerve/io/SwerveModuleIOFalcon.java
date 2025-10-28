@@ -61,6 +61,8 @@ public class SwerveModuleIOFalcon extends SwerveModuleIO {
         driveMotorStatus = driveMotor.getConfigurator().apply(driveMotorConfig);
         turnMotorStatus = turnMotor.getConfigurator().apply(turnMotorConfig);
         canCoderStatus = canCoder.getConfigurator().apply(canCoderConfig);
+        
+        turnMotor.setPosition(0);
 
         String moduleAlertPrefix = "Module " + moduleNum + " " + getModuleName(moduleNum) + " ";
 
@@ -109,7 +111,7 @@ public class SwerveModuleIOFalcon extends SwerveModuleIO {
     }
 
     @Override
-    public void resetIntegratedAngle(double newAngle) {
+    public void resetIntegratedAngleRotations(double newAngle) {
         turnMotor.setPosition(newAngle);
     }
 

@@ -67,11 +67,15 @@ public class SwerveModule implements Tunable {
         if (optimize)
             targetState.optimize(Rotation2d.fromDegrees(-currentAngleDegreesCW));
 
-        if (useVoltage)
+        if (useVoltage) {
+            fieldsTable.recordOutput("Drive motor desired voltage", (targetState.speedMetersPerSecond / MAX_SPEED_MPS) * MAX_VOLTAGE);
             io.setDriveVoltage((targetState.speedMetersPerSecond / MAX_SPEED_MPS) * MAX_VOLTAGE);
-        else
+        } else {
+            fieldsTable.recordOutput("Drive motor desired speed", targetState.speedMetersPerSecond / MAX_SPEED_MPS);
             io.setDrivePercentageSpeed(targetState.speedMetersPerSecond / MAX_SPEED_MPS);
+        }
 
+        fieldsTable.recordOutput("Turn motor desired rotation", targetState.angle.getRotations());
         io.setTurnAngleRotations(targetState.angle.getRotations());
     }
 
@@ -88,12 +92,12 @@ public class SwerveModule implements Tunable {
     }
 
     public SwerveModulePosition getModulePosition() {
-        return new SwerveModulePosition(getDriveDistanceMeters(), Rotation2d.fromDegrees(getAbsoluteDegreesCW()));
+        return new SwerveModulePosition(getDriveDistanceMeters(), Rotation2d.fromDegrees(-getIntegratedDegreesCW()));
     }
 
     public SwerveModulePosition getModulePositionDelta() {
         return new SwerveModulePosition(getDriveDistanceMeters() - lastDriveDistanceMeters,
-                Rotation2d.fromDegrees(getAbsoluteDegreesCW()));
+                Rotation2d.fromDegrees(-getIntegratedDegreesCW()));
     }
 
     public double getIntegratedDegreesCW() {
@@ -102,7 +106,12 @@ public class SwerveModule implements Tunable {
 
     public void resetIntegratedAngleToAbsolute() {
         currentAngleDegreesCW = getAbsoluteDegreesCW();
-        io.resetIntegratedAngle(currentAngleDegreesCW);
+        io.resetIntegratedAngleRotations(currentAngleDegreesCW / 360);
+    }
+
+    public void resetAngleDegrees(double newAngle) {
+        absoluteAngleDegreesCW.resetAngle(newAngle);
+        resetIntegratedAngleToAbsolute();
     }
 
     public void setCoast() {
