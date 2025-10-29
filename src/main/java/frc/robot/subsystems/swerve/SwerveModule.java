@@ -18,13 +18,13 @@ import team2679.atlantiskit.tunables.TunableBuilder;
 public class SwerveModule implements Tunable {
     private final LogFieldsTable fieldsTable;
     private final SwerveModuleIO io;
-    private final RotationalSensorHelper absoluteAngleDegreesCW;
+    private final RotationalSensorHelper absoluteAngleDegreesCWW;
     private final int moduleNum;
 
     private double lastDriveDistanceMeters;
     private double currentDriveDistanceMeters;
 
-    private double currentAngleDegreesCW;
+    private double currentAngleDegreesCCW;
 
     public SwerveModule(LogFieldsTable swerveFieldsTable, int moudleNum, int driveMotorID, int turnMotorID,
             int canCoderID) {
@@ -36,21 +36,21 @@ public class SwerveModule implements Tunable {
 
         this.moduleNum = moudleNum;
 
-        absoluteAngleDegreesCW = new RotationalSensorHelper(io.absoluteTurnAngleRotations.getAsDouble() * 360, OFFSETS[moudleNum]);
-        absoluteAngleDegreesCW.enableContinuousWrap(0, 360);
+        absoluteAngleDegreesCWW = new RotationalSensorHelper(io.absoluteTurnAngleRotations.getAsDouble() * 360, OFFSETS[moudleNum]);
+        absoluteAngleDegreesCWW.enableContinuousWrap(0, 360);
 
         resetIntegratedAngleToAbsolute();
     }
 
     public void periodic() {
-        absoluteAngleDegreesCW.update(io.absoluteTurnAngleRotations.getAsDouble() * 360);
+        absoluteAngleDegreesCWW.update(io.absoluteTurnAngleRotations.getAsDouble() * 360);
         lastDriveDistanceMeters = currentDriveDistanceMeters;
         currentDriveDistanceMeters = getDriveDistanceMeters();
 
-        currentAngleDegreesCW = getIntegratedDegreesCW();
+        currentAngleDegreesCCW = getIntegratedDegreesCCW();
 
-        fieldsTable.recordOutput("Absolute Angle Degrees CW", getAbsoluteDegreesCW());
-        fieldsTable.recordOutput("Integrated Angles Degrees CW", getIntegratedDegreesCW());
+        fieldsTable.recordOutput("Absolute Angle Degrees CCW", getAbsoluteDegreesCCW());
+        fieldsTable.recordOutput("Integrated Angles Degrees CCW", getIntegratedDegreesCCW());
         fieldsTable.recordOutput("Drive Distance Meters", getDriveDistanceMeters());
         fieldsTable.recordOutput("Module Position", getModulePosition());
         fieldsTable.recordOutput("Module Position Delta", getModulePositionDelta());
@@ -65,7 +65,7 @@ public class SwerveModule implements Tunable {
         }
 
         if (optimize)
-            targetState.optimize(Rotation2d.fromDegrees(-currentAngleDegreesCW));
+            targetState.optimize(Rotation2d.fromDegrees(currentAngleDegreesCCW));
 
         if (useVoltage) {
             fieldsTable.recordOutput("Drive motor desired voltage", (targetState.speedMetersPerSecond / MAX_SPEED_MPS) * MAX_VOLTAGE);
@@ -76,11 +76,11 @@ public class SwerveModule implements Tunable {
         }
 
         fieldsTable.recordOutput("Turn motor desired rotation", targetState.angle.getRotations());
-        io.setTurnAngleRotations(-targetState.angle.getRotations());
+        io.setTurnAngleRotations(targetState.angle.getRotations());
     }
 
-    public double getAbsoluteDegreesCW() {
-        return absoluteAngleDegreesCW.getAngle();
+    public double getAbsoluteDegreesCCW() {
+        return absoluteAngleDegreesCWW.getAngle();
     }
 
     public int getModuleNumber() {
@@ -92,25 +92,25 @@ public class SwerveModule implements Tunable {
     }
 
     public SwerveModulePosition getModulePosition() {
-        return new SwerveModulePosition(getDriveDistanceMeters(), Rotation2d.fromDegrees(-getIntegratedDegreesCW()));
+        return new SwerveModulePosition(getDriveDistanceMeters(), Rotation2d.fromDegrees(getIntegratedDegreesCCW()));
     }
 
     public SwerveModulePosition getModulePositionDelta() {
         return new SwerveModulePosition(getDriveDistanceMeters() - lastDriveDistanceMeters,
-                Rotation2d.fromDegrees(-getIntegratedDegreesCW()));
+                Rotation2d.fromDegrees(getIntegratedDegreesCCW()));
     }
 
-    public double getIntegratedDegreesCW() {
+    public double getIntegratedDegreesCCW() {
         return io.intergatedTurnAngleRotations.getAsDouble() * 360;
     }
 
     public void resetIntegratedAngleToAbsolute() {
-        currentAngleDegreesCW = getAbsoluteDegreesCW();
-        io.resetIntegratedAngleRotations(currentAngleDegreesCW / 360);
+        currentAngleDegreesCCW = getAbsoluteDegreesCCW();
+        io.resetIntegratedAngleRotations(currentAngleDegreesCCW / 360);
     }
 
     public void resetAngleDegrees(double newAngle) {
-        absoluteAngleDegreesCW.resetAngle(newAngle);
+        absoluteAngleDegreesCWW.resetAngle(newAngle);
         resetIntegratedAngleToAbsolute();
     }
 
@@ -130,10 +130,10 @@ public class SwerveModule implements Tunable {
 
     @Override
     public void initTunable(TunableBuilder builder) {
-        builder.addDoubleProperty("Integrated Angle Degrees CW", this::getIntegratedDegreesCW, null);
-        builder.addDoubleProperty("Absolute Angle Degrees CW", this::getAbsoluteDegreesCW, null);
-        builder.addDoubleProperty("Tunable Offset", absoluteAngleDegreesCW::getOffset, newOffset -> {
-            absoluteAngleDegreesCW.setOffset(newOffset);
+        builder.addDoubleProperty("Integrated Angle Degrees CCW", this::getIntegratedDegreesCCW, null);
+        builder.addDoubleProperty("Absolute Angle Degrees CCW", this::getAbsoluteDegreesCCW, null);
+        builder.addDoubleProperty("Tunable Offset", absoluteAngleDegreesCWW::getOffset, newOffset -> {
+            absoluteAngleDegreesCWW.setOffset(newOffset);
             resetIntegratedAngleToAbsolute();
         });
     }

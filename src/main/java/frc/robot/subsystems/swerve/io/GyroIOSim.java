@@ -8,7 +8,7 @@ public class GyroIOSim extends GyroIO {
     }
 
     @Override
-    protected double getYawDegreesCW() {
+    protected double getYawDegreesCCW() {
         return 0;
     }
 

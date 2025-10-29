@@ -43,7 +43,7 @@ public class Swerve extends SubsystemBase implements Tunable {
 
   private SwerveDriveKinematics kinematics = new SwerveDriveKinematics(MODULES_LOCATIONS);
 
-  private final RotationalSensorHelper yawDegreesCW = new RotationalSensorHelper(0);
+  private final RotationalSensorHelper yawDegreesCCW = new RotationalSensorHelper(0);
 
   private final GyroIO gyroIO = Robot.isReal() ? new GyroIONavX(fieldsTable) : new GyroIOSim(fieldsTable);
 
@@ -63,7 +63,7 @@ public class Swerve extends SubsystemBase implements Tunable {
       resetYaw(isRedAlliance() ? 180 : 0);
     });
 
-    yawDegreesCW.enableContinuousWrap(0, 360);
+    yawDegreesCCW.enableContinuousWrap(0, 360);
 
     PeriodicAlertsGroup.defaultInstance.addErrorAlert(() -> "Gyro Disconnected!", () -> !isGyroConnected());
 
@@ -77,7 +77,7 @@ public class Swerve extends SubsystemBase implements Tunable {
     }
 
     if (isGyroConnected()) {
-      yawDegreesCW.update(gyroIO.angleDegreesCw.getAsDouble());
+      yawDegreesCCW.update(gyroIO.angleDegreesCCW.getAsDouble());
     } else {
       Twist2d twist = kinematics.toTwist2d(
           modules[0].getModulePositionDelta(),
@@ -85,12 +85,12 @@ public class Swerve extends SubsystemBase implements Tunable {
           modules[2].getModulePositionDelta(),
           modules[3].getModulePositionDelta());
 
-      yawDegreesCW.update(twist.dtheta);
+      yawDegreesCCW.update(twist.dtheta);
     }
 
-    fieldsTable.recordOutput("gyro degreescw", gyroIO.angleDegreesCw.getAsDouble());
+    fieldsTable.recordOutput("Last gyro degrees CCW", gyroIO.angleDegreesCCW.getAsDouble());
     fieldsTable.recordOutput("Is gryo connected", isGyroConnected());
-    fieldsTable.recordOutput("Yaw degrees CW", getYawDegreesCW());
+    fieldsTable.recordOutput("Yaw degrees CCW", getYawDegreesCCW());
     fieldsTable.recordOutput("Current Command", getCurrentCommand() != null ? getCurrentCommand().getName() : "none");
 
     SmartDashboard.putBoolean("isRedAlliance", isRedAlliance());
@@ -103,7 +103,7 @@ public class Swerve extends SubsystemBase implements Tunable {
     ChassisSpeeds targetChassisSpeeds = isFieldRelative ? ChassisSpeeds.fromFieldRelativeSpeeds(
         isRedAlliance() ? -vxSpeedMPS : vxSpeedMPS,
         isRedAlliance() ? -vySpeedMPS : vySpeedMPS,
-        vAngleRandiansPS, Rotation2d.fromDegrees(-getYawDegreesCW()))
+        vAngleRandiansPS, Rotation2d.fromDegrees(getYawDegreesCCW()))
         : new ChassisSpeeds(vxSpeedMPS, vySpeedMPS, vAngleRandiansPS);
 
     driveChassisSpeeds(targetChassisSpeeds, useVoltage);
@@ -113,8 +113,8 @@ public class Swerve extends SubsystemBase implements Tunable {
     drive(0, 0, 0, false, true);
   }
 
-  public double getYawDegreesCW() {
-    return yawDegreesCW.getAngle();
+  public double getYawDegreesCCW() {
+    return yawDegreesCCW.getAngle();
   }
 
   public boolean isRedAlliance() {
@@ -136,7 +136,7 @@ public class Swerve extends SubsystemBase implements Tunable {
   }
 
   public void resetYaw(double newAngle) {
-    yawDegreesCW.resetAngle(newAngle);
+    yawDegreesCCW.resetAngle(newAngle);
   }
 
   public void resetModulesToAbsoulte() {
@@ -169,7 +169,7 @@ public class Swerve extends SubsystemBase implements Tunable {
 
     builder.addChild("Reset moudles to absoulte", new InstantCommand(this::resetModulesToAbsoulte).ignoringDisable(true));
 
-    builder.addChild("Reset modules to absoulte", (Tunable) (resetBuilder) -> {
+    builder.addChild("Reset absolute angle", (Tunable) (resetBuilder) -> {
       DoubleHolder angleToReset = new DoubleHolder(0);
       resetBuilder.addDoubleProperty("Angle to reset", angleToReset::get, angleToReset::set);
       resetBuilder.addChild("reset!", new InstantCommand(() -> {

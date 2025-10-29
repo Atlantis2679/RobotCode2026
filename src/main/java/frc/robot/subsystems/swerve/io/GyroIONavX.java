@@ -12,8 +12,8 @@ public class GyroIONavX extends GyroIO {
   }
 
   @Override
-  protected double getYawDegreesCW() {
-    return navX.getAngle();
+  protected double getYawDegreesCCW() {
+    return -navX.getAngle();
   }
 
   @Override
