@@ -77,7 +77,7 @@ public class Swerve extends SubsystemBase implements Tunable {
     }
 
     if (isGyroConnected()) {
-      yawDegreesCW.update(gyroIO.angleDegreesCw.getAsDouble() * 360);
+      yawDegreesCW.update(gyroIO.angleDegreesCw.getAsDouble());
     } else {
       Twist2d twist = kinematics.toTwist2d(
           modules[0].getModulePositionDelta(),
@@ -88,6 +88,7 @@ public class Swerve extends SubsystemBase implements Tunable {
       yawDegreesCW.update(twist.dtheta);
     }
 
+    fieldsTable.recordOutput("gyro degreescw", gyroIO.angleDegreesCw.getAsDouble());
     fieldsTable.recordOutput("Is gryo connected", isGyroConnected());
     fieldsTable.recordOutput("Yaw degrees CW", getYawDegreesCW());
     fieldsTable.recordOutput("Current Command", getCurrentCommand() != null ? getCurrentCommand().getName() : "none");

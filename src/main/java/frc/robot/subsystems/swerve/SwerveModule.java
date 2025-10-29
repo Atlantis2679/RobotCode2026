@@ -76,7 +76,7 @@ public class SwerveModule implements Tunable {
         }
 
         fieldsTable.recordOutput("Turn motor desired rotation", targetState.angle.getRotations());
-        io.setTurnAngleRotations(targetState.angle.getRotations());
+        io.setTurnAngleRotations(-targetState.angle.getRotations());
     }
 
     public double getAbsoluteDegreesCW() {
