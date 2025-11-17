@@ -2,9 +2,9 @@ package frc.robot.subsystems.swerve;
 
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -28,6 +28,8 @@ import team2679.atlantiskit.tunables.TunablesManager;
 import team2679.atlantiskit.valueholders.DoubleHolder;
 
 import static frc.robot.subsystems.swerve.SwerveConstants.*;
+
+import java.util.Optional;
 
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
@@ -89,6 +91,7 @@ public class Swerve extends SubsystemBase implements Tunable {
 
     //   yawDegreesCCW.update(twist.dtheta);
     // }
+    poseEstimator.update(getModulePositions(), Optional.of(Rotation2d.fromDegrees(getGyroYawDegreesCCW())));
 
     fieldsTable.recordOutput("Last gyro degrees CCW", gyroIO.angleDegreesCCW.getAsDouble());
     fieldsTable.recordOutput("Is gryo connected", isGyroConnected());
@@ -117,6 +120,14 @@ public class Swerve extends SubsystemBase implements Tunable {
 
   public double getGyroYawDegreesCCW() {
     return gyroYawDegreesCCW.getAngle();
+  }
+
+  public SwerveModulePosition[] getModulePositions() {
+    SwerveModulePosition[] positions = new SwerveModulePosition[modules.length];
+    for (int i = 0; i < modules.length; i++) {
+      positions[i] = modules[i].getModulePosition();
+    }
+    return positions;
   }
 
   public boolean isRedAlliance() {
