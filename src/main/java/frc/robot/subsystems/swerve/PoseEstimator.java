@@ -30,10 +30,9 @@ public class PoseEstimator {
 
     public void update(SwerveModulePosition[] modulePositions, Optional<Rotation2d> gyroAngle) {
         Twist2d twist2d = kinematics.toTwist2d(lastModulePositions, modulePositions);
-        fieldsTable.recordOutput("Twist", twist2d);
         lastModulePositions = modulePositions;
-        Pose2d lastOdometryPose = new Pose2d();
-        odomertryPose.exp(twist2d);
+        Pose2d lastOdometryPose = odomertryPose;
+        odomertryPose = odomertryPose.exp(twist2d);
         if (gyroAngle.isPresent()) {
             odomertryPose = new Pose2d(odomertryPose.getTranslation(), gyroAngle.get());
         }

@@ -36,10 +36,10 @@ public final class SwerveConstants {
         public static final double WHEEL_CIRCUMFERENCE_METERS = Units.inchesToMeters(2);
 
         public static final double[] OFFSETS = {
-            -25.6640625 + 180,
-            125.859375,
-            -100.1953125,
-            38.759765625 + 180,
+            -12.5244140625,
+            -25.8837890625,
+            41.30859375,
+            18.6328125,
         };
     }
 

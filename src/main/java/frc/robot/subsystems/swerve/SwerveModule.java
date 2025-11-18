@@ -36,14 +36,14 @@ public class SwerveModule implements Tunable {
 
         this.moduleNum = moudleNum;
 
-        absoluteAngleDegreesCWW = new RotationalSensorHelper(io.absoluteTurnAngleRotations.getAsDouble() * 360, OFFSETS[moudleNum]);
+        absoluteAngleDegreesCWW = new RotationalSensorHelper(io.absoluteTurnAngleRotations.getAsDouble() * 180, OFFSETS[moudleNum]);
         absoluteAngleDegreesCWW.enableContinuousWrap(0, 360);
 
         resetIntegratedAngleToAbsolute();
     }
 
     public void periodic() {
-        absoluteAngleDegreesCWW.update(io.absoluteTurnAngleRotations.getAsDouble() * 360);
+        absoluteAngleDegreesCWW.update(io.absoluteTurnAngleRotations.getAsDouble() * 180);
         lastDriveDistanceMeters = currentDriveDistanceMeters;
         currentDriveDistanceMeters = getDriveDistanceMeters();
 
@@ -64,18 +64,19 @@ public class SwerveModule implements Tunable {
             return;
         }
 
-        if (optimize)
-            targetState.optimize(Rotation2d.fromDegrees(currentAngleDegreesCCW));
+        // if (optimize)
+        //     targetState.optimize(Rotation2d.fromDegrees(currentAngleDegreesCCW));
 
+        fieldsTable.recordOutput("Module target state", targetState);
         if (useVoltage) {
-            fieldsTable.recordOutput("Drive motor desired voltage", (targetState.speedMetersPerSecond / MAX_SPEED_MPS) * MAX_VOLTAGE);
+            fieldsTable.recordOutput("Drive motor target voltage", (targetState.speedMetersPerSecond / MAX_SPEED_MPS) * MAX_VOLTAGE);
             io.setDriveVoltage((targetState.speedMetersPerSecond / MAX_SPEED_MPS) * MAX_VOLTAGE);
         } else {
-            fieldsTable.recordOutput("Drive motor desired speed", targetState.speedMetersPerSecond / MAX_SPEED_MPS);
+            fieldsTable.recordOutput("Drive motor target speed", targetState.speedMetersPerSecond / MAX_SPEED_MPS);
             io.setDrivePercentageSpeed(targetState.speedMetersPerSecond / MAX_SPEED_MPS);
         }
 
-        fieldsTable.recordOutput("Turn motor desired rotation", targetState.angle.getRotations());
+        fieldsTable.recordOutput("Turn motor target rotation", targetState.angle.getRotations());
         io.setTurnAngleRotations(targetState.angle.getRotations());
     }
 
@@ -101,15 +102,15 @@ public class SwerveModule implements Tunable {
     }
 
     public double getIntegratedDegreesCCW() {
-        return io.intergatedTurnAngleRotations.getAsDouble() * 360;
+        return io.intergatedTurnAngleRotations.getAsDouble() * 180;
     }
 
     public void resetIntegratedAngleToAbsolute() {
         currentAngleDegreesCCW = getAbsoluteDegreesCCW();
-        io.resetIntegratedAngleRotations(currentAngleDegreesCCW / 360);
+        io.resetIntegratedAngleRotations(currentAngleDegreesCCW / 180);
     }
 
-    public void resetAngleDegrees(double newAngle) {
+    public void resetAngleDegreesCCW(double newAngle) {
         absoluteAngleDegreesCWW.resetAngle(newAngle);
         resetIntegratedAngleToAbsolute();
     }

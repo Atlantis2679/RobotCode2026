@@ -7,7 +7,7 @@ import team2679.atlantiskit.logfields.IOBase;
 import team2679.atlantiskit.logfields.LogFieldsTable;
 
 public abstract class GyroIO extends IOBase {
-  public final DoubleSupplier angleDegreesCCW = fields.addDouble("angleDegreesCW", this::getYawDegreesCCW);
+  public final DoubleSupplier angleDegreesCCW = fields.addDouble("angleDegreesCCW", this::getYawDegreesCCW);
   public final BooleanSupplier isConnected = fields.addBoolean("isGyroConnected", this::getIsConnected);
 
   public GyroIO(LogFieldsTable fieldsTable) {

@@ -26,7 +26,7 @@ public class SwerveModuleIOFalcon extends SwerveModuleIO {
     private final VoltageOut driveVoltageControl = new VoltageOut(0);
     private final DutyCycleOut drivePercentageControl = new DutyCycleOut(0);
 
-    private final PositionVoltage turnVoltageControl = new PositionVoltage(0);
+    private final PositionVoltage turnVoltageControl = new PositionVoltage(0).withSlot(0);
 
     private StatusCode driveMotorStatus;
     private StatusCode turnMotorStatus;
@@ -50,6 +50,7 @@ public class SwerveModuleIOFalcon extends SwerveModuleIO {
 
         turnMotorConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
         turnMotorConfig.Feedback.SensorToMechanismRatio = TURN_GEAR_RATIO;
+        turnMotorConfig.ClosedLoopGeneral.ContinuousWrap = true;
 
         turnSlotConfigs = turnMotorConfig.Slot0;
         turnSlotConfigs.kP = TURN_MOTOR_KP;
