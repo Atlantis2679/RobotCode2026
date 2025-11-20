@@ -29,7 +29,7 @@ public class NaturalXboxController extends CommandXboxController {
 
     @Override
     public double getRightX() {
-        return applyDeadband(super.getRightX());
+        return -1 * applyDeadband(super.getRightX());
     }
 
     @Override
@@ -39,7 +39,7 @@ public class NaturalXboxController extends CommandXboxController {
 
     @Override
     public double getLeftX() {
-        return applyDeadband(super.getLeftX());
+        return -1 * applyDeadband(super.getLeftX());
     }
 
     @Override

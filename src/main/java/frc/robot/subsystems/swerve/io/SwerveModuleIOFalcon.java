@@ -46,11 +46,22 @@ public class SwerveModuleIOFalcon extends SwerveModuleIO {
         driveMotorConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
         driveMotorConfig.Feedback.SensorToMechanismRatio = DRIVE_GEAR_RATIO;
 
+        driveMotorConfig.CurrentLimits.StatorCurrentLimitEnable = true;
+        driveMotorConfig.CurrentLimits.StatorCurrentLimit = DRIVE_STATOR_CURRENT_LIMIT;
+
+        driveMotorConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
+        driveMotorConfig.CurrentLimits.SupplyCurrentLimit = DRIVE_SUPPLY_CURRENT_LIMIT;
+        driveMotorConfig.CurrentLimits.SupplyCurrentLowerLimit = DRIVE_SUPPLY_CURRENT_LOWER_LIMIT;
+        driveMotorConfig.CurrentLimits.SupplyCurrentLowerTime = DRIVE_SUPPLY_CURRENT_LOWER_TIME;
+
         TalonFXConfiguration turnMotorConfig = new TalonFXConfiguration();
 
         turnMotorConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
         turnMotorConfig.Feedback.SensorToMechanismRatio = TURN_GEAR_RATIO;
         turnMotorConfig.ClosedLoopGeneral.ContinuousWrap = true;
+
+        turnMotorConfig.CurrentLimits.StatorCurrentLimitEnable = true;
+        turnMotorConfig.CurrentLimits.StatorCurrentLimit = TURN_STATOR_CURRENT_LIMIT;
 
         turnSlotConfigs = turnMotorConfig.Slot0;
         turnSlotConfigs.kP = TURN_MOTOR_KP;
