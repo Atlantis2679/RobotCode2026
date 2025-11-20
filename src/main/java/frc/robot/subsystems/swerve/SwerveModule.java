@@ -36,14 +36,14 @@ public class SwerveModule implements Tunable {
 
         this.moduleNum = moudleNum;
 
-        absoluteAngleDegreesCWW = new RotationalSensorHelper(io.absoluteTurnAngleRotations.getAsDouble() * 180, OFFSETS[moudleNum]);
+        absoluteAngleDegreesCWW = new RotationalSensorHelper(io.absoluteTurnAngleRotations.getAsDouble() * 360, OFFSETS[moudleNum]);
         absoluteAngleDegreesCWW.enableContinuousWrap(0, 360);
 
         resetIntegratedAngleToAbsolute();
     }
 
     public void periodic() {
-        absoluteAngleDegreesCWW.update(io.absoluteTurnAngleRotations.getAsDouble() * 180);
+        absoluteAngleDegreesCWW.update(io.absoluteTurnAngleRotations.getAsDouble() * 360);
         lastDriveDistanceMeters = currentDriveDistanceMeters;
         currentDriveDistanceMeters = getDriveDistanceMeters();
 
@@ -102,12 +102,12 @@ public class SwerveModule implements Tunable {
     }
 
     public double getIntegratedDegreesCCW() {
-        return io.intergatedTurnAngleRotations.getAsDouble() * 180;
+        return io.intergatedTurnAngleRotations.getAsDouble() * 360;
     }
 
     public void resetIntegratedAngleToAbsolute() {
         currentAngleDegreesCCW = getAbsoluteDegreesCCW();
-        io.resetIntegratedAngleRotations(currentAngleDegreesCCW / 180);
+        io.resetIntegratedAngleRotations(currentAngleDegreesCCW / 360);
     }
 
     public void resetAngleDegreesCCW(double newAngle) {

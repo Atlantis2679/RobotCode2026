@@ -65,7 +65,7 @@ public class Swerve extends SubsystemBase implements Tunable {
     isRedAlliance.addOption("blue", false);
 
     isRedAlliance.getSendableChooser().onChange((str) -> {
-      resetYaw(str == "red" ? 180 : 0);
+      resetYaw(str == "red" ? 0 : 180);
     });
 
     gyroYawDegreesCCW = new RotationalSensorHelper(gyroIO.angleDegreesCCW.getAsDouble());
@@ -73,7 +73,7 @@ public class Swerve extends SubsystemBase implements Tunable {
 
     PeriodicAlertsGroup.defaultInstance.addErrorAlert(() -> "Gyro Disconnected!", () -> !isGyroConnected());
 
-    resetYaw(isRedAlliance() ? 180 : 0);
+    resetYaw(isRedAlliance() ? 0 : 180);
   }
 
   @Override
@@ -99,10 +99,11 @@ public class Swerve extends SubsystemBase implements Tunable {
       boolean useVoltage) {
     fieldsTable.recordOutput("vxSpeedMPS", vxSpeedMPS);
     fieldsTable.recordOutput("vySpeedMPS", vySpeedMPS);
+    fieldsTable.recordOutput("isFieldRelative", isFieldRelative);
     ChassisSpeeds targetChassisSpeeds = isFieldRelative ? ChassisSpeeds.fromFieldRelativeSpeeds(
         isRedAlliance() ? -vxSpeedMPS : vxSpeedMPS,
         isRedAlliance() ? -vySpeedMPS : vySpeedMPS,
-        vAngleRandiansPS, Rotation2d.fromDegrees(getGyroYawDegreesCCW()))
+        vAngleRandiansPS, getPose().getRotation())
         : new ChassisSpeeds(vxSpeedMPS, vySpeedMPS, vAngleRandiansPS);
 
     driveChassisSpeeds(targetChassisSpeeds, useVoltage);
