@@ -30,6 +30,7 @@ import team2679.atlantiskit.valueholders.DoubleHolder;
 
 import static frc.robot.subsystems.swerve.SwerveConstants.*;
 
+import java.util.ArrayList;
 import java.util.Optional;
 
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
@@ -85,7 +86,7 @@ public class Swerve extends SubsystemBase implements Tunable {
     gyroYawDegreesCCW.update(gyroIO.angleDegreesCCW.getAsDouble());
 
     Optional<Rotation2d> gyroAngle = isGyroConnected() ? Optional.of(Rotation2d.fromDegrees(getGyroYawDegreesCCW())) : Optional.empty();
-    poseEstimator.update(getModulePositions(), gyroAngle);
+    poseEstimator.update(getModulePositions(), gyroAngle, new ArrayList<>());
 
     fieldsTable.recordOutput("Is gryo connected", isGyroConnected());
     fieldsTable.recordOutput("Yaw degrees CCW", getGyroYawDegreesCCW());

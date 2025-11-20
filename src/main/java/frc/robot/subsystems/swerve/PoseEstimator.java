@@ -1,12 +1,20 @@
 package frc.robot.subsystems.swerve;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.Vector;
 
+import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.Nat;
+import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
+import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N3;
 import team2679.atlantiskit.logfields.LogFieldsTable;
 
 public class PoseEstimator {
@@ -28,7 +36,7 @@ public class PoseEstimator {
         this.fieldsTable = fieldsTable;
     }
 
-    public void update(SwerveModulePosition[] modulePositions, Optional<Rotation2d> gyroAngle) {
+    public void update(SwerveModulePosition[] modulePositions, Optional<Rotation2d> gyroAngle, List<VisionMesurment> visionMesurments) {
         Twist2d twist2d = kinematics.toTwist2d(lastModulePositions, modulePositions);
         lastModulePositions = modulePositions;
         Pose2d lastOdometryPose = odomertryPose;
@@ -40,6 +48,30 @@ public class PoseEstimator {
         Twist2d twistFromLastPose = lastOdometryPose.log(odomertryPose);
         estimatedPose = estimatedPose.exp(twistFromLastPose);
         fieldsTable.recordOutput("Current Estimated Pose", estimatedPose);
+    }
+
+    private Transform2d calculateVisionTransform(VisionMesurment visionMesurment, Pose2d odometryPose) {
+        // Solve for closed form Kalman gain for continuous Kalman filter with A = 0
+        // and C = I. See wpimath/algorithms.md.
+        Matrix<N3, N3> visionK = new Matrix<N3, N3>(Nat.N3(), Nat.N3());
+        for (int row = 0; row < 3; row++) {
+            double stdDev = visionMesurment.stdDevs.get(row, 0);
+            if (stdDev == 0) {
+                visionK.set(row, row, 0);
+            } else {
+                visionK.set(row, row, stdDev / (stdDev + Math.sqrt(stdDev)));
+            }
+        }
+
+        Transform2d transform = new Transform2d(odometryPose, visionMesurment.pose);
+
+        Matrix<N3, N1> kTimesTransform = visionK.times(
+            VecBuilder.fill(transform.getX(), transform.getY(), transform.getRotation().getRadians()));
+        
+        return new Transform2d(
+            kTimesTransform.get(0, 0),
+            kTimesTransform.get(1, 0),
+            Rotation2d.fromRadians(kTimesTransform.get(2, 0)));
     }
 
     public void resetPose(Pose2d newPose) {
@@ -56,4 +88,6 @@ public class PoseEstimator {
     public Pose2d getOdometryPose() {
         return odomertryPose;
     }
+
+    public record VisionMesurment(Pose2d pose, Matrix<N3, N1> stdDevs) {}
 }
