@@ -2,7 +2,6 @@ package frc.robot.subsystems.swerve;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Vector;
 
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.Nat;
@@ -45,8 +44,12 @@ public class PoseEstimator {
             odomertryPose = new Pose2d(odomertryPose.getTranslation(), gyroAngle.get());
         }
         fieldsTable.recordOutput("Current Odomertry Pose", odomertryPose);
-        Twist2d twistFromLastPose = lastOdometryPose.log(odomertryPose);
-        estimatedPose = estimatedPose.exp(twistFromLastPose);
+        Twist2d odometryTwistFromLastPose = lastOdometryPose.log(odomertryPose);
+        estimatedPose = estimatedPose.exp(odometryTwistFromLastPose);
+        for (VisionMesurment visionMesurment : visionMesurments) {
+            Transform2d visionTransformFromOdometryPose = calculateVisionTransform(visionMesurment, odomertryPose);
+            estimatedPose.plus(visionTransformFromOdometryPose);
+        }
         fieldsTable.recordOutput("Current Estimated Pose", estimatedPose);
     }
 
