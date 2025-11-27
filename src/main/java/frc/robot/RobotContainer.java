@@ -44,7 +44,7 @@ public class RobotContainer {
                         driverController::getLeftY,
                         driverController::getRightY).fullTunable());
 
-        driverController.a().onTrue(new InstantCommand(() -> swerve.resetYaw(0)));
+        driverController.a().onTrue(new InstantCommand(swerve::resetYawZero));
     }
 
     public void enterSwerveIntoTest() {

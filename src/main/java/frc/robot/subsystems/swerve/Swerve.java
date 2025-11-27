@@ -1,5 +1,6 @@
 package frc.robot.subsystems.swerve;
 
+import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -16,10 +17,12 @@ import frc.robot.RobotMap.ModuleFL;
 import frc.robot.RobotMap.ModuleFR;
 import frc.robot.RobotMap.ModuleBL;
 import frc.robot.RobotMap.ModuleBR;
+import frc.robot.subsystems.swerve.PoseEstimator.VisionMesurment;
 import frc.robot.subsystems.swerve.SwerveConstants.Modules;
 import frc.robot.subsystems.swerve.io.GyroIO;
 import frc.robot.subsystems.swerve.io.GyroIONavX;
 import frc.robot.subsystems.swerve.io.GyroIOSim;
+import frc.robot.subsystems.swerve.vision.Vision;
 import team2679.atlantiskit.helpers.RotationalSensorHelper;
 import team2679.atlantiskit.logfields.LogFieldsTable;
 import team2679.atlantiskit.periodicalerts.PeriodicAlertsGroup;
@@ -31,6 +34,7 @@ import team2679.atlantiskit.valueholders.DoubleHolder;
 import static frc.robot.subsystems.swerve.SwerveConstants.*;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
@@ -57,6 +61,8 @@ public class Swerve extends SubsystemBase implements Tunable {
 
   private final PoseEstimator poseEstimator = new PoseEstimator(fieldsTable.getSubTable("poseEstimator"), kinematics);
 
+  private final Vision vision = new Vision();
+
   public Swerve() {
     fieldsTable.update();
 
@@ -74,7 +80,7 @@ public class Swerve extends SubsystemBase implements Tunable {
 
     PeriodicAlertsGroup.defaultInstance.addErrorAlert(() -> "Gyro Disconnected!", () -> !isGyroConnected());
 
-    resetYaw(isRedAlliance() ? 0 : 180);
+    resetYawZero();
   }
 
   @Override
@@ -86,7 +92,11 @@ public class Swerve extends SubsystemBase implements Tunable {
     gyroYawDegreesCCW.update(gyroIO.angleDegreesCCW.getAsDouble());
 
     Optional<Rotation2d> gyroAngle = isGyroConnected() ? Optional.of(Rotation2d.fromDegrees(getGyroYawDegreesCCW())) : Optional.empty();
-    poseEstimator.update(getModulePositions(), gyroAngle, new ArrayList<>());
+    List<VisionMesurment> visionMesurments = new ArrayList<>();
+    for (Pose2d pose : vision.getAllResults()) {
+      visionMesurments.add(new VisionMesurment(pose, VecBuilder.fill(0.10, 0.10, 0.30)));
+    }
+    poseEstimator.update(getModulePositions(), gyroAngle, visionMesurments);
 
     fieldsTable.recordOutput("Is gryo connected", isGyroConnected());
     fieldsTable.recordOutput("Yaw degrees CCW", getGyroYawDegreesCCW());
@@ -148,6 +158,10 @@ public class Swerve extends SubsystemBase implements Tunable {
     gyroYawDegreesCCW.resetAngle(newAngleDegreesCCW);
     Pose2d newPose = new Pose2d(getPose().getTranslation(), Rotation2d.fromDegrees(getGyroYawDegreesCCW()));
     poseEstimator.resetPose(newPose);
+  }
+
+  public void resetYawZero() {
+    resetYaw(isRedAlliance() ? 0 : 180);
   }
 
   public void resetModulesToAbsoulte() {
