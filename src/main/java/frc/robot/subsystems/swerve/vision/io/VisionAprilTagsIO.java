@@ -14,7 +14,7 @@ public abstract class VisionAprilTagsIO extends IOBase {
             this::getCameraTimestampsSeconds);
     public final Supplier<Pose3d[][]> tagsPoses = fields.addObjectMatrix("tagsPoses", this::getTagsPoses, new Pose3d[0][0]);
     public final Supplier<double[][]> tagsAmbiguities = fields.addDoubleMatrix("tagsAmbiguities", this::getTagsAmbiguities);
-    public final BooleanSupplier isCameraConnected = fields.addBoolean("isCameraConnected", this::getIsCameraConnected);
+    public final BooleanSupplier isConnected = fields.addBoolean("isConnected", this::getIsConnected);
 
     protected VisionAprilTagsIO(LogFieldsTable fieldsTable) {
         super(fieldsTable);
@@ -32,5 +32,5 @@ public abstract class VisionAprilTagsIO extends IOBase {
 
     protected abstract double[][] getTagsAmbiguities();
 
-    protected abstract boolean getIsCameraConnected();
+    protected abstract boolean getIsConnected();
 }

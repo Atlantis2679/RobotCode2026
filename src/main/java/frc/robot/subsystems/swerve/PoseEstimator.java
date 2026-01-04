@@ -6,6 +6,7 @@ import java.util.Optional;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.Nat;
 import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
@@ -17,6 +18,7 @@ import edu.wpi.first.math.numbers.N3;
 import team2679.atlantiskit.logfields.LogFieldsTable;
 
 public class PoseEstimator {
+    private static final double[] qStdDevs = new double[] {0, 0, 0};
     private Pose2d odomertryPose = Pose2d.kZero;
     private Pose2d estimatedPose = Pose2d.kZero;
     private SwerveDriveKinematics kinematics;
@@ -55,14 +57,17 @@ public class PoseEstimator {
 
     private Transform2d calculateVisionTransform(VisionMesurment visionMesurment, Pose2d odometryPose) {
         // Solve for closed form Kalman gain for continuous Kalman filter with A = 0
-        // and C = I. See wpimath/algorithms.md.
+        // and C = I. See wpimath/algorithms.md 
+        double[] r = new double[3];
+        for (int i = 0; i < 3; ++i) {
+          r[i] = Math.pow(visionMesurment.stdDevs().get(i), 2);
+        }    
         Matrix<N3, N3> visionK = new Matrix<N3, N3>(Nat.N3(), Nat.N3());
         for (int row = 0; row < 3; row++) {
-            double stdDev = visionMesurment.stdDevs.get(row, 0);
-            if (stdDev == 0) {
+            if (qStdDevs[row] == 0) {
                 visionK.set(row, row, 0);
             } else {
-                visionK.set(row, row, stdDev / (stdDev + Math.sqrt(stdDev)));
+                visionK.set(row, row, qStdDevs[row] / (qStdDevs[row] + Math.sqrt(qStdDevs[row] * r[row])));
             }
         }
 
@@ -92,5 +97,5 @@ public class PoseEstimator {
         return odomertryPose;
     }
 
-    public record VisionMesurment(Pose2d pose, Matrix<N3, N1> stdDevs) {}
+    public record VisionMesurment(Pose2d pose, Vector<N3> stdDevs) {}
 }

@@ -1,6 +1,5 @@
 package frc.robot.subsystems.swerve;
 
-import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -33,7 +32,6 @@ import team2679.atlantiskit.valueholders.DoubleHolder;
 
 import static frc.robot.subsystems.swerve.SwerveConstants.*;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -92,10 +90,7 @@ public class Swerve extends SubsystemBase implements Tunable {
     gyroYawDegreesCCW.update(gyroIO.angleDegreesCCW.getAsDouble());
 
     Optional<Rotation2d> gyroAngle = isGyroConnected() ? Optional.of(Rotation2d.fromDegrees(getGyroYawDegreesCCW())) : Optional.empty();
-    List<VisionMesurment> visionMesurments = new ArrayList<>();
-    for (Pose2d pose : vision.getAllResults()) {
-      visionMesurments.add(new VisionMesurment(pose, VecBuilder.fill(0.10, 0.10, 0.30)));
-    }
+    List<VisionMesurment> visionMesurments = vision.getAllResults();
     poseEstimator.update(getModulePositions(), gyroAngle, visionMesurments);
 
     fieldsTable.recordOutput("Is gryo connected", isGyroConnected());
