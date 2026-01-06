@@ -22,14 +22,14 @@ public class VisionAprilTagsIOPhoton extends VisionAprilTagsIO {
     private final PhotonCamera camera;
     private List<PhotonPipelineResult> photonPipelineResults;
     private List<EstimatedRobotPose> photonEstimatorResults = new ArrayList<>();
-    private final Transform3d robotToCameraTransform;
+    private final CameraConfig cameraConfig;
 
-    public VisionAprilTagsIOPhoton(LogFieldsTable fieldsTable, Camera camera) {
-        super(fieldsTable.getSubTable(camera.name()));
+    public VisionAprilTagsIOPhoton(LogFieldsTable fieldsTable, CameraConfig cameraConfig) {
+        super(fieldsTable.getSubTable(cameraConfig.name()));
 
-        this.robotToCameraTransform = camera.robotToCam();
+        this.camera = new PhotonCamera(cameraConfig.name());
 
-        this.camera = new PhotonCamera(camera.name());
+        this.cameraConfig = cameraConfig;
       
         photonPoseEstimator = new PhotonPoseEstimator(APRTIL_TAGS_FIELD_LAYOUT, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
                 new Transform3d());
@@ -48,6 +48,11 @@ public class VisionAprilTagsIOPhoton extends VisionAprilTagsIO {
     }
 
     @Override
+    public CameraConfig getCameraConfig() {
+      return cameraConfig;
+    }
+
+    @Override
     protected double[] getCameraTimestampsSeconds() {
         double[] timestamps = new double[photonEstimatorResults.size()];
 
@@ -55,10 +60,6 @@ public class VisionAprilTagsIOPhoton extends VisionAprilTagsIO {
             timestamps[i] = photonEstimatorResults.get(i).timestampSeconds;
         }
         return timestamps;
-    }
-
-    public Transform3d getRobotToCameraTransform() {
-        return robotToCameraTransform;
     }
 
     @Override
@@ -85,16 +86,29 @@ public class VisionAprilTagsIOPhoton extends VisionAprilTagsIO {
     }
 
     @Override
-    protected double[][] getTagsAmbiguities() {
-        double[][] ambiguitys = new double[photonEstimatorResults.size()][];
+    protected double[][] getTagsDistanceToCam() {
+        double[][] tagsDistanceToCam = new double[photonEstimatorResults.size()][];
         for (int i = 0; i < photonEstimatorResults.size(); i++) {
             List<PhotonTrackedTarget> targets = photonEstimatorResults.get(i).targetsUsed;
-            ambiguitys[i] = new double[targets.size()];
+            tagsDistanceToCam[i] = new double[targets.size()];
             for (int j = 0; j < targets.size(); j++) {
-                ambiguitys[i][j] = targets.get(j).getPoseAmbiguity();
+                tagsDistanceToCam[i][j] = targets.get(j).bestCameraToTarget.getTranslation().getNorm();
             }
         }
-        return ambiguitys;
+        return tagsDistanceToCam;
+    }
+
+    @Override
+    protected double[][] getTagsAmbiguities() {
+        double[][] ambiguities = new double[photonEstimatorResults.size()][];
+        for (int i = 0; i < photonEstimatorResults.size(); i++) {
+            List<PhotonTrackedTarget> targets = photonEstimatorResults.get(i).targetsUsed;
+            ambiguities[i] = new double[targets.size()];
+            for (int j = 0; j < targets.size(); j++) {
+                ambiguities[i][j] = targets.get(j).getPoseAmbiguity();
+            }
+        }
+        return ambiguities;
     }
 
     @Override
