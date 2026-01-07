@@ -1,4 +1,4 @@
-package frc.robot.subsystems.swerve.vision;
+package frc.robot.subsystems.vision;
 
 import static edu.wpi.first.units.Units.Degrees;
 
@@ -16,7 +16,7 @@ public class VisionConstants {
   public static final double ROTATION_STD_MULTIPLYER = 0.03;
 
   public static final double AVG_DIUSTANCE_DEGREDATION_START_METERS = 0.25;
-  public static final double AMBIGUITY_THREASHOLD = 0.5;
+  public static final double AMBIGUITY_THREASHOLD = 0.4;
 
   public record CameraConfig(String name, double stdFactor, Transform3d robotToCam) {
   };

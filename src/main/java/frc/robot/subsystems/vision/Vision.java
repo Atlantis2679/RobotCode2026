@@ -1,10 +1,10 @@
-package frc.robot.subsystems.swerve.vision;
+package frc.robot.subsystems.vision;
 
-import static frc.robot.subsystems.swerve.vision.VisionConstants.AMBIGUITY_THREASHOLD;
-import static frc.robot.subsystems.swerve.vision.VisionConstants.AVG_DIUSTANCE_DEGREDATION_START_METERS;
-import static frc.robot.subsystems.swerve.vision.VisionConstants.CAMERAS;
-import static frc.robot.subsystems.swerve.vision.VisionConstants.ROTATION_STD_MULTIPLYER;
-import static frc.robot.subsystems.swerve.vision.VisionConstants.TRANSLATION_STD_MULTIPLYER;
+import static frc.robot.subsystems.vision.VisionConstants.AMBIGUITY_THREASHOLD;
+import static frc.robot.subsystems.vision.VisionConstants.AVG_DIUSTANCE_DEGREDATION_START_METERS;
+import static frc.robot.subsystems.vision.VisionConstants.CAMERAS;
+import static frc.robot.subsystems.vision.VisionConstants.ROTATION_STD_MULTIPLYER;
+import static frc.robot.subsystems.vision.VisionConstants.TRANSLATION_STD_MULTIPLYER;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,9 +15,9 @@ import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.Vector;
 import frc.robot.FieldConstants;
 import frc.robot.subsystems.swerve.PoseEstimator.VisionMesurment;
-import frc.robot.subsystems.swerve.vision.VisionConstants.CameraConfig;
-import frc.robot.subsystems.swerve.vision.io.VisionAprilTagsIO;
-import frc.robot.subsystems.swerve.vision.io.VisionAprilTagsIOPhoton;
+import frc.robot.subsystems.vision.VisionConstants.CameraConfig;
+import frc.robot.subsystems.vision.io.VisionAprilTagsIO;
+import frc.robot.subsystems.vision.io.VisionAprilTagsIOPhoton;
 import team2679.atlantiskit.logfields.LogFieldsTable;
 import team2679.atlantiskit.periodicalerts.PeriodicAlertsGroup;
 
@@ -26,7 +26,7 @@ public class Vision {
   private final VisionAprilTagsIO[] visionCameras = new VisionAprilTagsIO[CAMERAS.length];
 
   public Vision() {
-    PeriodicAlertsGroup alertsGroup = new PeriodicAlertsGroup("Vision");
+    PeriodicAlertsGroup alertsGroup = new PeriodicAlertsGroup("VisionAlerts");
     for (int i = 0; i < visionCameras.length; i++) {
       CameraConfig camera = CAMERAS[i];
       visionCameras[i] = new VisionAprilTagsIOPhoton(fieldsTable, camera);
@@ -45,8 +45,8 @@ public class Vision {
       for (double ambiguities : io.tagsAmbiguities.get()[i]) {
         maxAmbiguity = Math.max(maxAmbiguity, ambiguities);
       }
-      if (maxAmbiguity > AMBIGUITY_THREASHOLD) continue;
-      if (!FieldConstants.isOnField(pose)) continue;
+      // if (maxAmbiguity > AMBIGUITY_THREASHOLD) continue;
+      // if (!FieldConstants.isOnField(pose)) continue;
       double distanceSum = 0;
       for (double distance : io.tagsDistanceToCam.get()[i]) {
         distanceSum += distance;
@@ -54,6 +54,7 @@ public class Vision {
       double avgDistance = distanceSum / tagsUsed;
       Vector<N3> trustLevels = calculateTrustLevel(stdFactor, tagsUsed, avgDistance, maxAmbiguity, useRoation);
       visionMesurments.add(new VisionMesurment(pose.toPose2d(), trustLevels, io.cameraTimestampsSeconds.get()[i]));
+      System.out.println(visionMesurments.size() != 0);
     }
     return visionMesurments;
   }
@@ -65,6 +66,7 @@ public class Vision {
         measurments.add(measurment);
       }
     }
+    fieldsTable.recordOutput("Vision measurments", measurments.toArray(new VisionMesurment[0]));
     return measurments;
   }
 

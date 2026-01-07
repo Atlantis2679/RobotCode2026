@@ -1,10 +1,10 @@
-package frc.robot.subsystems.swerve.vision.io;
+package frc.robot.subsystems.vision.io;
 
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
 import edu.wpi.first.math.geometry.Pose3d;
-import frc.robot.subsystems.swerve.vision.VisionConstants.CameraConfig;
+import frc.robot.subsystems.vision.VisionConstants.CameraConfig;
 import team2679.atlantiskit.logfields.IOBase;
 import team2679.atlantiskit.logfields.LogFieldsTable;
 

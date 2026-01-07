@@ -8,6 +8,7 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.util.sendable.Sendable;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -21,7 +22,7 @@ import frc.robot.subsystems.swerve.SwerveConstants.Modules;
 import frc.robot.subsystems.swerve.io.GyroIO;
 import frc.robot.subsystems.swerve.io.GyroIONavX;
 import frc.robot.subsystems.swerve.io.GyroIOSim;
-import frc.robot.subsystems.swerve.vision.Vision;
+import frc.robot.subsystems.vision.Vision;
 import team2679.atlantiskit.helpers.RotationalSensorHelper;
 import team2679.atlantiskit.logfields.LogFieldsTable;
 import team2679.atlantiskit.periodicalerts.PeriodicAlertsGroup;
@@ -90,8 +91,11 @@ public class Swerve extends SubsystemBase implements Tunable {
     gyroYawDegreesCCW.update(gyroIO.angleDegreesCCW.getAsDouble());
 
     Optional<Rotation2d> gyroAngle = isGyroConnected() ? Optional.of(Rotation2d.fromDegrees(getGyroYawDegreesCCW())) : Optional.empty();
+    poseEstimator.addOdometryMeasurment(getModulePositions(), gyroAngle, Timer.getTimestamp());
     List<VisionMesurment> visionMesurments = vision.getAllResults(!gyroIO.isConnected.getAsBoolean());
-    poseEstimator.update(getModulePositions(), gyroAngle, visionMesurments);
+    for (VisionMesurment visionMesurment : visionMesurments) {
+      poseEstimator.addVisionMeasurment(visionMesurment);
+    }
 
     fieldsTable.recordOutput("Is gryo connected", isGyroConnected());
     fieldsTable.recordOutput("Yaw degrees CCW", getGyroYawDegreesCCW());

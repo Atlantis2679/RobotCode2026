@@ -1,4 +1,6 @@
-package frc.robot.subsystems.swerve.vision.io;
+package frc.robot.subsystems.vision.io;
+
+import static frc.robot.subsystems.vision.VisionConstants.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,8 +16,6 @@ import org.photonvision.targeting.PhotonTrackedTarget;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import team2679.atlantiskit.logfields.LogFieldsTable;
-
-import static frc.robot.subsystems.swerve.vision.VisionConstants.*;
 
 public class VisionAprilTagsIOPhoton extends VisionAprilTagsIO {
     private final PhotonPoseEstimator photonPoseEstimator;
