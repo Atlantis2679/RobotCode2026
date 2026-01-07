@@ -1,6 +1,7 @@
 package frc.robot.subsystems.swerve.vision;
 
 import static frc.robot.subsystems.swerve.vision.VisionConstants.AMBIGUITY_THREASHOLD;
+import static frc.robot.subsystems.swerve.vision.VisionConstants.AVG_DIUSTANCE_DEGREDATION_START_METERS;
 import static frc.robot.subsystems.swerve.vision.VisionConstants.CAMERAS;
 import static frc.robot.subsystems.swerve.vision.VisionConstants.ROTATION_STD_MULTIPLYER;
 import static frc.robot.subsystems.swerve.vision.VisionConstants.TRANSLATION_STD_MULTIPLYER;
@@ -8,7 +9,6 @@ import static frc.robot.subsystems.swerve.vision.VisionConstants.TRANSLATION_STD
 import java.util.ArrayList;
 import java.util.List;
 
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.VecBuilder;
@@ -69,9 +69,9 @@ public class Vision {
   }
 
   private static Vector<N3> calculateTrustLevel(double stdFactor, int tagsUsed, double avgDistanceToCam, double maxAmbiguity, boolean useRotation) {
-    if (maxAmbiguity == 1 || tagsUsed == 0 || stdFactor == 0 || avgDistanceToCam == 0)
+    if (maxAmbiguity == 1 || tagsUsed == 0 || avgDistanceToCam == 0)
       return VecBuilder.fill(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
-    double value = Math.pow(avgDistanceToCam, 1.2) / Math.pow(tagsUsed, 2) / Math.pow(1 - maxAmbiguity, 2) * stdFactor;
+    double value = Math.pow(avgDistanceToCam + AVG_DIUSTANCE_DEGREDATION_START_METERS, 1.2) / Math.pow(tagsUsed, 2) / Math.pow(1 - maxAmbiguity, 2) * stdFactor;
     double xyStdDev = TRANSLATION_STD_MULTIPLYER * value;
     double rotationStdDevs = useRotation ? ROTATION_STD_MULTIPLYER * value : Double.POSITIVE_INFINITY;
     return VecBuilder.fill(xyStdDev, xyStdDev, rotationStdDevs);

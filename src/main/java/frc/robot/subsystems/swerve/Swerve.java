@@ -90,7 +90,7 @@ public class Swerve extends SubsystemBase implements Tunable {
     gyroYawDegreesCCW.update(gyroIO.angleDegreesCCW.getAsDouble());
 
     Optional<Rotation2d> gyroAngle = isGyroConnected() ? Optional.of(Rotation2d.fromDegrees(getGyroYawDegreesCCW())) : Optional.empty();
-    List<VisionMesurment> visionMesurments = vision.getAllResults();
+    List<VisionMesurment> visionMesurments = vision.getAllResults(!gyroIO.isConnected.getAsBoolean());
     poseEstimator.update(getModulePositions(), gyroAngle, visionMesurments);
 
     fieldsTable.recordOutput("Is gryo connected", isGyroConnected());
