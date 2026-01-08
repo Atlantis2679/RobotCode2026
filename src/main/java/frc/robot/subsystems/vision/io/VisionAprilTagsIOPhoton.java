@@ -67,7 +67,7 @@ public class VisionAprilTagsIOPhoton extends VisionAprilTagsIO {
         Pose3d[] robotPoses = new Pose3d[photonEstimatorResults.size()];
 
         for (int i = 0; i < robotPoses.length; i++) {
-            robotPoses[i] = photonEstimatorResults.get(i).estimatedPose;
+            robotPoses[i] = photonEstimatorResults.get(i).estimatedPose.transformBy(cameraConfig.robotToCam().inverse());
         }
         return robotPoses;
     }

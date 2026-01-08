@@ -1,7 +1,8 @@
 package frc.robot.subsystems.vision;
 
 import static frc.robot.subsystems.vision.VisionConstants.AMBIGUITY_THREASHOLD;
-import static frc.robot.subsystems.vision.VisionConstants.AVG_DIUSTANCE_DEGREDATION_START_METERS;
+import static frc.robot.subsystems.vision.VisionConstants.AVG_DISTANCE_DEGREDATION_START_METERS;
+import static frc.robot.subsystems.vision.VisionConstants.AVG_DISTANCE_THREASHOLD_METERS;
 import static frc.robot.subsystems.vision.VisionConstants.CAMERAS;
 import static frc.robot.subsystems.vision.VisionConstants.ROTATION_STD_MULTIPLYER;
 import static frc.robot.subsystems.vision.VisionConstants.TRANSLATION_STD_MULTIPLYER;
@@ -10,9 +11,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.numbers.N3;
-import edu.wpi.first.math.VecBuilder;
-import edu.wpi.first.math.Vector;
 import frc.robot.FieldConstants;
 import frc.robot.subsystems.swerve.PoseEstimator.VisionMesurment;
 import frc.robot.subsystems.vision.VisionConstants.CameraConfig;
@@ -45,16 +43,16 @@ public class Vision {
       for (double ambiguities : io.tagsAmbiguities.get()[i]) {
         maxAmbiguity = Math.max(maxAmbiguity, ambiguities);
       }
-      // if (maxAmbiguity > AMBIGUITY_THREASHOLD) continue;
-      // if (!FieldConstants.isOnField(pose)) continue;
+      if (maxAmbiguity > AMBIGUITY_THREASHOLD) continue;
+      if (!FieldConstants.isOnField(pose)) continue;
       double distanceSum = 0;
       for (double distance : io.tagsDistanceToCam.get()[i]) {
         distanceSum += distance;
       }
       double avgDistance = distanceSum / tagsUsed;
-      Vector<N3> trustLevels = calculateTrustLevel(stdFactor, tagsUsed, avgDistance, maxAmbiguity, useRoation);
-      visionMesurments.add(new VisionMesurment(pose.toPose2d(), trustLevels, io.cameraTimestampsSeconds.get()[i]));
-      System.out.println(visionMesurments.size() != 0);
+      if (avgDistance > AVG_DISTANCE_THREASHOLD_METERS) continue;
+      double[] trustLevels = calculateTrustLevel(stdFactor, tagsUsed, avgDistance, maxAmbiguity, useRoation);
+      visionMesurments.add(new VisionMesurment(pose.toPose2d(), trustLevels[0], trustLevels[1], io.cameraTimestampsSeconds.get()[i]));
     }
     return visionMesurments;
   }
@@ -70,12 +68,12 @@ public class Vision {
     return measurments;
   }
 
-  private static Vector<N3> calculateTrustLevel(double stdFactor, int tagsUsed, double avgDistanceToCam, double maxAmbiguity, boolean useRotation) {
+  private static double[] calculateTrustLevel(double stdFactor, int tagsUsed, double avgDistanceToCam, double maxAmbiguity, boolean useRotation) {
     if (maxAmbiguity == 1 || tagsUsed == 0 || avgDistanceToCam == 0)
-      return VecBuilder.fill(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
-    double value = Math.pow(avgDistanceToCam + AVG_DIUSTANCE_DEGREDATION_START_METERS, 1.2) / Math.pow(tagsUsed, 2) / Math.pow(1 - maxAmbiguity, 2) * stdFactor;
+      return new double[] {Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY};
+    double value = Math.pow(avgDistanceToCam + AVG_DISTANCE_DEGREDATION_START_METERS, 1.2) / Math.pow(tagsUsed, 2) / Math.pow(1 - maxAmbiguity, 2) * stdFactor;
     double xyStdDev = TRANSLATION_STD_MULTIPLYER * value;
     double rotationStdDevs = useRotation ? ROTATION_STD_MULTIPLYER * value : Double.POSITIVE_INFINITY;
-    return VecBuilder.fill(xyStdDev, xyStdDev, rotationStdDevs);
+    return new double[] {xyStdDev, rotationStdDevs};
   }
 }

@@ -5,7 +5,6 @@ import java.util.Optional;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.Nat;
 import edu.wpi.first.math.VecBuilder;
-import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
@@ -26,7 +25,7 @@ public class PoseEstimator {
     private TimeInterpolatableBuffer<Pose2d> odometryPosesBuffer = TimeInterpolatableBuffer.createBuffer(ODOMETRY_POSES_BUFFER_SIZE_SEC);
     private SwerveDriveKinematics kinematics;
 
-    private LogFieldsTable fieldsTable;
+    private LogFieldsTable fieldsTable = new LogFieldsTable("PoseEstimator");
 
     private SwerveModulePosition[] lastModulePositions = new SwerveModulePosition[] {
         new SwerveModulePosition(),
@@ -35,9 +34,8 @@ public class PoseEstimator {
         new SwerveModulePosition(),
     };
 
-    public PoseEstimator(LogFieldsTable fieldsTable, SwerveDriveKinematics kinematics) {
+    public PoseEstimator(SwerveDriveKinematics kinematics) {
         this.kinematics = kinematics;
-        this.fieldsTable = fieldsTable;
     }
 
     public void addOdometryMeasurment(SwerveModulePosition[] modulePositions, Optional<Rotation2d> gyroAngle, double timestamp) {
@@ -67,11 +65,9 @@ public class PoseEstimator {
 
     private Transform2d calculateVisionTransform(VisionMesurment visionMesurment, Pose2d estimateAtTime) {
         // Solve for closed form Kalman gain for continuous Kalman filter with A = 0
-        // and C = I. See wpimath/algorithms.md 
-        double[] r = new double[3];
-        for (int i = 0; i < 3; ++i) {
-          r[i] = Math.pow(visionMesurment.stdDevs().get(i), 2);
-        }    
+        // and C = I. See wpimath/algorithms.md
+        double[] r = new double[] {visionMesurment.xyStdDev(), visionMesurment.xyStdDev(), visionMesurment.thetaStdDev()};
+        
         Matrix<N3, N3> visionK = new Matrix<N3, N3>(Nat.N3(), Nat.N3());
         for (int row = 0; row < 3; row++) {
             if (VISION_Q_STD_DEVS[row] == 0) {
@@ -108,5 +104,5 @@ public class PoseEstimator {
         return odomertryPose;
     }
 
-    public record VisionMesurment(Pose2d pose, Vector<N3> stdDevs, double timestamp) {}
+    public record VisionMesurment(Pose2d pose, double xyStdDev, double thetaStdDev, double timestamp) {}
 }

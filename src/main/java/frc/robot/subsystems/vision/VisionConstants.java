@@ -15,7 +15,8 @@ public class VisionConstants {
   public static final double TRANSLATION_STD_MULTIPLYER = 0.01;
   public static final double ROTATION_STD_MULTIPLYER = 0.03;
 
-  public static final double AVG_DIUSTANCE_DEGREDATION_START_METERS = 0.25;
+  public static final double AVG_DISTANCE_DEGREDATION_START_METERS = 0.25;
+  public static final double AVG_DISTANCE_THREASHOLD_METERS = 2.5;
   public static final double AMBIGUITY_THREASHOLD = 0.4;
 
   public record CameraConfig(String name, double stdFactor, Transform3d robotToCam) {
@@ -24,8 +25,9 @@ public class VisionConstants {
   public static CameraConfig[] CAMERAS = {
       new CameraConfig(
           "FrontRightCam", 1.0,
-          new Transform3d(new Translation3d(0.285, -0.19, 0.355),
-              new Rotation3d(Degrees.of(-0.76), Degrees.of(8.5), Degrees.of(-4)))),
+          new Transform3d(new Translation3d(0.285, -0.19, 0.39),
+            //   new Rotation3d(Degrees.of(-0.76), Degrees.of(8.5), Degrees.of(-4)))),
+              new Rotation3d(Degrees.of(0), Degrees.of(8.5), Degrees.of(-4)))),
       new CameraConfig(
           "FrontLeftCam", 1.0,
           new Transform3d(new Translation3d(0.31, 0.19, 0.22),

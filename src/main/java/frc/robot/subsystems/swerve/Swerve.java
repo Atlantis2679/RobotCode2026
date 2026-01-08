@@ -58,7 +58,7 @@ public class Swerve extends SubsystemBase implements Tunable {
 
   private final LoggedDashboardChooser<Boolean> isRedAlliance = new LoggedDashboardChooser<>("alliance");
 
-  private final PoseEstimator poseEstimator = new PoseEstimator(fieldsTable.getSubTable("poseEstimator"), kinematics);
+  private final PoseEstimator poseEstimator = new PoseEstimator(kinematics);
 
   private final Vision vision = new Vision();
 
