@@ -1,12 +1,5 @@
 package frc.robot;
 
-<<<<<<< HEAD
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
-
-public class RobotContainer {
-    public RobotContainer() {
-=======
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -28,14 +21,10 @@ public class RobotContainer {
 
     public RobotContainer() {
         new Trigger(DriverStation::isDisabled).whileTrue(swerveCommands.stop());
-
->>>>>>> Swerve2025/swerve
-        configureBindings();
+        configureDrive();
     }
 
-    private void configureBindings() {
-<<<<<<< HEAD
-=======
+    private void configureDrive() {
         TunableCommand driveCommand = swerveCommands.driverController(
                 driverController::getLeftY,
                 driverController::getLeftX,
@@ -59,7 +48,6 @@ public class RobotContainer {
 
     public void enterSwerveIntoTest() {
         swerve.costAll();
->>>>>>> Swerve2025/swerve
     }
 
     public Command getAutonomousCommand() {

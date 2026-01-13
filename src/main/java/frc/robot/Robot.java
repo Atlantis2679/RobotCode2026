@@ -143,10 +143,7 @@ public class Robot extends LoggedRobot {
     public void testInit() {
         CommandScheduler.getInstance().disable();
         TunablesManager.enable();
-<<<<<<< HEAD
-=======
         robotContainer.enterSwerveIntoTest();
->>>>>>> Swerve2025/swerve
     }
 
     @Override

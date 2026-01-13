@@ -185,15 +185,3 @@ compile_commands.json
 
 # Eclipse generated file for annotation processors
 .factorypath
-
-# Manually added
-src/main/java/frc/robot/BuildConstants.java
-simgui-ds.json
-simgui.json
-/simlogs
-<<<<<<< HEAD
-networktables.json
-src/main/java/frc/robot/vendordeps/
-=======
-networktables.json
->>>>>>> Swerve2025/swerve
