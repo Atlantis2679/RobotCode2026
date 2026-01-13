@@ -44,7 +44,7 @@ public class Vision {
         maxAmbiguity = Math.max(maxAmbiguity, ambiguities);
       }
       if (maxAmbiguity > AMBIGUITY_THREASHOLD) continue;
-      if (!FieldConstants.isOnField(pose)) continue;
+      // if (!FieldConstants.isOnField(pose)) continue;
       double distanceSum = 0;
       for (double distance : io.tagsDistanceToCam.get()[i]) {
         distanceSum += distance;
