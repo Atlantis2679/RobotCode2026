@@ -23,6 +23,7 @@ import frc.robot.subsystems.swerve.io.GyroIO;
 import frc.robot.subsystems.swerve.io.GyroIONavX;
 import frc.robot.subsystems.swerve.io.GyroIOSim;
 import frc.robot.subsystems.vision.Vision;
+import frc.robot.subsystems.vision.VisionConstants;
 import team2679.atlantiskit.helpers.RotationalSensorHelper;
 import team2679.atlantiskit.logfields.LogFieldsTable;
 import team2679.atlantiskit.periodicalerts.PeriodicAlertsGroup;
@@ -80,6 +81,10 @@ public class Swerve extends SubsystemBase implements Tunable {
     PeriodicAlertsGroup.defaultInstance.addErrorAlert(() -> "Gyro Disconnected!", () -> !isGyroConnected());
 
     resetYawZero();
+
+    if (Robot.isSimulation()) {
+      poseEstimator.registerCallbackOnPoseUpdate(VisionConstants.Sim.callbackOnPoseEstimatorUpdate);
+    }
   }
 
   @Override
@@ -113,7 +118,7 @@ public class Swerve extends SubsystemBase implements Tunable {
     ChassisSpeeds targetChassisSpeeds = isFieldRelative ? ChassisSpeeds.fromFieldRelativeSpeeds(
         isRedAlliance() ? -vxSpeedMPS : vxSpeedMPS,
         isRedAlliance() ? -vySpeedMPS : vySpeedMPS,
-        vAngleRandiansPS, getPose().getRotation())
+        vAngleRandiansPS, poseEstimator.getEstimatedPose().getRotation())
         : new ChassisSpeeds(vxSpeedMPS, vySpeedMPS, vAngleRandiansPS);
 
     driveChassisSpeeds(targetChassisSpeeds, useVoltage);
@@ -155,7 +160,7 @@ public class Swerve extends SubsystemBase implements Tunable {
 
   public void resetYaw(double newAngleDegreesCCW) {
     gyroYawDegreesCCW.resetAngle(newAngleDegreesCCW);
-    Pose2d newPose = new Pose2d(getPose().getTranslation(), Rotation2d.fromDegrees(getGyroYawDegreesCCW()));
+    Pose2d newPose = new Pose2d(poseEstimator.getEstimatedPose().getTranslation(), Rotation2d.fromDegrees(getGyroYawDegreesCCW()));
     poseEstimator.resetPose(newPose);
   }
 
@@ -176,8 +181,8 @@ public class Swerve extends SubsystemBase implements Tunable {
       module.setTargetState(moduleStates[module.getModuleNumber()], optimize, preventJittering, useVoltage);
   }
 
-  public Pose2d getPose() {
-    return poseEstimator.getEstimatedPose();
+  public PoseEstimator getPoseEstimator() {
+    return poseEstimator;
   }
 
   public void costAll() {

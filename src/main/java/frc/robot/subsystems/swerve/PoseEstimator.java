@@ -1,6 +1,9 @@
 package frc.robot.subsystems.swerve;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.Nat;
@@ -25,6 +28,8 @@ public class PoseEstimator {
     private TimeInterpolatableBuffer<Pose2d> odometryPosesBuffer = TimeInterpolatableBuffer.createBuffer(ODOMETRY_POSES_BUFFER_SIZE_SEC);
     private SwerveDriveKinematics kinematics;
 
+    private final List<Consumer<Pose2d>> callbackOnPoseUpdate = new ArrayList<>();
+
     private LogFieldsTable fieldsTable = new LogFieldsTable("PoseEstimator");
 
     private SwerveModulePosition[] lastModulePositions = new SwerveModulePosition[] {
@@ -36,6 +41,7 @@ public class PoseEstimator {
 
     public PoseEstimator(SwerveDriveKinematics kinematics) {
         this.kinematics = kinematics;
+        callbackOnPoseUpdate.add(pose -> fieldsTable.recordOutput("Current Estimated Pose", pose));
     }
 
     public void addOdometryMeasurment(SwerveModulePosition[] modulePositions, Optional<Rotation2d> gyroAngle, double timestamp) {
@@ -50,7 +56,7 @@ public class PoseEstimator {
         odometryPosesBuffer.addSample(timestamp, odomertryPose);
         Twist2d odometryTwistFromLastPose = lastOdometryPose.log(odomertryPose);
         estimatedPose = estimatedPose.exp(odometryTwistFromLastPose);
-        fieldsTable.recordOutput("Current Estimated Pose", estimatedPose);
+        callAllCallbacks();
     }
 
     public void addVisionMeasurment(VisionMesurment mesurment) {
@@ -60,7 +66,7 @@ public class PoseEstimator {
         Pose2d estimateAtTime = estimatedPose.plus(odometryToSampleTransform);
         Transform2d visionTransform = calculateVisionTransform(mesurment, estimateAtTime);
         estimatedPose = estimateAtTime.plus(visionTransform).plus(odometryToSampleTransform.inverse());
-        fieldsTable.recordOutput("Current Estimated Pose", estimatedPose);
+        callAllCallbacks();
     }
 
     private Transform2d calculateVisionTransform(VisionMesurment visionMesurment, Pose2d estimateAtTime) {
@@ -86,6 +92,16 @@ public class PoseEstimator {
             kTimesTransform.get(0, 0),
             kTimesTransform.get(1, 0),
             Rotation2d.fromRadians(kTimesTransform.get(2, 0)));
+    }
+
+    private void callAllCallbacks() {
+        for (Consumer<Pose2d> callback : callbackOnPoseUpdate) {
+            callback.accept(estimatedPose);
+        }
+    }
+
+    public void registerCallbackOnPoseUpdate(Consumer<Pose2d> callback) {
+        callbackOnPoseUpdate.add(callback);
     }
 
     public void resetPose(Pose2d newPose) {

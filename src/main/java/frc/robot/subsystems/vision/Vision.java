@@ -1,7 +1,6 @@
 package frc.robot.subsystems.vision;
 
 import static frc.robot.subsystems.vision.VisionConstants.AMBIGUITY_THREASHOLD;
-import static frc.robot.subsystems.vision.VisionConstants.AVG_DISTANCE_DEGREDATION_START_METERS;
 import static frc.robot.subsystems.vision.VisionConstants.AVG_DISTANCE_THREASHOLD_METERS;
 import static frc.robot.subsystems.vision.VisionConstants.CAMERAS;
 import static frc.robot.subsystems.vision.VisionConstants.ROTATION_STD_MULTIPLYER;
@@ -11,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import edu.wpi.first.math.geometry.Pose3d;
+import frc.robot.FieldConstants;
 import frc.robot.subsystems.swerve.PoseEstimator.VisionMesurment;
 import frc.robot.subsystems.vision.VisionConstants.CameraConfig;
 import frc.robot.subsystems.vision.io.VisionAprilTagsIO;
@@ -40,7 +40,7 @@ public class Vision {
       Pose3d pose = io.posesEstimates.get()[i];
       double ambiguity = io.tagsAmbiguities.get()[i];
       if (ambiguity > AMBIGUITY_THREASHOLD) continue;
-      // if (!FieldConstants.isOnField(pose)) continue;
+      if (!FieldConstants.isOnField(pose)) continue;
       double distanceSum = 0;
       for (double distance : io.tagsDistanceToCam.get()[i]) {
         distanceSum += distance;
@@ -64,10 +64,10 @@ public class Vision {
     return measurments;
   }
 
-  private static double[] calculateTrustLevel(double stdFactor, int tagsUsed, double avgDistanceToCam, double maxAmbiguity, boolean useRotation) {
-    if (maxAmbiguity == 1 || tagsUsed == 0 || avgDistanceToCam == 0)
+  private static double[] calculateTrustLevel(double stdFactor, int tagsUsed, double avgDistanceToCam, double ambiguity, boolean useRotation) {
+    if (ambiguity == 1 || tagsUsed == 0 || avgDistanceToCam == 0)
       return new double[] {Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY};
-    double value = Math.pow(avgDistanceToCam + AVG_DISTANCE_DEGREDATION_START_METERS, 1.2) / Math.pow(tagsUsed, 2) / Math.pow(1 - maxAmbiguity, 2) * stdFactor;
+    double value = Math.pow(avgDistanceToCam, 1.2) / Math.pow(tagsUsed, 2) / Math.pow(1 - ambiguity, 2) * stdFactor;
     double xyStdDev = TRANSLATION_STD_MULTIPLYER * value;
     double rotationStdDevs = useRotation ? ROTATION_STD_MULTIPLYER * value : Double.POSITIVE_INFINITY;
     return new double[] {xyStdDev, rotationStdDevs};

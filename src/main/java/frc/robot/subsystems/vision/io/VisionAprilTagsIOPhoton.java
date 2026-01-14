@@ -6,11 +6,14 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.photonvision.PhotonCamera;
+import org.photonvision.simulation.PhotonCameraSim;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Transform3d;
+import frc.robot.Robot;
+import frc.robot.subsystems.vision.VisionConstants.CameraConfig;
 import team2679.atlantiskit.logfields.LogFieldsTable;
 
 public class VisionAprilTagsIOPhoton extends VisionAprilTagsIO {
@@ -24,30 +27,22 @@ public class VisionAprilTagsIOPhoton extends VisionAprilTagsIO {
 
         this.camera = new PhotonCamera(cameraConfig.name());
 
+        if (Robot.isSimulation()) {
+            PhotonCameraSim photonCameraSim = new PhotonCameraSim(camera, Sim.SIM_CAMERA_PROPERTIES);
+            Sim.VISION_SIM.addCamera(photonCameraSim, cameraConfig.robotToCam());
+        }
+
         this.cameraConfig = cameraConfig;
-      
-        // photonPoseEstimator = new PhotonPoseEstimator(APRTIL_TAGS_FIELD_LAYOUT, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
-        //     cameraConfig.robotToCam());
     }
 
     @Override
     public void periodicBeforeFields() {
         photonPipelineResults = camera.getAllUnreadResults();
-        // for (PhotonPipelineResult photonPipelineResult : photonPipelineResults) {
-        //     // Optional<EstimatedRobotPose> estimatedPose = photonPoseEstimator.update(photonPipelineResult);
-        //     // photonEstimatorResults = new ArrayList<>();
-        //     // if (estimatedPose.isPresent()) {
-        //     //     photonEstimatorResults.add(estimatedPose.get());
-        //     // }
-        //     if (photonPipelineResult.hasTargets()) {
-
-        //     }
-        // }
     }
-
+    
     @Override
     public CameraConfig getCameraConfig() {
-      return cameraConfig;
+        return cameraConfig;
     }
 
     @Override
