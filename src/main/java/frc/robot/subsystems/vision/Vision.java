@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import edu.wpi.first.math.geometry.Pose3d;
-import frc.robot.FieldConstants;
 import frc.robot.subsystems.swerve.PoseEstimator.VisionMesurment;
 import frc.robot.subsystems.vision.VisionConstants.CameraConfig;
 import frc.robot.subsystems.vision.io.VisionAprilTagsIO;
@@ -39,11 +38,8 @@ public class Vision {
     for (int i = 0; i < length; i++) {
       int tagsUsed = io.tagsPoses.get()[i].length;
       Pose3d pose = io.posesEstimates.get()[i];
-      double maxAmbiguity = 0;
-      for (double ambiguities : io.tagsAmbiguities.get()[i]) {
-        maxAmbiguity = Math.max(maxAmbiguity, ambiguities);
-      }
-      if (maxAmbiguity > AMBIGUITY_THREASHOLD) continue;
+      double ambiguity = io.tagsAmbiguities.get()[i];
+      if (ambiguity > AMBIGUITY_THREASHOLD) continue;
       // if (!FieldConstants.isOnField(pose)) continue;
       double distanceSum = 0;
       for (double distance : io.tagsDistanceToCam.get()[i]) {
@@ -51,7 +47,7 @@ public class Vision {
       }
       double avgDistance = distanceSum / tagsUsed;
       if (avgDistance > AVG_DISTANCE_THREASHOLD_METERS) continue;
-      double[] trustLevels = calculateTrustLevel(stdFactor, tagsUsed, avgDistance, maxAmbiguity, useRoation);
+      double[] trustLevels = calculateTrustLevel(stdFactor, tagsUsed, avgDistance, ambiguity, useRoation);
       visionMesurments.add(new VisionMesurment(pose.toPose2d(), trustLevels[0], trustLevels[1], io.cameraTimestampsSeconds.get()[i]));
     }
     return visionMesurments;

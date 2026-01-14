@@ -2,24 +2,21 @@ package frc.robot.subsystems.vision.io;
 
 import static frc.robot.subsystems.vision.VisionConstants.*;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
-import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
-import org.photonvision.PhotonPoseEstimator;
-import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 import org.photonvision.targeting.PhotonPipelineResult;
+import org.photonvision.targeting.PhotonTrackedTarget;
 
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Transform3d;
 import team2679.atlantiskit.logfields.LogFieldsTable;
 
 public class VisionAprilTagsIOPhoton extends VisionAprilTagsIO {
-    private final PhotonPoseEstimator photonPoseEstimator;
     private final PhotonCamera camera;
     private List<PhotonPipelineResult> photonPipelineResults;
-    private List<EstimatedRobotPose> photonEstimatorResults = new ArrayList<>();
+    // private List<EstimatedRobotPose> photonEstimatorResults = new ArrayList<>();
     private final CameraConfig cameraConfig;
 
     public VisionAprilTagsIOPhoton(LogFieldsTable fieldsTable, CameraConfig cameraConfig) {
@@ -29,20 +26,23 @@ public class VisionAprilTagsIOPhoton extends VisionAprilTagsIO {
 
         this.cameraConfig = cameraConfig;
       
-        photonPoseEstimator = new PhotonPoseEstimator(APRTIL_TAGS_FIELD_LAYOUT, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
-            cameraConfig.robotToCam());
+        // photonPoseEstimator = new PhotonPoseEstimator(APRTIL_TAGS_FIELD_LAYOUT, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
+        //     cameraConfig.robotToCam());
     }
 
     @Override
     public void periodicBeforeFields() {
         photonPipelineResults = camera.getAllUnreadResults();
-        for (PhotonPipelineResult photonPipelineResult : photonPipelineResults) {
-            Optional<EstimatedRobotPose> estimatedPose = photonPoseEstimator.update(photonPipelineResult);
-            photonEstimatorResults = new ArrayList<>();
-            if (estimatedPose.isPresent()) {
-                photonEstimatorResults.add(estimatedPose.get());
-            }
-        }
+        // for (PhotonPipelineResult photonPipelineResult : photonPipelineResults) {
+        //     // Optional<EstimatedRobotPose> estimatedPose = photonPoseEstimator.update(photonPipelineResult);
+        //     // photonEstimatorResults = new ArrayList<>();
+        //     // if (estimatedPose.isPresent()) {
+        //     //     photonEstimatorResults.add(estimatedPose.get());
+        //     // }
+        //     if (photonPipelineResult.hasTargets()) {
+
+        //     }
+        // }
     }
 
     @Override
@@ -52,30 +52,46 @@ public class VisionAprilTagsIOPhoton extends VisionAprilTagsIO {
 
     @Override
     protected double[] getCameraTimestampsSeconds() {
-        double[] timestamps = new double[photonEstimatorResults.size()];
+        double[] timestamps = new double[photonPipelineResults.size()];
 
         for (int i = 0; i < timestamps.length; i++) {
-            timestamps[i] = photonEstimatorResults.get(i).timestampSeconds;
+            timestamps[i] = photonPipelineResults.get(i).getTimestampSeconds();
         }
         return timestamps;
     }
 
     @Override
     protected Pose3d[] getRobotPoses() {
-        Pose3d[] robotPoses = new Pose3d[photonEstimatorResults.size()];
+        Pose3d[] robotPoses = new Pose3d[photonPipelineResults.size()];
+        int count = 0;
         for (int i = 0; i < robotPoses.length; i++) {
-            robotPoses[i] = photonEstimatorResults.get(i).estimatedPose.transformBy(cameraConfig.robotToCam().inverse());
+            PhotonPipelineResult result = photonPipelineResults.get(i);
+            if (result.hasTargets()) {
+                if (result.getMultiTagResult().isPresent()) {
+                    Transform3d cameraToPose = result.multitagResult.get().estimatedPose.best;
+                    Pose3d robotPose = new Pose3d().transformBy(cameraToPose).transformBy(cameraConfig.robotToCam())
+                        .relativeTo(APRTIL_TAGS_FIELD_LAYOUT.getOrigin());
+                    robotPoses[i] = robotPose;
+                } else {
+                    PhotonTrackedTarget target = result.getTargets().get(0);
+                    Pose3d tagPose = APRTIL_TAGS_FIELD_LAYOUT.getTagPose(target.fiducialId).get(); // Crash if tag not on field!
+                    Transform3d targetToCam = target.bestCameraToTarget.inverse();
+                    Pose3d robotPose = tagPose.transformBy(targetToCam);
+                    robotPoses[i] = robotPose;
+                }
+                count++;
+            }
         }
-        return robotPoses;
+        return Arrays.copyOf(robotPoses, count);
     }
 
     @Override
     protected Pose3d[][] getTagsPoses() {
-        Pose3d[][] tagsPoses = new Pose3d[photonEstimatorResults.size()][];
+        Pose3d[][] tagsPoses = new Pose3d[photonPipelineResults.size()][];
         for (int i = 0; i < tagsPoses.length; i++) {
-            tagsPoses[i] = new Pose3d[photonEstimatorResults.get(i).targetsUsed.size()];
+            tagsPoses[i] = new Pose3d[photonPipelineResults.get(i).targets.size()];
             for (int j = 0; j < tagsPoses[i].length; j++) {
-                tagsPoses[i][j] = APRTIL_TAGS_FIELD_LAYOUT.getTagPose(photonEstimatorResults.get(i).targetsUsed.get(j).fiducialId).get(); // Crash if not present
+                tagsPoses[i][j] = APRTIL_TAGS_FIELD_LAYOUT.getTagPose(i).get(); // Crash if tag not on field!
             }
         }
         return tagsPoses;
@@ -83,23 +99,26 @@ public class VisionAprilTagsIOPhoton extends VisionAprilTagsIO {
 
     @Override
     protected double[][] getTagsDistanceToCam() {
-        double[][] tagsDistanceToCam = new double[photonEstimatorResults.size()][];
+        double[][] tagsDistanceToCam = new double[photonPipelineResults.size()][];
         for (int i = 0; i < tagsDistanceToCam.length; i++) {
-            tagsDistanceToCam[i] = new double[photonEstimatorResults.get(i).targetsUsed.size()];
+            tagsDistanceToCam[i] = new double[photonPipelineResults.get(i).targets.size()];
             for (int j = 0; j < tagsDistanceToCam[i].length; j++) {
-                tagsDistanceToCam[i][j] = photonEstimatorResults.get(i).targetsUsed.get(j).bestCameraToTarget.getTranslation().getNorm();
+                PhotonTrackedTarget target = photonPipelineResults.get(i).targets.get(j);
+                tagsDistanceToCam[i][j] = target.getBestCameraToTarget().getTranslation().getNorm(); // Crash if tag not on field!
             }
         }
         return tagsDistanceToCam;
     }
 
     @Override
-    protected double[][] getTagsAmbiguities() {
-        double[][] ambiguities = new double[photonEstimatorResults.size()][];
+    protected double[] getTagsAmbiguities() {
+        double[] ambiguities = new double[photonPipelineResults.size()];
         for (int i = 0; i < ambiguities.length; i++) {
-            ambiguities[i] = new double[photonEstimatorResults.get(i).targetsUsed.size()];
-            for (int j = 0; j < ambiguities[i].length; j++) {
-                ambiguities[i][j] = photonEstimatorResults.get(i).targetsUsed.get(j).poseAmbiguity;
+            if (photonPipelineResults.get(i).multitagResult.isPresent()) {
+                ambiguities[i] = 0;
+            } else {
+                PhotonTrackedTarget target = photonPipelineResults.get(i).targets.get(0);
+                ambiguities[i] = target.getPoseAmbiguity();
             }
         }
         return ambiguities;

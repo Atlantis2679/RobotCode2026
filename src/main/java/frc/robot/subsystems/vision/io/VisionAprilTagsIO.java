@@ -14,7 +14,7 @@ public abstract class VisionAprilTagsIO extends IOBase {
             this::getCameraTimestampsSeconds);
     public final Supplier<Pose3d[][]> tagsPoses = fields.addObjectMatrix("tagsPoses", this::getTagsPoses, new Pose3d[0][0]);
     public final Supplier<double[][]> tagsDistanceToCam = fields.addDoubleMatrix("tagsDistanceToCam", this::getTagsDistanceToCam);
-    public final Supplier<double[][]> tagsAmbiguities = fields.addDoubleMatrix("tagsAmbiguities", this::getTagsAmbiguities);
+    public final Supplier<double[]> tagsAmbiguities = fields.addDoubleArray("tagsAmbiguities", this::getTagsAmbiguities);
     public final BooleanSupplier isConnected = fields.addBoolean("isConnected", this::getIsConnected);
 
     protected VisionAprilTagsIO(LogFieldsTable fieldsTable) {
@@ -29,7 +29,7 @@ public abstract class VisionAprilTagsIO extends IOBase {
 
     protected abstract Pose3d[][] getTagsPoses();
 
-    protected abstract double[][] getTagsAmbiguities();
+    protected abstract double[] getTagsAmbiguities();
 
     protected abstract double[][] getTagsDistanceToCam();
 
