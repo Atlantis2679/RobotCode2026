@@ -32,7 +32,7 @@ public class Vision {
   }
 
   private static List<VisionMesurment> getAllResultsInIO(VisionAprilTagsIO io, boolean useRoation) {
-    int length = io.cameraTimestampsSeconds.get().length;
+    int length = io.posesEstimates.get().length;
     List<VisionMesurment> visionMesurments = new ArrayList<>();
     double stdFactor = io.getCameraConfig().stdFactor();
     for (int i = 0; i < length; i++) {

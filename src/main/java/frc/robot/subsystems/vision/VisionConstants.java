@@ -40,8 +40,8 @@ public class VisionConstants {
   public static CameraConfig[] CAMERAS = {
       new CameraConfig(
           "FrontRightCam", 1.0,
-          new Transform3d(new Translation3d(0.285, -0.19, 0.39),
-              new Rotation3d(Degrees.of(0), Degrees.of(8.5), Degrees.of(-4)))),
+          new Transform3d(new Translation3d(0.175, 0.31, 0.39),
+              new Rotation3d(Degrees.of(0), Degrees.of(12), Degrees.of(0)))),
       // new CameraConfig(
       //     "FrontLeftCam", 1.0,
       //     new Transform3d(new Translation3d(0.31, 0.19, 0.22),
@@ -49,7 +49,7 @@ public class VisionConstants {
       new CameraConfig(
           "BackCam", 1.0,
           new Transform3d(new Translation3d(-0.29, 0, 0.6),
-              new Rotation3d(Degrees.of(0), Degrees.of(-23.5), Degrees.of(154))))
+              new Rotation3d(Degrees.of(0), Degrees.of(-23.5), Degrees.of(180))))
   };
 
   public static class Sim {
