@@ -28,10 +28,15 @@ public final class RobotMap {
   public static final class Controllers {
     public static final int DRIVER_PORT = 0;
   }
+  public static final class Dio{
+    public final static int HOOD_ENCODER_ID = 0;
+  }
 
   public static final class CanBus{
     public final static int FLYWHEEL_MOTOR1_ID = 0;
     public final static int FLYWHEEL_MOTOR2_ID = 0;     //FIXXXXXXX, IDK IDs YETTT.
+    
+    public final static int HOOD_MOTOR_ID = 0;
 
   }
 }
