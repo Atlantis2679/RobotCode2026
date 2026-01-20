@@ -36,7 +36,7 @@ public class IndexIOSparkMax extends IndexIO {
             () -> inConfigError, inMotor::getWarnings, inMotor::getFaults, "In Motor Config");
     }
 
-    //input:
+    //Input:
     public void setSpindexVolt(double volt){
         spinMotor.setVoltage(volt);
     }
@@ -44,7 +44,7 @@ public class IndexIOSparkMax extends IndexIO {
         inMotor.setVoltage(volt);
     }
     
-    //output:
+    //Output:
     protected double getSpindexCurrent(){
         return spinMotor.getOutputCurrent();
     }
