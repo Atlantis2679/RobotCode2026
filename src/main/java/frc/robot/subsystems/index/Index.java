@@ -17,6 +17,11 @@ public class Index extends SubsystemBase{
             getCurrentCommand() != null ? getCurrentCommand().getName() : "None");
     }
 
+    public void stop(){
+        io.setSpindexVolt(0);
+        io.setIndexerVolt(0);
+    }
+
     //Input:
     public void setSpindexVolt(double volt){
         fields.recordOutput("Spin Motor volt", volt);
