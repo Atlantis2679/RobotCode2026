@@ -14,42 +14,42 @@ import team2679.atlantiskit.logfields.LogFieldsTable;
 import team2679.atlantiskit.periodicalerts.PeriodicAlertsGroup;
 
 public class IndexIOSparkMax extends IndexIO {
-    private SparkMax spinMotor = new SparkMax(IndexConstants.Canbus.SPINDEX_ID, MotorType.kBrushless);
-    private SparkMax inMotor = new SparkMax(IndexConstants.Canbus.INDEXER_ID, MotorType.kBrushless);
+    private SparkMax spindexMotor = new SparkMax(IndexConstants.Canbus.SPINDEX_ID, MotorType.kBrushless);
+    private SparkMax indexerMotor = new SparkMax(IndexConstants.Canbus.INDEXER_ID, MotorType.kBrushless);
 
-    private SparkMaxConfig spinMotorConfig = new SparkMaxConfig();
-    private SparkMaxConfig inMotorConfig = new SparkMaxConfig();
+    private SparkMaxConfig spindexMotorConfig = new SparkMaxConfig();
+    private SparkMaxConfig indexerMotorConfig = new SparkMaxConfig();
 
     public IndexIOSparkMax(LogFieldsTable fields){
         super(fields);
 
-        spinMotorConfig.smartCurrentLimit(IndexConstants.SpinCurrentLimit);
-        spinMotorConfig.idleMode(IdleMode.kCoast);
-        REVLibError spinConfigError = spinMotor.configure(inMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
+        spindexMotorConfig.smartCurrentLimit(IndexConstants.SPINDEX_CURRENT_LIMIT);
+        spindexMotorConfig.idleMode(IdleMode.kCoast);
+        REVLibError spinConfigError = spindexMotor.configure(indexerMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
         AlertsFactory.revMotor(PeriodicAlertsGroup.defaultInstance, 
-            () -> spinConfigError, spinMotor::getWarnings, spinMotor::getFaults, "Spinex Motor Config");
+            () -> spinConfigError, spindexMotor::getWarnings, spindexMotor::getFaults, "Spinex Motor Config");
 
-        inMotorConfig.smartCurrentLimit(IndexConstants.InCurrentLimit);
-        inMotorConfig.idleMode(IdleMode.kCoast);
-        REVLibError inConfigError = inMotor.configure(inMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
+        indexerMotorConfig.smartCurrentLimit(IndexConstants.INDEXER_CURRENT_LIMIT);
+        indexerMotorConfig.idleMode(IdleMode.kCoast);
+        REVLibError inConfigError = indexerMotor.configure(indexerMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
         AlertsFactory.revMotor(PeriodicAlertsGroup.defaultInstance, 
-            () -> inConfigError, inMotor::getWarnings, inMotor::getFaults, "In Motor Config");
+            () -> inConfigError, indexerMotor::getWarnings, indexerMotor::getFaults, "In Motor Config");
     }
 
     //Input:
     public void setSpindexVolt(double volt){
-        spinMotor.setVoltage(volt);
+        spindexMotor.setVoltage(volt);
     }
     public void setIndexerVolt(double volt){
-        inMotor.setVoltage(volt);
+        indexerMotor.setVoltage(volt);
     }
     
     //Output:
     protected double getSpindexCurrent(){
-        return spinMotor.getOutputCurrent();
+        return spindexMotor.getOutputCurrent();
     }
     protected double getIndexerCurrent(){
-        return inMotor.getOutputCurrent();
+        return indexerMotor.getOutputCurrent();
     }
 }
 

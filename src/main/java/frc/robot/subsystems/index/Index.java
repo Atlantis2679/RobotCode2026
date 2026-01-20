@@ -34,9 +34,9 @@ public class Index extends SubsystemBase{
 
     //Output:
     public double getSpindexCurrent() {
-        return io.getSpinCurrent.getAsDouble();
+        return io.getSpindexCurrent.getAsDouble();
     }
     public double getIndexerCurrent() {
-        return io.getInCurrent.getAsDouble();
+        return io.getIndexerCurrent.getAsDouble();
     }
 }
