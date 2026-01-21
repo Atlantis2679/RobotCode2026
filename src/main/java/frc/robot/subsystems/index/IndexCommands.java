@@ -1,5 +1,7 @@
 package frc.robot.subsystems.index;
 
+import java.util.function.DoubleSupplier;
+
 import edu.wpi.first.wpilibj2.command.Command;
 
 public class IndexCommands {
@@ -8,14 +10,14 @@ public class IndexCommands {
     public IndexCommands(Index index){
         this.index = index;
     }
-    public Command spin(double volt){
-        return index.run(() -> index.setSpindexVolt(volt))
+    public Command spin(DoubleSupplier volt){
+        return index.run(() -> index.setSpindexVolt(volt.getAsDouble()))
             .finallyDo(() -> index.setSpindexVolt(0))
             .withName("Rotate Spindex");
     }
 
-    public Command insert(double volt){
-        return index.run(() -> index.setIndexerVolt(volt))
+    public Command insert(DoubleSupplier volt){
+        return index.run(() -> index.setIndexerVolt(volt.getAsDouble()))
             .finallyDo(()-> index.setIndexerVolt(0))
             .withName("Rotate Indexer");
     }
@@ -28,7 +30,7 @@ public class IndexCommands {
         return index.run(() -> index.setIndexerVolt(0));
     }
 
-    public Command stopAll() {
+    public Command stop() {
         return index.run(index::stop);
     }
 }
