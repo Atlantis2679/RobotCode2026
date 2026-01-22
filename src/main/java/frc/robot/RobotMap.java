@@ -28,4 +28,9 @@ public final class RobotMap {
   public static final class Controllers {
     public static final int DRIVER_PORT = 0;
   }
+
+  public static final class CANBUS {
+    public static final int SLAPDOWN_ID = 0;
+    public static final int SLAPDOWN_ENCODER_ID = 0;
+  }
 }
