@@ -1,19 +1,15 @@
 package frc.robot.subsystems.shooter.flyWheel;
 
-import com.fasterxml.jackson.databind.module.SimpleModule;
-
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Robot;
 import frc.robot.subsystems.shooter.flyWheel.io.*;
-import frc.robot.subsystems.shooter.flyWheel.FlyWheelConstants;
 import team2679.atlantiskit.helpers.RotationalSensorHelper;
 import team2679.atlantiskit.logfields.LogFieldsTable;
 import team2679.atlantiskit.tunables.extensions.TunableArmFeedforward;
 import team2679.atlantiskit.tunables.extensions.TunableTrapezoidProfile;
-import team2679.atlantiskit.valueholders.ValueHolder;
 
 public class FlyWheel extends SubsystemBase{
     

@@ -1,7 +1,6 @@
 package frc.robot.subsystems.shooter.flyWheel;
 
 import java.util.function.DoubleSupplier;
-import java.util.function.Supplier;
 
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj2.command.Command;

@@ -1,11 +1,9 @@
 package frc.robot.subsystems.shooter.hood.io;
 
-import com.ctre.phoenix6.CANBus;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
-import frc.robot.RobotContainer;
 import frc.robot.RobotMap.*;
 import team2679.atlantiskit.logfields.LogFieldsTable;
 

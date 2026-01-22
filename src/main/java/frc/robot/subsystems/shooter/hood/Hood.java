@@ -1,7 +1,5 @@
 package frc.robot.subsystems.shooter.hood;
 
-import com.google.flatbuffers.Constants;
-
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;

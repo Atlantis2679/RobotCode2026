@@ -26,7 +26,7 @@ public class HoodCommands {
 
             double volt = hood.calculateFeedForward(
                 referenceState.get().position,
-                referenceState.get().velocity); //According to old code, needs to be (angle.getAsDouble, 0); ?? Yair, pls explain.
+                referenceState.get().velocity);
 
             hood.setVoltage(volt);
         }));
