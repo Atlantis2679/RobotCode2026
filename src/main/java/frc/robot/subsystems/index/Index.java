@@ -6,14 +6,15 @@ import frc.robot.subsystems.index.io.*;
 import team2679.atlantiskit.logfields.LogFieldsTable;
 
 public class Index extends SubsystemBase{
-    private final LogFieldsTable fields = new LogFieldsTable(getName());
-    private final IndexIO io = Robot.isReal() ? new IndexIOSparkMax(fields) : new IndexIOSim(fields);
+    private final LogFieldsTable fieldsTable = new LogFieldsTable(getName());
+    private final IndexIO io = Robot.isReal() ? new IndexIOSparkMax(fieldsTable) : new IndexIOSim(fieldsTable);
     
-    public Index(){}
+    public Index() {
+    }
 
     @Override
-    public void periodic(){
-        fields.recordOutput("Current command", 
+    public void periodic() {
+        fieldsTable.recordOutput("Current command", 
             getCurrentCommand() != null ? getCurrentCommand().getName() : "None");
     }
 
@@ -22,21 +23,21 @@ public class Index extends SubsystemBase{
         io.setIndexerVolt(0);
     }
 
-    //Input:
-    public void setSpindexVolt(double volt){
-        fields.recordOutput("Spin Motor volt", volt);
+    public void setSpindexVolt(double volt) {
+        fieldsTable.recordOutput("Spindex Motor Desired Volt", volt);
         io.setSpindexVolt(volt);
     }
-    public void setIndexerVolt(double volt){
-        fields.recordOutput("In Motor Volt", volt);
+
+    public void setIndexerVolt(double volt) {
+        fieldsTable.recordOutput("Indexer Motor Desired Volt", volt);
         io.setIndexerVolt(volt);
     }
 
-    //Output:
     public double getSpindexCurrent() {
-        return io.getSpindexCurrent.getAsDouble();
+        return io.indexerCurrent.getAsDouble();
     }
+
     public double getIndexerCurrent() {
-        return io.getIndexerCurrent.getAsDouble();
+        return io.indexerCurrent.getAsDouble();
     }
 }

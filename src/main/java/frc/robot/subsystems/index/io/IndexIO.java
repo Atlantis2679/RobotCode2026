@@ -6,18 +6,16 @@ import team2679.atlantiskit.logfields.IOBase;
 import team2679.atlantiskit.logfields.LogFieldsTable;
 
 public abstract class IndexIO extends IOBase {
-    public DoubleSupplier getSpindexCurrent = fields.addDouble("Spinex Current", this::getSpindexCurrent);
-    public DoubleSupplier getIndexerCurrent = fields.addDouble("Indexer Current", this::getIndexerCurrent);
+    public DoubleSupplier spindexCurrent = fields.addDouble("Spindex Current", this::getSpindexCurrent);
+    public DoubleSupplier indexerCurrent = fields.addDouble("Indexer Current", this::getIndexerCurrent);
 
     public IndexIO(LogFieldsTable fields){
         super(fields);
     }
 
-    //Output:
     protected abstract double getSpindexCurrent();
     protected abstract double getIndexerCurrent();
 
-    //Input:
     public abstract void setSpindexVolt(double volt);
     public abstract void setIndexerVolt(double volt);
 }
