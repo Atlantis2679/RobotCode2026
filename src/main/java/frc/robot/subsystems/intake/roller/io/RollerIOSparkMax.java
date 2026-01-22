@@ -16,16 +16,16 @@ import team2679.atlantiskit.periodicalerts.PeriodicAlertsGroup;
 public class RollerIOSparkMax extends RollerIO{
     
     private SparkMax motor = new SparkMax(RollerConstants.Canbus.ROLLER_ID, MotorType.kBrushless);
-    private SparkMaxConfig motorConfig = new SparkMaxConfig();
 
     public RollerIOSparkMax(LogFieldsTable fields){
         super(fields);
 
+        SparkMaxConfig motorConfig = new SparkMaxConfig();
         motorConfig.smartCurrentLimit(RollerConstants.CURRENT_LIMIT);
         motorConfig.idleMode(IdleMode.kCoast);
         REVLibError motorConfigError = motor.configure(motorConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
         AlertsFactory.revMotor(PeriodicAlertsGroup.defaultInstance, 
-        () -> motorConfigError, motor::getWarnings, motor::getFaults, "Roller Config");
+            () -> motorConfigError, motor::getWarnings, motor::getFaults, "Roller Config");
     }
 
     public void setSpeed(double speed){
