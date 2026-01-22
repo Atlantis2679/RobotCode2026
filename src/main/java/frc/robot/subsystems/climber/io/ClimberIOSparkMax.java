@@ -9,30 +9,37 @@ import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import frc.robot.RobotMap.CANBUS;
 import team2679.atlantiskit.logfields.LogFieldsTable;
 
-public class ClimberIOSparkMax extends ClimberIO{
-        private SparkMax elevatorMotor = new SparkMax(CANBUS.ELEVATOR_ID, MotorType.kBrushless);
-        private SparkMax pivotMotor = new SparkMax(CANBUS.PIVOT_ID, MotorType.kBrushless);
-        private DutyCycleEncoder encoder = new DutyCycleEncoder(CANBUS.ELEVATOR_ENCODER_ID);
-    
-        public ClimberIOSparkMax(LogFieldsTable fieldsTable){
-            super(fieldsTable);
-        }
-        public double getHeightMeters(){
-            return (Units.rotationsToRadians(encoder.get()) - ClimberConstants.HOMED_POSITION) * ClimberConstants.DRUM_RADIUS;;
+public class ClimberIOSparkMax extends ClimberIO {
+    private SparkMax elevatorMotor = new SparkMax(CANBUS.ELEVATOR_ID, MotorType.kBrushless);
+    private SparkMax pivotMotor = new SparkMax(CANBUS.PIVOT_ID, MotorType.kBrushless);
+    private DutyCycleEncoder encoder = new DutyCycleEncoder(CANBUS.ELEVATOR_ENCODER_ID);
+
+    public ClimberIOSparkMax(LogFieldsTable fieldsTable) {
+        super(fieldsTable);
     }
-    public double getElevatorMotorCurrent(){
+
+    public double getHeightMeters() {
+        return (Units.rotationsToRadians(encoder.get()) - ClimberConstants.Elevator.HOMED_POSITION)
+                * ClimberConstants.Elevator.DRUM_RADIUS;
+    }
+
+    public double getElevatorMotorCurrent() {
         return elevatorMotor.getOutputCurrent();
     }
-    public double getPivotMotorCurrent(){
+
+    public double getPivotMotorCurrent() {
         return pivotMotor.getOutputCurrent();
     }
-    protected boolean getIsEncoderConnected(){
+
+    protected boolean getIsEncoderConnected() {
         return encoder.isConnected();
     }
-    public void setElevatorVoltage(double voltage){
+
+    public void setElevatorVoltage(double voltage) {
         elevatorMotor.setVoltage(voltage);
     }
-    public void setPivotVoltage(double voltage){
+
+    public void setPivotVoltage(double voltage) {
         pivotMotor.setVoltage(voltage);
     }
 }
