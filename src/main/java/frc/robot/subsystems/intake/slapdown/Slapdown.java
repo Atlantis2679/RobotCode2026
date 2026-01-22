@@ -41,7 +41,6 @@ public class Slapdown extends SubsystemBase {
         //אמורים לטפל בזה
     }
 
-
     public double getCurrent(){
         return io.getCurrent.getAsDouble();
     }
