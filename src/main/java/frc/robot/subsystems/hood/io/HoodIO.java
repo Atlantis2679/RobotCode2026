@@ -1,5 +1,6 @@
 package frc.robot.subsystems.hood.io;
 
+import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
 import team2679.atlantiskit.logfields.IOBase;
@@ -9,6 +10,8 @@ public abstract class HoodIO extends IOBase{
     
     public final DoubleSupplier hoodMotorAngle = fields.addDouble("Hood Motor Angle",
     this::getHoodMotorAngle);
+    public final BooleanSupplier isEncoderConnected = fields.addBoolean("isEncoderConnected", this::getIsEncoderConnected);
+
 
     public HoodIO(LogFieldsTable fieldsTable){
         super(fieldsTable);
@@ -17,4 +20,7 @@ public abstract class HoodIO extends IOBase{
     public abstract double getHoodMotorAngle();
 
     public abstract void setVoltage(double volt);
+        
+    protected abstract boolean getIsEncoderConnected();
+
 }

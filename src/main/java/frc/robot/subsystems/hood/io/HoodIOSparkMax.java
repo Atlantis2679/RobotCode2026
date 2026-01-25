@@ -25,5 +25,9 @@ public class HoodIOSparkMax extends HoodIO{
     public void setVoltage(double volt) {
         hoodMotor.setVoltage(volt);
     }
+    @Override
+    protected boolean getIsEncoderConnected() {
+        return hoodEncoder.isConnected();
+    }
     
 }

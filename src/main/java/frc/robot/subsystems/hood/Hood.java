@@ -1,6 +1,8 @@
 package frc.robot.subsystems.hood;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Robot;
@@ -9,8 +11,13 @@ import frc.robot.subsystems.hood.io.HoodIOSim;
 import frc.robot.subsystems.hood.io.HoodIOSparkMax;
 import team2679.atlantiskit.helpers.RotationalSensorHelper;
 import team2679.atlantiskit.logfields.LogFieldsTable;
+import team2679.atlantiskit.tunables.Tunable;
+import team2679.atlantiskit.tunables.TunableBuilder;
+import team2679.atlantiskit.tunables.TunablesManager;
 import team2679.atlantiskit.tunables.extensions.TunableArmFeedforward;
 import team2679.atlantiskit.tunables.extensions.TunableTrapezoidProfile;
+
+import static frc.robot.subsystems.hood.HoodConstants.*;
 
 public class Hood extends SubsystemBase{
 
@@ -19,7 +26,7 @@ public class Hood extends SubsystemBase{
         new HoodIOSparkMax(fieldsTable):
         new HoodIOSim(fieldsTable);
 
-    private final RotationalSensorHelper sensorHelpr;
+    private final RotationalSensorHelper rotationalHelpr;
 
     private final TunableTrapezoidProfile trapezoidProfile = new TunableTrapezoidProfile(
         new TrapezoidProfile.Constraints(
@@ -39,14 +46,27 @@ public class Hood extends SubsystemBase{
         HoodConstants.KA
     );
 
+    private final Debouncer encoderConnectedDebouncer = new Debouncer(ENCODER_CONNECTED_DEBAUNCER_SEC);
+
+    private double maxAngle = MAX_ANGLE_DEGREES;
+    private double minAngle = MIN_ANGLE_DEGREES;
+
+    private double upperBound = UPPER_BOUND;
+    private double lowerBound = LOWER_BOUND;
+
     public Hood(){
         fieldsTable.update();
 
-        sensorHelpr = new RotationalSensorHelper(io.getHoodMotorAngle(), HoodConstants.ANGLE_OFFSET);    
+        TunablesManager.add("Hood", (Tunable) this);
+
+        rotationalHelpr = new RotationalSensorHelper(io.getHoodMotorAngle(), HoodConstants.ANGLE_OFFSET); 
+        rotationalHelpr.enableContinuousWrap(lowerBound, upperBound);   
     }
 
     public void periodic(){
-        sensorHelpr.update(io.getHoodMotorAngle());
+        rotationalHelpr.update(io.getHoodMotorAngle());
+        fieldsTable.recordOutput("angle", getAngleDegrees());
+        fieldsTable.recordOutput("velocity", rotationalHelpr.getVelocity());
     }
     public double calculateFeedForward(double desiredAngle, double desiredSpeed){
         double speed = hoodFeedForward.calculate(Math.toRadians(desiredAngle), desiredSpeed);
@@ -64,13 +84,47 @@ public class Hood extends SubsystemBase{
         return io.getHoodMotorAngle();
     }
     public double getVelocity(){
-        return sensorHelpr.getVelocity();
+        return rotationalHelpr.getVelocity();
     }
     public void resetPID(){
         hoodPidController.reset();
     }
-    public void setVoltage(double volt){
-        io.setVoltage(volt);
+
+    public boolean isAtAngle(double desiredAngleDegrees) {
+        return Math.abs(desiredAngleDegrees - getAngleDegrees()) < ANGLE_TOLERENCE_DEGREES;
+    }
+
+    public boolean getEncoderConnectedDebouncer() {
+        return encoderConnectedDebouncer.calculate(io.isEncoderConnected.getAsBoolean());
+    }
+
+    public void setHoodVoltage(double voltage) {
+        if((getAngleDegrees() > MAX_ANGLE_DEGREES && voltage > 0)
+            || (getAngleDegrees() < MIN_ANGLE_DEGREES && voltage < 0)) {
+            voltage = 0.0;
+        }
+        voltage = MathUtil.clamp(voltage, -HOOD_MAX_VOLTAGE, HOOD_MAX_VOLTAGE);
+        fieldsTable.recordOutput("voltage", voltage);
+        io.setVoltage(voltage);
+    }
+
+    public void initTunable(TunableBuilder builder) {
+        builder.addChild("Pivot PID", hoodPidController);
+        builder.addChild("Pivot feedforward", hoodFeedForward);
+        builder.addChild("Pivot Trapezoid profile", trapezoidProfile);
+        builder.addChild("Pivot rotational helper", rotationalHelpr);
+        builder.addDoubleProperty("Pivot max angle", () -> maxAngle, (angle) -> maxAngle = angle);
+        builder.addDoubleProperty("Pivot min angle", () -> minAngle, (angle) -> minAngle = angle);
+        builder.addDoubleProperty("Pivot upper bound", () -> upperBound,
+            (newUpperBound) -> {
+                upperBound = newUpperBound;
+                rotationalHelpr.enableContinuousWrap(lowerBound, newUpperBound);
+            });
+        builder.addDoubleProperty("Pivot lower bound", () -> lowerBound,
+            (newLowerBound) -> {
+                lowerBound = newLowerBound;
+                rotationalHelpr.enableContinuousWrap(newLowerBound, upperBound);
+            });
     }
     
 }

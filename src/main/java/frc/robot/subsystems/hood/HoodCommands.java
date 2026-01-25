@@ -28,13 +28,17 @@ public class HoodCommands {
                 referenceState.get().position,
                 referenceState.get().velocity);
 
-            hood.setVoltage(volt);
+            hood.setHoodVoltage(volt);
         }));
+    }
+
+    public Command moveToAngle(double angle) {
+        return moveToAngle(() -> angle);
     }
 
     public Command manualController(DoubleSupplier speed){
         return hood.run(() -> {
-            hood.setVoltage(speed.getAsDouble() * 8);
+            hood.setHoodVoltage(speed.getAsDouble() * 8);
         });
     }
 }
