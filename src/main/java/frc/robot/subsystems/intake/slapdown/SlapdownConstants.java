@@ -16,5 +16,7 @@ public class SlapdownConstants {
     public static final double MIN_ANGLE = 0;
     public static final double MAX_VOLTAGE = 0;
     public static final double ANGLE_TOLLERANCE = 0;
+    public static final double OPEN_ANGLE_DEG = 0;
+    public static final double CLOSE_ANGLE_DEG = 0;
 }
 
