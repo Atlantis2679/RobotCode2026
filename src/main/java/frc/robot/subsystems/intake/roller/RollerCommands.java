@@ -12,7 +12,7 @@ public class RollerCommands {
     }
     
     public Command takeIn(DoubleSupplier speed){
-        return roller.run(() -> roller.setSpeed(speed.getAsDouble()))
+        return roller.run(() -> roller.setSpeedRPM(speed.getAsDouble()))
         .finallyDo(roller::stop)
         .withName("Take ball in");
     }
