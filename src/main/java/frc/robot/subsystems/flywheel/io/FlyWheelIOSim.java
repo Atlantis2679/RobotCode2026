@@ -6,22 +6,26 @@ import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.wpilibj.simulation.FlywheelSim;
 import team2679.atlantiskit.logfields.LogFieldsTable;
 import frc.robot.subsystems.flywheel.FlyWheelConstants;
-import frc.robot.subsystems.flywheel.FlyWheelConstants.Sim;
 
 public class FlyWheelIOSim extends FlyWheelIO{
 
+    private final FlywheelSim flyWheelMotorSim = new FlywheelSim(
+        LinearSystemId.createFlywheelSystem(DCMotor.getNeo550(1),
+        FlyWheelConstants.Sim.FLYWHEEL_JKgMetersSquared,FlyWheelConstants.GEAR_RATIO),
+         DCMotor.getNeo550(1));
+
     public FlyWheelIOSim(LogFieldsTable fieldsTable){
         super(fieldsTable);
-        //FlywheelSim sim = new FlywheelSim(LinearSystemId.createFlywheelSystem(DCMotor.getNeo550(1),FlyWheelConstants.Sim.FLYWHEEL_JKgMetersSquared,FlyWheelConstants.GEAR_RATIO), 2, );
     }
 
     @Override
     public double getMotorsRPM(){
-        return 0;
+        return flyWheelMotorSim.getAngularVelocityRPM();
     }
 
     @Override
     public void setVoltage(double volt) {
+        flyWheelMotorSim.setInputVoltage(volt);
     }
     
 }
