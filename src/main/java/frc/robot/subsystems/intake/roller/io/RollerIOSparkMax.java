@@ -29,7 +29,7 @@ public class RollerIOSparkMax extends RollerIO{
     }
 
     public void setSpeed(double speed){
-        motor.set(speed/RollerConstants.MAX_RPM);
+        motor.set(speed);
     }
     protected double getCurrent(){
         return motor.getOutputCurrent();

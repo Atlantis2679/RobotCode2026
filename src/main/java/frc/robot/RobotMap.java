@@ -28,4 +28,8 @@ public final class RobotMap {
   public static final class Controllers {
     public static final int DRIVER_PORT = 0;
   }
+
+  public static final class CANBUS {
+    public static final int ROLLER_ID = 0;
+  }
 }
