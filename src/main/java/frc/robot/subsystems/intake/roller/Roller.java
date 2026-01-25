@@ -25,9 +25,6 @@ public class Roller extends SubsystemBase {
     public void setSpeedRPM(double speed){
         io.setSpeed(speed/RollerConstants.MAX_RPM);
     }
-    public void setSpeed(double speed){
-        io.setSpeed(speed);
-    }
 
     public double getCurrent(){
         return io.getCurrent.getAsDouble();

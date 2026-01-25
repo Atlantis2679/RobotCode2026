@@ -11,18 +11,18 @@ public class RollerCommands {
         this.roller = roller;
     }
     
-    public Command spin(Double speed){
-        return roller.run(() -> roller.setSpeedRPM(speed))
-        .finallyDo(roller::stop)
-        .withName("Take ball in");
-    }
-
     public Command spin(DoubleSupplier speed){
-        return roller.run(() -> roller.setSpeed(speed.getAsDouble()))
+        return roller.run(() -> roller.setSpeedRPM(speed.getAsDouble()))
         .finallyDo(roller::stop)
         .withName("Take ball in");
     }
     
+    public Command manualController(DoubleSupplier speed){
+        return roller.run(() -> roller.setSpeedRPM(speed.getAsDouble()*RollerConstants.MAX_RPM))
+        .finallyDo(roller::stop)
+        .withName("Manual Controller");
+    }
+
     public Command stop(){
         return roller.run(roller::stop)
         .withName("Stop");
