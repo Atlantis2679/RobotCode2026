@@ -50,6 +50,9 @@ public class Slapdown extends SubsystemBase {
     public double getAngleDegrees(){
         return sensorHelper.getAngle();
     }
+    public double getVelocity(){
+        return sensorHelper.getVelocity();
+    }
 
     public void setVoltage(double volt){
         //יש בדיקה של האם הוולט חיובי והאם הזווית מעל המקס (וההפך) אבל כאילו למה שהזווית pivotב
