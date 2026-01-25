@@ -14,6 +14,11 @@ public class FlyWheelIOSim extends FlyWheelIO{
         FlyWheelConstants.Sim.FLYWHEEL_JKgMetersSquared,FlyWheelConstants.GEAR_RATIO),
          DCMotor.getNeo550(1));
 
+    @Override
+    protected void periodicBeforeFields() {
+        flyWheelMotorSim.update(0.02);
+    }
+
     public FlyWheelIOSim(LogFieldsTable fieldsTable){
         super(fieldsTable);
     }
