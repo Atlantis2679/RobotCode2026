@@ -4,6 +4,7 @@ import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 
 import frc.robot.RobotMap.CANBUS;
+import frc.robot.subsystems.flywheel.FlyWheelConstants;
 import team2679.atlantiskit.logfields.LogFieldsTable;
 
 public class FlyWheelIOSparkMax extends FlyWheelIO{
@@ -18,14 +19,14 @@ public class FlyWheelIOSparkMax extends FlyWheelIO{
 
 
     @Override
-    public double getAbsoluteRotations() {
-        return motor1.getAbsoluteEncoder().getPosition();
-    }
-
-    @Override
     public void setVoltage(double volt) {
         motor1.setVoltage(volt);
         motor2.setVoltage(volt);
+    }
+
+    @Override
+    public double getMotorsRPM(){
+        return motor1.getAbsoluteEncoder().getVelocity() * FlyWheelConstants.GEAR_RATIO;
     }
     
 }

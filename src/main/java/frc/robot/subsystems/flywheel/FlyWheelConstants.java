@@ -4,6 +4,7 @@ public class FlyWheelConstants {
 
     public static final double MAX_VOLTAGE = 11;
 
+    public static final double SPEED_TOLERANCE_RPM = 0;
 
     public static final double KP = 0;
     public static final double KI = 0;
@@ -17,6 +18,8 @@ public class FlyWheelConstants {
     public static final double KV = 0;
     public static final double KG = 0;
 
+    public static final double GEAR_RATIO = 2;
+
 
 
     public class Sim{
@@ -24,5 +27,7 @@ public class FlyWheelConstants {
         public static final double SIM_KA = 0;
         public static final double SIM_KV = 0;
         public static final double SIM_KG = 0;
+
+        public static final double FLYWHEEL_JKgMetersSquared = 0;
     }
 }
