@@ -11,8 +11,14 @@ public class RollerCommands {
         this.roller = roller;
     }
     
-    public Command takeIn(DoubleSupplier speed){
-        return roller.run(() -> roller.setSpeedRPM(speed.getAsDouble()))
+    public Command spin(Double speed){
+        return roller.run(() -> roller.setSpeedRPM(speed))
+        .finallyDo(roller::stop)
+        .withName("Take ball in");
+    }
+
+    public Command spin(DoubleSupplier speed){
+        return roller.run(() -> roller.setSpeed(speed.getAsDouble()))
         .finallyDo(roller::stop)
         .withName("Take ball in");
     }
