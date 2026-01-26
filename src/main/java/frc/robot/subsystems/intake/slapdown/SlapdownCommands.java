@@ -31,10 +31,4 @@ public class SlapdownCommands {
             slapdown.setVoltage(ignore_mg + speed.getAsDouble()*SlapdownConstants.MAX_VOLTAGE);
         });
     }
-    public Command open(){
-        return this.goToAngleDeg(() -> SlapdownConstants.OPEN_ANGLE_DEG);
-    }
-    public Command close(){
-        return this.goToAngleDeg(() -> SlapdownConstants.CLOSE_ANGLE_DEG);
-    }
 }
