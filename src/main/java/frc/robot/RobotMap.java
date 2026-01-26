@@ -33,5 +33,10 @@ public final class RobotMap {
     public static final int ROLLER_ID = 0;
     public static final int SPINDEX_ID = 0;
     public static final int INDEXER_ID = 0;
+    public final static int HOOD_MOTOR_ID = 0;
+  }
+
+  public static final class DIO {
+    public final static int HOOD_ENCODER_ID = 0;
   }
 }
