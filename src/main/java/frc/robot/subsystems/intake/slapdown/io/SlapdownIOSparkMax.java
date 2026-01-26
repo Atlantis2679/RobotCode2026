@@ -19,7 +19,7 @@ public class SlapdownIOSparkMax extends SlapdownIO{
 
     private SparkMax motor = new SparkMax(RobotMap.CANBUS.SLAPDOWN_ID, MotorType.kBrushless);
     private SparkMaxConfig motorConfig = new SparkMaxConfig();
-    private DutyCycleEncoder encoder = new DutyCycleEncoder(RobotMap.CANBUS.SLAPDOWN_ENCODER_ID);
+    private DutyCycleEncoder encoder = new DutyCycleEncoder(RobotMap.DIO.SLAPDOWN_ENCODER_ID);
 
     public SlapdownIOSparkMax(LogFieldsTable fields){
         super(fields);
@@ -28,13 +28,13 @@ public class SlapdownIOSparkMax extends SlapdownIO{
         motorConfig.idleMode(IdleMode.kCoast);
         REVLibError motorConfigError = motor.configure(motorConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
         AlertsFactory.revMotor(PeriodicAlertsGroup.defaultInstance,
-            () -> motorConfigError, motor::getWarnings, motor::getFaults, "Slapdown config");
+            () -> motorConfigError, motor::getWarnings, motor::getFaults, "Slapdown motor");
 
         encoder.setDutyCycleRange(0, 1);
     }
 
     //input:
-    protected double getAngle(){
+    protected double getAngleDegrees(){
         return encoder.get();
     }
     protected boolean isEncoderConnected(){

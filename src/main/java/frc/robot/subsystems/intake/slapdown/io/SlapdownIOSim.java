@@ -8,7 +8,7 @@ public class SlapdownIOSim extends SlapdownIO {
         super(fieldsTable);
     }
 
-    protected double getAngle(){
+    protected double getAngleDegrees(){
         return 0;
     }
     protected boolean isEncoderConnected(){

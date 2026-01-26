@@ -12,33 +12,39 @@ import frc.robot.subsystems.intake.slapdown.io.SlapdownIOSim;
 import frc.robot.subsystems.intake.slapdown.io.SlapdownIOSparkMax;
 import team2679.atlantiskit.helpers.RotationalSensorHelper;
 import team2679.atlantiskit.logfields.LogFieldsTable;
+import team2679.atlantiskit.tunables.Tunable;
+import team2679.atlantiskit.tunables.TunableBuilder;
 import team2679.atlantiskit.tunables.extensions.TunableArmFeedforward;
 import team2679.atlantiskit.tunables.extensions.TunableTrapezoidProfile;
 
-public class Slapdown extends SubsystemBase {
-    private Debouncer encoderConnectedDebouncer = new Debouncer(SlapdownConstants.DEBOUNCER_DELAY);
-    private TunableArmFeedforward feedforward = new TunableArmFeedforward(SlapdownConstants.ks, SlapdownConstants.kg, SlapdownConstants.kv);
+import static frc.robot.subsystems.intake.slapdown.SlapdownConstants.*;
+
+public class Slapdown extends SubsystemBase implements Tunable {
+    private Debouncer encoderConnectedDebouncer = new Debouncer(DEBOUNCER_DELAY);
+    private TunableArmFeedforward feedforward = new TunableArmFeedforward(ks, kg, kv);
     private TunableTrapezoidProfile trapezoidProfile = new TunableTrapezoidProfile(
-        new Constraints(SlapdownConstants.MAX_VELOCITY, SlapdownConstants.MAX_ACCELERATION));
-    private PIDController pid = new PIDController(SlapdownConstants.kp, SlapdownConstants.ki, SlapdownConstants.kd);
+        new Constraints(MAX_VELOCITY, MAX_ACCELERATION));
+    private PIDController pid = new PIDController(kp, ki, kd);
     private LogFieldsTable fieldsTable = new LogFieldsTable(getName());
     private SlapdownIO io = Robot.isReal() ? new SlapdownIOSparkMax(fieldsTable) : new SlapdownIOSim(fieldsTable);
     private RotationalSensorHelper sensorHelper;
 
+    private double minAngle = MIN_ANGLE;
+    private double maxAngle = MAX_ANGLE;
+
     public Slapdown(){
-        sensorHelper = new RotationalSensorHelper(getAngleDegrees(), SlapdownConstants.ANGLE_OFFSET);
-        sensorHelper.enableContinuousWrap(SlapdownConstants.MIN_ANGLE, SlapdownConstants.MAX_ANGLE);
+        sensorHelper = new RotationalSensorHelper(getAngleDegrees(), ANGLE_OFFSET);
+        sensorHelper.enableContinuousWrap(MIN_ANGLE, MAX_ANGLE);
     }
+
     public void resetPID(){
         pid.reset();
     }
 
     @Override
     public void periodic() {
-        sensorHelper.update(io.getAngle.getAsDouble());
+        sensorHelper.update(io.getAngleDegrees.getAsDouble());
         fieldsTable.recordOutput("Current command", getCurrentCommand() != null ? getCurrentCommand().getName() : "None");
-        //מחובר, אבל הסופליירים encoderלזווית ולהאם ה recordOutput אמור להיות גם pivotלפי ה
-        //אמורים לטפל בזה
     }
 
     public double getCurrent(){
@@ -55,11 +61,10 @@ public class Slapdown extends SubsystemBase {
     }
 
     public void setVoltage(double volt){
-        //יש בדיקה של האם הוולט חיובי והאם הזווית מעל המקס (וההפך) אבל כאילו למה שהזווית pivotב
-        //תהיה מעל המקס זה לא הכי הגיוני אז לא יודע לא שמתי
-        volt = MathUtil.clamp(volt, -SlapdownConstants.MAX_VOLTAGE, SlapdownConstants.MAX_VOLTAGE);
-        fieldsTable.recordOutput("Voltage", volt);
+        volt = MathUtil.clamp(volt, -MAX_VOLTAGE, MAX_VOLTAGE);
+        fieldsTable.recordOutput("Desired Voltage", volt);
     }
+    
     public void stop(){
         io.setVolt(0);
     }
@@ -76,6 +81,22 @@ public class Slapdown extends SubsystemBase {
     }
 
     public boolean isAtAngle(double angle){
-        return Math.abs(getAngleDegrees() - angle) < SlapdownConstants.ANGLE_TOLLERANCE;
+        return Math.abs(getAngleDegrees() - angle) < ANGLE_TOLLERANCE;
+    }
+
+    @Override
+    public void initTunable(TunableBuilder builder) {
+        builder.addChild("PID", pid);
+        builder.addChild("FeedForward", feedforward);
+        builder.addChild("TrapeziodProfile", trapezoidProfile);
+        builder.addChild("RotationalSensorHelper", sensorHelper);
+        builder.addDoubleProperty("minAngle", () -> minAngle, (newMinAngle) -> {
+            minAngle = newMinAngle;
+            sensorHelper.enableContinuousWrap(minAngle, maxAngle);
+        });
+        builder.addDoubleProperty("maxAngle", () -> maxAngle, (newMaxAngle) -> {
+            maxAngle = newMaxAngle;
+            sensorHelper.enableContinuousWrap(minAngle, maxAngle);
+        });
     }
 }

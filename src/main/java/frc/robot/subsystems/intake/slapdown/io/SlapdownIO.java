@@ -10,8 +10,8 @@ public abstract class SlapdownIO extends IOBase{
     private LogFieldsTable fields;
 
     public DoubleSupplier getCurrent = fields.addDouble("Current", this::getCurrent);
-    public BooleanSupplier isEncoderConnected = fields.addBoolean("Encoder Connected?", this::isEncoderConnected);
-    public DoubleSupplier getAngle = fields.addDouble("Angle", this::getAngle);
+    public BooleanSupplier isEncoderConnected = fields.addBoolean("Encoder Connected", this::isEncoderConnected);
+    public DoubleSupplier getAngleDegrees = fields.addDouble("Angle Degrees", this::getAngleDegrees);
 
     public SlapdownIO(LogFieldsTable fields){
         super(fields);
@@ -19,7 +19,7 @@ public abstract class SlapdownIO extends IOBase{
 
     protected abstract double getCurrent();
     protected abstract boolean isEncoderConnected();
-    protected abstract double getAngle();
+    protected abstract double getAngleDegrees();
 
     public abstract void setVolt(double volt);
 }
