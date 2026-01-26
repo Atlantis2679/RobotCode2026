@@ -14,18 +14,17 @@ public class FlyWheelCommands {
 
 
     public Command setSpeed(DoubleSupplier speedRPM){
-        flyWheel.resetPID();
-        return flyWheel.run(() ->{
+        return flyWheel.runOnce(flyWheel::resetPID).andThen(flyWheel.run(() ->{
             flyWheel.setVoltage(
                 flyWheel.calcVoltsforRPM(speedRPM.getAsDouble())
             );
-        } ).withName("flywheelSetSpeed");
+        } )).withName("flywheelSetSpeed");
     }
 
-    public Command manualController(DoubleSupplier flyWheelVoltage){
+    public Command manualController(DoubleSupplier precentageVoltage){
         return flyWheel.run(() ->  {
 
-            flyWheel.setVoltage(flyWheelVoltage.getAsDouble() * FlyWheelConstants.MAX_VOLTAGE);
+            flyWheel.setVoltage(precentageVoltage.getAsDouble() * FlyWheelConstants.MAX_VOLTAGE);
 
         }).withName("FlyWheel manual controller");
     }
