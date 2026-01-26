@@ -4,6 +4,8 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.wpilibj.util.Color;
+import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Robot;
 import frc.robot.subsystems.hood.io.HoodIO;
@@ -25,6 +27,11 @@ public class Hood extends SubsystemBase{
     private final HoodIO io = Robot.isReal()?
         new HoodIOSparkMax(fieldsTable):
         new HoodIOSim(fieldsTable);
+
+    private final HoodVisualizer realVisualizer = new HoodVisualizer(fieldsTable, "Real Visualizer",
+        new Color8Bit(Color.kPurple));
+    private final HoodVisualizer desiredHoodVisualizer = new HoodVisualizer(fieldsTable, "Desired Visualizer",
+        new Color8Bit(Color.kYellow));
 
     private final RotationalSensorHelper rotationalHelpr;
 
@@ -64,6 +71,7 @@ public class Hood extends SubsystemBase{
     }
 
     public void periodic(){
+        realVisualizer.update(getAngleDegrees());
         rotationalHelpr.update(io.getHoodMotorAngleDegree());
         fieldsTable.recordOutput("angle", getAngleDegrees());
         fieldsTable.recordOutput("velocity", rotationalHelpr.getVelocity());
@@ -71,6 +79,7 @@ public class Hood extends SubsystemBase{
     public double calculateFeedForward(double desiredAngleDegree, double desiredSpeed, boolean usePID){
         fieldsTable.recordOutput("desired angle", desiredAngleDegree);
         fieldsTable.recordOutput("desired speed", desiredSpeed);
+        desiredHoodVisualizer.update(desiredAngleDegree);
         double speed = hoodFeedForward.calculate(Math.toRadians(desiredAngleDegree), desiredSpeed);
         if (usePID && !isAtAngle(desiredAngleDegree)) {
             speed += hoodPidController.calculate(getAngleDegrees(), desiredAngleDegree);
