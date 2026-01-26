@@ -59,18 +59,22 @@ public class Hood extends SubsystemBase{
 
         TunablesManager.add("Hood", (Tunable) this);
 
-        rotationalHelpr = new RotationalSensorHelper(io.getHoodMotorAngle(), HoodConstants.ANGLE_OFFSET); 
+        rotationalHelpr = new RotationalSensorHelper(io.getHoodMotorAngleDegree(), HoodConstants.ANGLE_OFFSET); 
         rotationalHelpr.enableContinuousWrap(lowerBound, upperBound);   
     }
 
     public void periodic(){
-        rotationalHelpr.update(io.getHoodMotorAngle());
+        rotationalHelpr.update(io.getHoodMotorAngleDegree());
         fieldsTable.recordOutput("angle", getAngleDegrees());
         fieldsTable.recordOutput("velocity", rotationalHelpr.getVelocity());
     }
-    public double calculateFeedForward(double desiredAngle, double desiredSpeed){
-        double speed = hoodFeedForward.calculate(Math.toRadians(desiredAngle), desiredSpeed);
-        speed += hoodPidController.calculate(getAngleDegrees(), desiredAngle);
+    public double calculateFeedForward(double desiredAngleDegree, double desiredSpeed, boolean usePID){
+        fieldsTable.recordOutput("desired angle", desiredAngleDegree);
+        fieldsTable.recordOutput("desired speed", desiredSpeed);
+        double speed = hoodFeedForward.calculate(Math.toRadians(desiredAngleDegree), desiredSpeed);
+        if (usePID && !isAtAngle(desiredAngleDegree)) {
+            speed += hoodPidController.calculate(getAngleDegrees(), desiredAngleDegree);
+        }
         return speed;
     }
     public TrapezoidProfile.State calculateTrapezoidProfile(double time, TrapezoidProfile.State initialState,
@@ -81,7 +85,7 @@ public class Hood extends SubsystemBase{
         io.setVoltage(0);
     }
     public double getAngleDegrees(){
-        return io.getHoodMotorAngle();
+        return io.getHoodMotorAngleDegree();
     }
     public double getVelocity(){
         return rotationalHelpr.getVelocity();
@@ -99,8 +103,8 @@ public class Hood extends SubsystemBase{
     }
 
     public void setHoodVoltage(double voltage) {
-        if((getAngleDegrees() > MAX_ANGLE_DEGREES && voltage > 0)
-            || (getAngleDegrees() < MIN_ANGLE_DEGREES && voltage < 0)) {
+        if((getAngleDegrees() > maxAngle && voltage > 0)
+            || (getAngleDegrees() < minAngle && voltage < 0)) {
             voltage = 0.0;
         }
         voltage = MathUtil.clamp(voltage, -HOOD_MAX_VOLTAGE, HOOD_MAX_VOLTAGE);

@@ -17,7 +17,7 @@ public class HoodIOSparkMax extends HoodIO{
     }
 
     @Override
-    public double getHoodMotorAngle() {
+    public double getHoodMotorAngleDegree() {
         return hoodEncoder.get() * 360;
     }
 

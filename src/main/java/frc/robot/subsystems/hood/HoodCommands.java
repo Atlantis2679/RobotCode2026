@@ -6,6 +6,8 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj2.command.Command;
 import team2679.atlantiskit.valueholders.ValueHolder;
 
+import static frc.robot.subsystems.hood.HoodConstants.*;
+
 public class HoodCommands {
     private final Hood hood;
 
@@ -26,7 +28,7 @@ public class HoodCommands {
 
             double volt = hood.calculateFeedForward(
                 referenceState.get().position,
-                referenceState.get().velocity);
+                referenceState.get().velocity, true);
 
             hood.setHoodVoltage(volt);
         }));
@@ -38,7 +40,9 @@ public class HoodCommands {
 
     public Command manualController(DoubleSupplier speed){
         return hood.run(() -> {
-            hood.setHoodVoltage(speed.getAsDouble() * 8);
+            double demandSpeed = speed.getAsDouble();
+            double feedForward = hood.calculateFeedForward(hood.getAngleDegrees(), 0, false);
+            hood.setHoodVoltage(feedForward + demandSpeed * HOOD_MAX_VOLTAGE);
         });
     }
 }

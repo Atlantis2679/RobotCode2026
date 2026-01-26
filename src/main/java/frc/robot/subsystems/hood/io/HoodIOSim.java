@@ -27,7 +27,7 @@ public class HoodIOSim extends HoodIO{
     }
 
     @Override
-    public double getHoodMotorAngle() {
+    public double getHoodMotorAngleDegree() {
         return Math.toDegrees(hoodMotor.getAngleRads());
     }
 
