@@ -2,6 +2,7 @@ package frc.robot.subsystems.climber;
 
 import java.util.function.DoubleSupplier;
 
+import frc.robot.subsystems.climber.ClimberConstants.*;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj2.command.Command;
 import team2679.atlantiskit.valueholders.ValueHolder;
@@ -17,7 +18,7 @@ public class ClimberCommands {
         ValueHolder<TrapezoidProfile.State> referenceState = new ValueHolder<TrapezoidProfile.State>(null);
         return climber.runOnce(() -> {
             climber.resetPID();
-            referenceState.set(new TrapezoidProfile.State(climber.getHeight(), climber.getHeightVelocity()));
+            referenceState.set(new TrapezoidProfile.State(climber.getHeightMeters(), climber.getHeightVelocity()));
         }).andThen(climber.run(() -> {
             referenceState.set(climber.calculateTrapezoidProfile(
                     0.02,
@@ -40,9 +41,9 @@ public class ClimberCommands {
         return climber.run(() -> {
             double demandSpeed = elevatorSpeed.getAsDouble();
 
-            double feedForward = climber.calculateFeedForward(climber.getHeight(), 0, false);
+            double feedForward = climber.calculateFeedForward(climber.getHeightMeters(), 0, false);
 
-            climber.setElevatorVoltage(feedForward + demandSpeed * ClimberConstants.Elevator.MAX_VOLTAGE);
+            climber.setElevatorVoltage(feedForward + demandSpeed * Elevator.MAX_VOLTAGE);
         }).withName("elevatorManualController");
     }
 

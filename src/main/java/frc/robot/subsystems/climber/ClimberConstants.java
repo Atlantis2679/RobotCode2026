@@ -16,6 +16,7 @@ public class ClimberConstants {
         public static final double KS = 0;
         public static final double KG = 0;
         public static final double KV = 0;
+        public static final double KA = 0;
 
         public static final double HOMED_POSITION = 0;
         public static final double DRUM_RADIUS = 0;

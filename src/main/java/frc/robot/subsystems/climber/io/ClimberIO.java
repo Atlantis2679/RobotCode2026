@@ -9,7 +9,7 @@ import team2679.atlantiskit.logfields.LogFieldsTable;
 public abstract class ClimberIO extends IOBase {
     public final DoubleSupplier elevatorMotorCurrect = fields.addDouble("elevatorMotorCurrect",
             this::getElevatorMotorCurrent);
-    public final DoubleSupplier height = fields.addDouble("elevatorHeight", this::getHeightMeters);
+    public final DoubleSupplier height = fields.addDouble("encoderAngle", this::getEncoderAngleDegrees);
     public final BooleanSupplier isEncoderConnected = fields.addBoolean("isEncoderConnected", this::getIsEncoderConnected);
 
 
@@ -20,8 +20,6 @@ public abstract class ClimberIO extends IOBase {
     // Outputs:
     
     public abstract double getEncoderAngleDegrees();
-
-    public abstract double getHeightMeters();
     
     public abstract double getElevatorMotorCurrent();
 
