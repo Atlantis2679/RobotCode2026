@@ -45,6 +45,9 @@ public class ClimberCommands {
             climber.setElevatorVoltage(feedForward + demandSpeed * ClimberConstants.Elevator.MAX_VOLTAGE);
         }).withName("elevatorManualController");
     }
+    public Command openPivot(){
+        return climber.run(() -> climber.setPivotVoltage(ClimberConstants.Pivot.OPEN_PIVOT_VOLTAGE)).withName("openPivot");
+    }
 
     public Command pivotManualController(DoubleSupplier pivotSpeed) {
         return climber.run(() -> climber.setPivotVoltage(0)).withName("pivotManualController");

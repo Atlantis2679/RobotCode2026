@@ -45,6 +45,8 @@ public class ClimberConstants {
         public static final double KG = 0;
         public static final double KV = 0;
 
+        public static final double OPEN_PIVOT_VOLTAGE = 0;
+
         public class Sim {
             public static final double SIM_KS = 0;
             public static final double SIM_KG = 0;
