@@ -10,12 +10,13 @@ import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
 import frc.robot.subsystems.intake.roller.RollerConstants;
 import frc.robot.utils.AlertsFactory;
+import frc.robot.RobotMap.CANBUS;
 import team2679.atlantiskit.logfields.LogFieldsTable;
 import team2679.atlantiskit.periodicalerts.PeriodicAlertsGroup;
 
 public class RollerIOSparkMax extends RollerIO{
     
-    private SparkMax motor = new SparkMax(RollerConstants.Canbus.ROLLER_ID, MotorType.kBrushless);
+    private SparkMax motor = new SparkMax(CANBUS.ROLLER_ID, MotorType.kBrushless);
 
     public RollerIOSparkMax(LogFieldsTable fields){
         super(fields);
