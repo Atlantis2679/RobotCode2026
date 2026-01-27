@@ -6,6 +6,9 @@ public class ClimberIOSim extends ClimberIO {
     public ClimberIOSim(LogFieldsTable fieldsTable) {
         super(fieldsTable);
     }
+    public double getEncoderAngleDegrees(){
+        return 0;
+    }
 
     public double getHeightMeters() {
         return 0;

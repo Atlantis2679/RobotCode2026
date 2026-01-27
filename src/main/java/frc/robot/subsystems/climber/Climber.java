@@ -4,11 +4,13 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Robot;
 import frc.robot.subsystems.climber.io.ClimberIO;
 import frc.robot.subsystems.climber.io.ClimberIOSim;
 import frc.robot.subsystems.climber.io.ClimberIOSparkMax;
+import team2679.atlantiskit.helpers.RotationalSensorHelper;
 import team2679.atlantiskit.logfields.LogFieldsTable;
 import team2679.atlantiskit.tunables.extensions.TunableArmFeedforward;
 import team2679.atlantiskit.tunables.extensions.TunableTrapezoidProfile;
@@ -35,12 +37,19 @@ public class Climber extends SubsystemBase {
     private final Debouncer encoderConnectedDebouncer = new Debouncer(
             ClimberConstants.Elevator.ENCODER_CONNECTED_DEBAUNCER_SEC);
 
+    private final RotationalSensorHelper elevatorRotationalSensorHelper;
+
     public Climber() {
         fieldsTable.update();
+
+        elevatorRotationalSensorHelper = new RotationalSensorHelper(io.getEncoderAngleDegrees(),
+                ClimberConstants.Elevator.ANGLE_OFFSET);
     }
 
     @Override
     public void periodic() {
+        elevatorRotationalSensorHelper.update(io.getEncoderAngleDegrees());
+
         fieldsTable.recordOutput("Current command",
                 getCurrentCommand() != null ? getCurrentCommand().getName() : "None");
         fieldsTable.recordOutput("Elevator Height", io.getHeightMeters());
@@ -62,6 +71,7 @@ public class Climber extends SubsystemBase {
         fieldsTable.recordOutput("Elevator Voltage", voltage);
         io.setElevatorVoltage(voltage);
     }
+
     public void setPivotVoltage(double voltage) {
         voltage = MathUtil.clamp(voltage, -ClimberConstants.Pivot.MAX_VOLTAGE,
                 ClimberConstants.Pivot.MAX_VOLTAGE);
@@ -71,6 +81,15 @@ public class Climber extends SubsystemBase {
 
     public double getHeight() {
         return io.getHeightMeters();
+    }
+
+    public double getAngularVelocity() {
+        return elevatorRotationalSensorHelper.getVelocity();
+    }
+
+    public double getHeightVelocity() {
+        return Units.degreesToRadians(getAngularVelocity())
+                * ClimberConstants.Elevator.DRUM_RADIUS;
     }
 
     public double calculateFeedForward(double desiredHeight, double desiredSpeed, boolean usePID) {

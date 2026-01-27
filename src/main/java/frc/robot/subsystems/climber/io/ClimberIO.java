@@ -21,6 +21,8 @@ public abstract class ClimberIO extends IOBase {
 
     // Outputs:
     
+    public abstract double getEncoderAngleDegrees();
+
     public abstract double getHeightMeters();
     
     public abstract double getElevatorMotorCurrent();

@@ -18,6 +18,10 @@ public class ClimberIOSparkMax extends ClimberIO {
         super(fieldsTable);
     }
 
+    public double getEncoderAngleDegrees(){
+        return encoder.get();
+    }
+
     public double getHeightMeters() {
         return (Units.rotationsToRadians(encoder.get()) - ClimberConstants.Elevator.HOMED_POSITION)
                 * ClimberConstants.Elevator.DRUM_RADIUS;
