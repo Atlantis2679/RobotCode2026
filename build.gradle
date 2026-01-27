@@ -1,6 +1,10 @@
 plugins {
     id "java"
+<<<<<<< HEAD
     id "edu.wpi.first.GradleRIO" version "2026.2.1"
+=======
+    id "edu.wpi.first.GradleRIO" version "2026.1.1"
+>>>>>>> 29476cdd9b3d1c0c0fcb188253ee6f57d6fb133a
 }
 
 java {
