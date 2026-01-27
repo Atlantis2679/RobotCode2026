@@ -30,26 +30,23 @@ public final class RobotMap {
   }
 
   public static final class CANBUS {
-<<<<<<< HEAD
     public static final int SPINDEX_ID = 0;
     public static final int INDEXER_ID = 0;
 
     public static final int ELEVATOR_ID = 0;
     public static final int PIVOT_ID = 0;
     public static final int ELEVATOR_ENCODER_ID = 0;
-=======
+
     public static final int SLAPDOWN_ID = 0;
     public static final int FLYWHEEL_MOTOR1_ID = 0;
     public static final int FLYWHEEL_MOTOR2_ID = 0;
     public static final int ROLLER_ID = 0;
-    public static final int SPINDEX_ID = 0;
-    public static final int INDEXER_ID = 0;
+
     public final static int HOOD_MOTOR_ID = 0;
   }
 
   public static final class DIO {
     public static final int SLAPDOWN_ENCODER_ID = 0;
     public final static int HOOD_ENCODER_ID = 0;
->>>>>>> 29476cdd9b3d1c0c0fcb188253ee6f57d6fb133a
   }
 }
