@@ -93,7 +93,7 @@ public class Climber extends SubsystemBase {
     }
 
     public double calculateFeedForward(double desiredHeight, double desiredSpeed, boolean usePID) {
-        fieldsTable.recordOutput("Desired  Height", desiredHeight);
+        fieldsTable.recordOutput("Desired Height", desiredHeight);
         fieldsTable.recordOutput("Desired Speed", desiredSpeed);
         double speed = elevatorFeedforward.calculate(desiredHeight, desiredSpeed);
         if (usePID && !isAtHeight(desiredHeight)) {
