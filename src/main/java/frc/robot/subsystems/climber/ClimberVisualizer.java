@@ -15,20 +15,15 @@ public class ClimberVisualizer {
     private final LoggedMechanismRoot2d elevatorRoot = elevatorMech.getRoot("root", 0.75, 0);
     private final LoggedMechanismLigament2d elevatorTower;
 
-    private final LoggedMechanismLigament2d pivot;
-
-    public ClimberVisualizer(LogFieldsTable fieldsTable, String name, Color8Bit color1, Color8Bit color2){
+    public ClimberVisualizer(LogFieldsTable fieldsTable, String name, Color8Bit color1){
         this.fieldsTable = fieldsTable;
         this.name = name;
 
         elevatorTower = elevatorRoot.append(new LoggedMechanismLigament2d("elevator", 0.5, 90, 3, color1));
-        pivot = elevatorTower.append(new LoggedMechanismLigament2d("pivot", 0.2, 0, 0.5, color2));
     }
-    public void update(double height, double angle){
+    public void update(double height){
         elevatorTower.setLength(height);
-        pivot.setAngle(angle);
         fieldsTable.recordOutput("Visualizer Elevator Height", height);
-        fieldsTable.recordOutput("Visualizer Pivot Angle", angle);
         fieldsTable.recordOutput(name, elevatorMech);
     }
 }

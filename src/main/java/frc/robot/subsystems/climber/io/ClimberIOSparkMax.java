@@ -11,7 +11,6 @@ import team2679.atlantiskit.logfields.LogFieldsTable;
 
 public class ClimberIOSparkMax extends ClimberIO {
     private SparkMax elevatorMotor = new SparkMax(CANBUS.ELEVATOR_ID, MotorType.kBrushless);
-    private SparkMax pivotMotor = new SparkMax(CANBUS.PIVOT_ID, MotorType.kBrushless);
     private DutyCycleEncoder encoder = new DutyCycleEncoder(CANBUS.ELEVATOR_ENCODER_ID);
 
     public ClimberIOSparkMax(LogFieldsTable fieldsTable) {
@@ -31,19 +30,11 @@ public class ClimberIOSparkMax extends ClimberIO {
         return elevatorMotor.getOutputCurrent();
     }
 
-    public double getPivotMotorCurrent() {
-        return pivotMotor.getOutputCurrent();
-    }
-
     protected boolean getIsEncoderConnected() {
         return encoder.isConnected();
     }
 
     public void setElevatorVoltage(double voltage) {
         elevatorMotor.setVoltage(voltage);
-    }
-
-    public void setPivotVoltage(double voltage) {
-        pivotMotor.setVoltage(voltage);
     }
 }

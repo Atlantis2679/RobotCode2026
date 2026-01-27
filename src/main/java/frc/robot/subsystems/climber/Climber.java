@@ -54,7 +54,6 @@ public class Climber extends SubsystemBase {
                 getCurrentCommand() != null ? getCurrentCommand().getName() : "None");
         fieldsTable.recordOutput("Elevator Height", io.getHeightMeters());
         fieldsTable.recordOutput("Elevator motor current", io.getElevatorMotorCurrent());
-        fieldsTable.recordOutput("Pivot motor current", io.getPivotMotorCurrent());
     }
 
     public boolean getEncoderConnectedDebouncer() {
@@ -70,13 +69,6 @@ public class Climber extends SubsystemBase {
                 ClimberConstants.Elevator.MAX_VOLTAGE);
         fieldsTable.recordOutput("Elevator Voltage", voltage);
         io.setElevatorVoltage(voltage);
-    }
-
-    public void setPivotVoltage(double voltage) {
-        voltage = MathUtil.clamp(voltage, -ClimberConstants.Pivot.MAX_VOLTAGE,
-                ClimberConstants.Pivot.MAX_VOLTAGE);
-        fieldsTable.recordOutput("Pivot Voltage", voltage);
-        io.setPivotVoltage(voltage);
     }
 
     public double getHeight() {
@@ -117,6 +109,5 @@ public class Climber extends SubsystemBase {
 
     public void stop() {
         io.setElevatorVoltage(0);
-        io.setPivotVoltage(0);
     }
 }

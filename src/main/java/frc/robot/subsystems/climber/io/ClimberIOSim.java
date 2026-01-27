@@ -16,12 +16,8 @@ public class ClimberIOSim extends ClimberIO {
     public double getElevatorMotorCurrent() {
         return 0;
     }
-    public double getPivotMotorCurrent() {
-        return 0;
-    }
     protected boolean getIsEncoderConnected() {
         return true;
     }
     public void setElevatorVoltage(double voltage) {}
-    public void setPivotVoltage(double voltage) {}
 }
