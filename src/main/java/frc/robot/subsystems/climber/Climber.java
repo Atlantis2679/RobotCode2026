@@ -1,7 +1,5 @@
 package frc.robot.subsystems.climber;
 
-import static edu.wpi.first.units.Units.Feet;
-
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.filter.Debouncer;
@@ -17,6 +15,9 @@ import frc.robot.subsystems.climber.io.ClimberIOSparkMax;
 import frc.robot.subsystems.climber.ClimberConstants.*;
 import team2679.atlantiskit.helpers.RotationalSensorHelper;
 import team2679.atlantiskit.logfields.LogFieldsTable;
+import team2679.atlantiskit.tunables.Tunable;
+import team2679.atlantiskit.tunables.TunableBuilder;
+import team2679.atlantiskit.tunables.TunablesManager;
 import team2679.atlantiskit.tunables.extensions.TunableArmFeedforward;
 import team2679.atlantiskit.tunables.extensions.TunableTrapezoidProfile;
 
@@ -49,11 +50,15 @@ public class Climber extends SubsystemBase {
 
     private final RotationalSensorHelper elevatorRotationalSensorHelper;
 
+    private double maxHeight = Elevator.MAX_HEIGHT_METERS;
+    private double minHeight = Elevator.MIN_HEIGHT_METERS;
+
     public Climber() {
         fieldsTable.update();
 
-        elevatorRotationalSensorHelper = new RotationalSensorHelper(io.encoderAngle.getAsDouble(),
-                Elevator.ANGLE_OFFSET);
+        TunablesManager.add("Climber", (Tunable) this);
+
+        elevatorRotationalSensorHelper = new RotationalSensorHelper(io.encoderAngle.getAsDouble());
     }
 
     @Override
@@ -73,8 +78,8 @@ public class Climber extends SubsystemBase {
     }
     
     public void setElevatorVoltage(double voltage) {
-        if ((getHeightMeters() > Elevator.MAX_HEIGHT_METERS && voltage > 0)
-                || (getHeightMeters() < Elevator.MIN_HEIGHT_METERS && voltage < 0)) {
+        if ((getHeightMeters() > maxHeight && voltage > 0)
+                || (getHeightMeters() < minHeight && voltage < 0)) {
             voltage = 0.0;
         }
         voltage = MathUtil.clamp(voltage, -Elevator.MAX_VOLTAGE,
@@ -127,5 +132,13 @@ public class Climber extends SubsystemBase {
 
     public void stop() {
         io.setElevatorVoltage(0);
+    }
+    public void initTunable(TunableBuilder builder) {
+        builder.addChild("Climber PID", elevatorPidController);
+        builder.addChild("Climber feedforward", elevatorFeedforward);
+        builder.addChild("Climber Trapezoid profile", elevatorTrapezoid);
+        builder.addChild("Climber rotational helper", elevatorRotationalSensorHelper);
+        builder.addDoubleProperty("Elevator max height", () -> maxHeight, (height) -> maxHeight = height);
+        builder.addDoubleProperty("Elevator min angle", () -> minHeight, (height) -> minHeight = height);
     }
 }

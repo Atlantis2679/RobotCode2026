@@ -22,7 +22,6 @@ public class ClimberConstants {
         public static final double DRUM_RADIUS = 0;
 
         public static final double ENCODER_CONNECTED_DEBAUNCER_SEC = 0;
-        public static final double ANGLE_OFFSET = 0;
 
         public static final double HEIGHT_TOLERENCE = 0;
 
