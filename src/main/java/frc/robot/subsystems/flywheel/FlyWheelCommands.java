@@ -28,4 +28,8 @@ public class FlyWheelCommands {
 
         }).withName("FlyWheel manual controller");
     }
+
+    public Command stop(){
+        return setSpeed(() -> 0);
+    }
 }
