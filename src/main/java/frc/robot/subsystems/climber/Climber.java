@@ -1,5 +1,7 @@
 package frc.robot.subsystems.climber;
 
+import static edu.wpi.first.units.Units.Feet;
+
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.filter.Debouncer;
@@ -50,7 +52,7 @@ public class Climber extends SubsystemBase {
     public Climber() {
         fieldsTable.update();
 
-        elevatorRotationalSensorHelper = new RotationalSensorHelper(io.getEncoderAngleDegrees(),
+        elevatorRotationalSensorHelper = new RotationalSensorHelper(io.encoderAngle.getAsDouble(),
                 Elevator.ANGLE_OFFSET);
     }
 
@@ -62,7 +64,8 @@ public class Climber extends SubsystemBase {
         fieldsTable.recordOutput("Current command",
                 getCurrentCommand() != null ? getCurrentCommand().getName() : "None");
         fieldsTable.recordOutput("Elevator Height", getHeightMeters());
-        fieldsTable.recordOutput("Elevator motor current", io.getElevatorMotorCurrent());
+        fieldsTable.recordOutput("Elevator Motor Current", io.elevatorMotorCurrect.getAsDouble());
+        fieldsTable.recordOutput("Encoder Connected Debouncer",  getEncoderConnectedDebouncer());
     }
 
     public boolean getEncoderConnectedDebouncer() {
@@ -81,11 +84,11 @@ public class Climber extends SubsystemBase {
     }
 
     public double getAngleDegrees(){
-        return io.getEncoderAngleDegrees();
+        return io.encoderAngle.getAsDouble();
     }
 
     public double getHeightMeters() {
-        return (Units.degreesToRadians(io.getEncoderAngleDegrees()) - ClimberConstants.Elevator.HOMED_POSITION)
+        return (Units.degreesToRadians(getAngleDegrees()) - ClimberConstants.Elevator.HOMED_POSITION)
                 * ClimberConstants.Elevator.DRUM_RADIUS;
     }
 
