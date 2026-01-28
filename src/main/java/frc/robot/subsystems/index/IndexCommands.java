@@ -22,6 +22,14 @@ public class IndexCommands {
             .withName("Rotate Indexer");
     }
 
+    public Command spinBoth(DoubleSupplier indexerVolt, DoubleSupplier spindexVolt){
+        return index.run(() -> {
+            index.setIndexerVolt(indexerVolt.getAsDouble());
+            index.setSpindexVolt(spindexVolt.getAsDouble());
+        }).finallyDo(index::stop)
+        .withName("Set voltage for both motors");    
+    }
+
     public Command stopSpin(){
         return index.run(() -> index.setSpindexVolt(0));
     }
