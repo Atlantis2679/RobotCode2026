@@ -12,6 +12,12 @@ import frc.robot.subsystems.intake.slapdown.Slapdown;
 import frc.robot.subsystems.intake.slapdown.SlapdownCommands;
 import frc.robot.subsystems.swerve.Swerve;
 import frc.robot.subsystems.swerve.SwerveCommands;
+import team2679.atlantiskit.tunables.extensions.TunableCommand;
+import team2679.atlantiskit.valueholders.DoubleHolder;
+
+import static frc.robot.allCommands.AllCommandsConstants.*;
+
+import java.util.function.DoubleSupplier;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -47,31 +53,41 @@ public class AllCommands {
         indexCMDs = new IndexCommands(this.index);
     }
 
-    public Command startIntake() {
-        return slapdownCMDs.goToAngleDeg(() -> AllCommandsConstants.SLAPDOWN_OPEN_ANGLE_DEG)
-                .andThen(() -> rollerCMDs.spin(() -> 1));
+    public Command shoot(DoubleSupplier speed, DoubleSupplier angle){
+        return Commands.waitUntil(() -> 
+            flyWheel.isAtSpeed(speed.getAsDouble())&&hood.isAtAngle(angle.getAsDouble()))
+            .andThen(indexCMDs.spinBoth(() -> INDEXER_VOLTAGE, () -> SPINDEX_VOLTAGE));
     }
 
-    public Command stopIntake() {
-        return rollerCMDs.stop()
-                .andThen(() -> slapdownCMDs.goToAngleDeg(() -> AllCommandsConstants.SLAPDOWN_MID_ANGLE_DEG));
-    }
-
-    public Command startDelivering() { // Currently assumes orientation is correct
-        return Commands.runEnd(
-                () -> Commands.parallel(
-                        indexCMDs.spin(() -> AllCommandsConstants.INDEX_VOLT),
-                        flyWheelCMDs.setSpeed(() -> AllCommandsConstants.FLYWHEEL_DELIVERY_SPEED),
-                        hoodCMDs.moveToAngle(() -> AllCommandsConstants.HOOD_DELIVERY_ANGLE))
-                        .until(() -> flyWheel.isAtSpeed(AllCommandsConstants.FLYWHEEL_DELIVERY_SPEED)
-                                && hood.isAtAngle(AllCommandsConstants.HOOD_DELIVERY_ANGLE)),
-                () -> indexCMDs.insert(() -> AllCommandsConstants.INDEX_VOLT),
-                index, flyWheel, hood);
-    }
-
-    public Command stopDelivery(){
+    public Command deliveryPrep(DoubleSupplier speedRPM, DoubleSupplier angle){
         return Commands.parallel(
-            indexCMDs.stop(),
-            flyWheelCMDs.stop());
+            hoodCMDs.moveToAngle(angle),
+            flyWheelCMDs.setSpeed(speedRPM)
+        );
+    }
+
+    public Command scorePrep(DoubleSupplier speedRPM, DoubleSupplier angle){
+        return Commands.parallel(
+            hoodCMDs.moveToAngle(angle),
+            flyWheelCMDs.setSpeed(speedRPM)
+        );
+    }
+
+    public TunableCommand tunableScorePrep(){
+        return TunableCommand.wrap((tunablesTable) -> {
+            DoubleHolder speedHolder = tunablesTable.addNumber("speed", FLYWHEEL_SCORING_SPEED_RPM);
+            DoubleHolder angleHolder = tunablesTable.addNumber("angle", HOOD_SCORING_ANGLE);
+            return scorePrep(() -> speedHolder.get(), () -> angleHolder.get())
+            .withName("Scoring tunable command");
+        });
+    }
+
+    public TunableCommand tunableDeliveryPrep(){
+        return TunableCommand.wrap((tunablesTable) -> {
+            DoubleHolder speedHolder = tunablesTable.addNumber("speed", FLYWHEEL_SCORING_SPEED_RPM);
+            DoubleHolder angleHolder = tunablesTable.addNumber("angle", HOOD_SCORING_ANGLE);
+            return scorePrep(() -> speedHolder.get(), () -> angleHolder.get())
+            .withName("Delivery tunable command");
+        });
     }
 }
