@@ -62,11 +62,11 @@ public class RobotContainer {
         driverController.a()
             .onTrue(allCommands.startIntake())
             .onFalse(allCommands.stopIntake());
-        driverController.leftBumper().whileTrue(allCommands.tunableDeliveryPrep());
-        driverController.rightBumper().whileTrue(allCommands.tunableScorePrep());
+        driverController.leftTrigger().whileTrue(allCommands.tunableShootPrep());
+        driverController.rightTrigger().whileTrue(allCommands.shoot());
 
-        TunablesManager.add("Score Commad", allCommands.tunableScorePrep().fullTunable());
-        TunablesManager.add("Delivery Commad", allCommands.tunableDeliveryPrep().fullTunable());
+        TunablesManager.add("Shoot Prep Commad", allCommands.tunableShootPrep().fullTunable());
+
     }
 
     public void enterSwerveIntoTest() {

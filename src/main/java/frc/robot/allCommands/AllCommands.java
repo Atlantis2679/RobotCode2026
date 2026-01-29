@@ -59,34 +59,23 @@ public class AllCommands {
             .andThen(indexCMDs.spinBoth(() -> INDEXER_VOLTAGE, () -> SPINDEX_VOLTAGE));
     }
 
-    public Command deliveryPrep(DoubleSupplier speedRPM, DoubleSupplier angle){
+    //no speed checks for testing
+    public Command shoot(){
+        return indexCMDs.spinBoth(INDEXER_VOLTAGE, SPINDEX_VOLTAGE);
+    }
+
+    public Command shootPrep(DoubleSupplier speedRPM, DoubleSupplier angle){
         return Commands.parallel(
             hoodCMDs.moveToAngle(angle),
             flyWheelCMDs.setSpeed(speedRPM)
         );
     }
 
-    public Command scorePrep(DoubleSupplier speedRPM, DoubleSupplier angle){
-        return Commands.parallel(
-            hoodCMDs.moveToAngle(angle),
-            flyWheelCMDs.setSpeed(speedRPM)
-        );
-    }
-
-    public TunableCommand tunableScorePrep(){
+    public TunableCommand tunableShootPrep(){
         return TunableCommand.wrap((tunablesTable) -> {
             DoubleHolder speedHolder = tunablesTable.addNumber("speed", FLYWHEEL_SCORING_SPEED_RPM);
             DoubleHolder angleHolder = tunablesTable.addNumber("angle", HOOD_SCORING_ANGLE);
-            return scorePrep(() -> speedHolder.get(), () -> angleHolder.get())
-            .withName("Scoring tunable command");
-        });
-    }
-
-    public TunableCommand tunableDeliveryPrep(){
-        return TunableCommand.wrap((tunablesTable) -> {
-            DoubleHolder speedHolder = tunablesTable.addNumber("speed", FLYWHEEL_SCORING_SPEED_RPM);
-            DoubleHolder angleHolder = tunablesTable.addNumber("angle", HOOD_SCORING_ANGLE);
-            return scorePrep(() -> speedHolder.get(), () -> angleHolder.get())
+            return shootPrep(() -> speedHolder.get(), () -> angleHolder.get())
             .withName("Delivery tunable command");
         });
     }
