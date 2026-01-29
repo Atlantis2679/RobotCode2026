@@ -3,16 +3,15 @@ package frc.robot.shooting;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.pathplanner.lib.util.FlippingUtil;
-
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 
-import static frc.robot.shooting.ShootingMeasurments.*;
 import frc.robot.utils.LinearInterpolation;
 import team2679.atlantiskit.logfields.LogFieldsTable;
-import static frc.robot.Constants.*;
 
 public class ShootingCalculator {
+    private static final double G = 9.8;
+
     private final LogFieldsTable fieldsTable = new LogFieldsTable("ShootingCalculations");
 
     private final LinearInterpolation hoodAngleDegreesLinearInterpolation;
@@ -23,13 +22,15 @@ public class ShootingCalculator {
     private double hoodAngleDegrees;
     private double flyWheelRPM;
 
-    private boolean isShootingHub;
+    private double flightTimeEstimateSeconds = 0;
 
-    public ShootingCalculator(boolean isShootingHub) {
+    private Pose3d targetPose;
+
+    public ShootingCalculator(Pose3d targetPose, ShootingState[] shootingStates) {
         List<LinearInterpolation.Point> hoodAngleDegreesPoints = new ArrayList<>();
         List<LinearInterpolation.Point> flyWheelRPMPoints = new ArrayList<>();
 
-        for (ShootingState shootingState : isShootingHub ? ALL_MEASURMENTS_HUB : ALL_MEASURMENTS_DELIVRY) {
+        for (ShootingState shootingState : shootingStates) {
             hoodAngleDegreesPoints.add(
                     new LinearInterpolation.Point(shootingState.distanceFromTarget(),
                             shootingState.hoodAngleDegrees()));
@@ -40,17 +41,11 @@ public class ShootingCalculator {
         hoodAngleDegreesLinearInterpolation = new LinearInterpolation(hoodAngleDegreesPoints);
         flyWheelRPMLinearInterpolation = new LinearInterpolation(flyWheelRPMPoints);
 
-        this.isShootingHub = isShootingHub;
+        this.targetPose = targetPose;
     }
 
     public void update(Pose2d robotPose, boolean isRedAlliance) {
-        Pose2d targetPose;
-        if (isShootingHub) {
-            targetPose = isRedAlliance ? FlippingUtil.flipFieldPose(BLUE_HUB_POSE) : BLUE_HUB_POSE;
-        } else {
-            targetPose = isRedAlliance ? FlippingUtil.flipFieldPose(BLUE_DELIVERY_POSE) : BLUE_DELIVERY_POSE;
-        }
-        double distanceFromTarget = 
+        double distanceFromTarget = new Pose3d(robotPose).getTranslation().getDistance(targetPose.getTranslation());
         robotYawDegreesCCW = Math.toDegrees(Math
                 .atan((targetPose.getY() - robotPose.getY()) / (targetPose.getX() - robotPose.getX())));
         if (isRedAlliance) {
@@ -60,10 +55,13 @@ public class ShootingCalculator {
         hoodAngleDegrees = hoodAngleDegreesLinearInterpolation.calculate(distanceFromTarget);
         flyWheelRPM = flyWheelRPMLinearInterpolation.calculate(distanceFromTarget);
 
+        flightTimeEstimateSeconds = solveKinematicsTime(targetPose.getX(), flyWheelRPM, hoodAngleDegrees);
+
         fieldsTable.recordOutput("distanceFromTarget", distanceFromTarget);
         fieldsTable.recordOutput("robotYawDegreesCCW", robotYawDegreesCCW);
         fieldsTable.recordOutput("hoodAngleDegrees", hoodAngleDegrees);
         fieldsTable.recordOutput("flyWheelRPM", flyWheelRPM);
+        fieldsTable.recordOutput("flightTimeEstimateSeconds", flightTimeEstimateSeconds);
     }
 
     public double getHoodAngleDegrees() {
@@ -76,5 +74,21 @@ public class ShootingCalculator {
 
     public double getRobotYawDegreesCCW() {
         return robotYawDegreesCCW;
+    }
+
+    public double getFlightTimeEstimateSeconds() {
+        return flightTimeEstimateSeconds;
+    }
+
+    private static double solveKinematicsTime(double deltaHeight, double startRPM, double angleDegrees) {
+        return solveRealQuadratic(0.5 * G, Math.sin(angleDegrees) * startRPM, -deltaHeight);
+    }
+
+    private static double solveRealQuadratic(double a, double b, double c) {
+        double discriminant = b * b - 4 * a * c;
+        double root1 = -b + Math.sqrt(discriminant) / (2 * a);
+        double root2 = -b + Math.sqrt(discriminant) / (2 * a);
+        if (root1 > 0) return root1;
+        return root2;
     }
 }
