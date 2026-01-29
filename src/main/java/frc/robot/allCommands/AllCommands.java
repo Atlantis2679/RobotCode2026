@@ -90,4 +90,18 @@ public class AllCommands {
             .withName("Delivery tunable command");
         });
     }
+
+    public Command startIntake(){
+        return Commands.parallel(
+            slapdownCMDs.goToAngleDeg(SLAPDOWN_OPEN_ANGLE_DEG),
+            rollerCMDs.spin(ROLLER_SPEED_RPM)
+        );
+    }
+
+    public Command stopIntake(){
+        return Commands.parallel(
+            slapdownCMDs.goToAngleDeg(SLAPDOWN_MID_ANGLE_DEG),
+            Commands.waitUntil(() -> (slapdown.isAtAngle(SLAPDOWN_MID_ANGLE_DEG)))
+                .andThen(rollerCMDs.stop()));
+    }
 }
