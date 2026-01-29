@@ -25,17 +25,16 @@ public class ShootingCalculator {
 
     private boolean isShootingHub;
 
-    public ShootingCalculator(boolean isShootingHub){
+    public ShootingCalculator(boolean isShootingHub) {
         List<LinearInterpolation.Point> hoodAngleDegreesPoints = new ArrayList<>();
         List<LinearInterpolation.Point> flyWheelRPMPoints = new ArrayList<>();
 
-        for(ShootingState shootingState : isShootingHub?ALL_MEASURMENTS_HUB:ALL_MEASURMENTS_DELIVRY){
+        for (ShootingState shootingState : isShootingHub ? ALL_MEASURMENTS_HUB : ALL_MEASURMENTS_DELIVRY) {
             hoodAngleDegreesPoints.add(
-                new LinearInterpolation.Point(shootingState.distanceFromTarget, shootingState.hoodAngleDegrees)
-            );
+                    new LinearInterpolation.Point(shootingState.distanceFromTarget(),
+                            shootingState.hoodAngleDegrees()));
             flyWheelRPMPoints.add(
-                new LinearInterpolation.Point(shootingState.distanceFromTarget, shootingState.flyWheelRPM)
-            );
+                    new LinearInterpolation.Point(shootingState.distanceFromTarget(), shootingState.flyWheelRPM()));
         }
 
         hoodAngleDegreesLinearInterpolation = new LinearInterpolation(hoodAngleDegreesPoints);
@@ -43,24 +42,20 @@ public class ShootingCalculator {
 
         this.isShootingHub = isShootingHub;
     }
-    public void update(Pose2d robotPose, boolean isRedAlliance){
+
+    public void update(Pose2d robotPose, boolean isRedAlliance) {
         Pose2d targetPose;
-        if(isShootingHub){
+        if (isShootingHub) {
             targetPose = isRedAlliance ? FlippingUtil.flipFieldPose(BLUE_HUB_POSE) : BLUE_HUB_POSE;
-        }
-        else{
+        } else {
             targetPose = isRedAlliance ? FlippingUtil.flipFieldPose(BLUE_DELIVERY_POSE) : BLUE_DELIVERY_POSE;
         }
-        double distanceFromTarget = Math.sqrt(
-            Math.pow(robotPose.getX() - targetPose.getX(), 2)
-                        + Math.pow(robotPose.getY() - targetPose.getY(), 2));
-
+        double distanceFromTarget = 
         robotYawDegreesCCW = Math.toDegrees(Math
                 .atan((targetPose.getY() - robotPose.getY()) / (targetPose.getX() - robotPose.getX())));
         if (isRedAlliance) {
             robotYawDegreesCCW += 180;
         }
-
 
         hoodAngleDegrees = hoodAngleDegreesLinearInterpolation.calculate(distanceFromTarget);
         flyWheelRPM = flyWheelRPMLinearInterpolation.calculate(distanceFromTarget);
@@ -71,14 +66,15 @@ public class ShootingCalculator {
         fieldsTable.recordOutput("flyWheelRPM", flyWheelRPM);
     }
 
-    public double getHoodAngleDegrees(){
+    public double getHoodAngleDegrees() {
         return hoodAngleDegrees;
     }
 
-    public double getFlyWheelRPM(){
+    public double getFlyWheelRPM() {
         return flyWheelRPM;
     }
-    public double getRobotYawDegreesCCW(){
+
+    public double getRobotYawDegreesCCW() {
         return robotYawDegreesCCW;
     }
 }
