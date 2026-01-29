@@ -1,6 +1,5 @@
 package frc.robot.subsystems.flywheel.io;
 
-import edu.wpi.first.math.system.LinearSystem;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.wpilibj.simulation.FlywheelSim;
@@ -19,12 +18,12 @@ public class FlyWheelIOSim extends FlyWheelIO{
         flyWheelMotorSim.update(0.02);
     }
 
-    public FlyWheelIOSim(LogFieldsTable fieldsTable){
+    public FlyWheelIOSim(LogFieldsTable fieldsTable) {
         super(fieldsTable);
     }
 
     @Override
-    public double getMotorsRPM(){
+    protected double getMotorsRPM() {
         return flyWheelMotorSim.getAngularVelocityRPM();
     }
 
