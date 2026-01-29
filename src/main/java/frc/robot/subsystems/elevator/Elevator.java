@@ -1,19 +1,22 @@
-package frc.robot.subsystems.climber;
+package frc.robot.subsystems.elevator;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
-import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Robot;
-import frc.robot.subsystems.climber.io.ClimberIO;
-import frc.robot.subsystems.climber.io.ClimberIOSim;
-import frc.robot.subsystems.climber.io.ClimberIOSparkMax;
-import frc.robot.subsystems.climber.ClimberConstants.*;
-import team2679.atlantiskit.helpers.RotationalSensorHelper;
+import frc.robot.subsystems.elevator.io.ElevatorIO;
+import frc.robot.subsystems.elevator.io.ElevatorIOSim;
+import frc.robot.subsystems.elevator.io.ElevatorIOSparkMax;
+
+import static frc.robot.subsystems.elevator.ElevatorConstants.Sim.*;
+import static frc.robot.subsystems.elevator.ElevatorConstants.*;
+
 import team2679.atlantiskit.logfields.LogFieldsTable;
 import team2679.atlantiskit.tunables.Tunable;
 import team2679.atlantiskit.tunables.TunableBuilder;
@@ -21,89 +24,85 @@ import team2679.atlantiskit.tunables.TunablesManager;
 import team2679.atlantiskit.tunables.extensions.TunableArmFeedforward;
 import team2679.atlantiskit.tunables.extensions.TunableTrapezoidProfile;
 
-public class Climber extends SubsystemBase {
+public class Elevator extends SubsystemBase {
     private final LogFieldsTable fieldsTable = new LogFieldsTable(getName());
-    private final ClimberIO io = Robot.isReal() ? new ClimberIOSparkMax(fieldsTable) : new ClimberIOSim(fieldsTable);
+    private final ElevatorIO io = Robot.isReal() ? new ElevatorIOSparkMax(fieldsTable) : new ElevatorIOSim(fieldsTable);
 
-    private final ClimberVisualizer realVisualizer = new ClimberVisualizer(fieldsTable, "Real Visualizer",
-        new Color8Bit(Color.kPurple));
-    private final ClimberVisualizer desiredHoodVisualizer = new ClimberVisualizer(fieldsTable, "Desired Visualizer",
-        new Color8Bit(Color.kYellow));
+    private final ElevatorVisualizer realVisualizer = new ElevatorVisualizer(fieldsTable, "Real Visualizer",
+            new Color8Bit(Color.kPurple));
+    private final ElevatorVisualizer desiredHoodVisualizer = new ElevatorVisualizer(fieldsTable, "Desired Visualizer",
+            new Color8Bit(Color.kYellow));
 
     private final TunableTrapezoidProfile elevatorTrapezoid = new TunableTrapezoidProfile(
-            new TrapezoidProfile.Constraints(Elevator.MAX_VELOCITY_METERS_PER_SEC,
-                    Elevator.MAX_ACCELERATION_METER_PER_SEC_SQUARED));
+            new TrapezoidProfile.Constraints(ElevatorConstants.MAX_VELOCITY_METERS_PER_SEC,
+                    MAX_ACCELERATION_METER_PER_SEC_SQUARED));
 
-    private PIDController elevatorPidController = new PIDController(
-            Elevator.KP,
-            Elevator.KI,
-            Elevator.KD);
+    private PIDController elevatorPidController = new PIDController(KP, KI, KD);
 
     private TunableArmFeedforward elevatorFeedforward = Robot.isReal()
-            ? new TunableArmFeedforward(Elevator.KS, Elevator.KG,
-                    Elevator.KV, Elevator.KA)
-            : new TunableArmFeedforward(Elevator.Sim.SIM_KS, Elevator.Sim.SIM_KG,
-                    Elevator.Sim.SIM_KV, Elevator.Sim.SIM_KA);
+            ? new TunableArmFeedforward(KS, KG,
+                    KV, KA)
+            : new TunableArmFeedforward(SIM_KS, SIM_KG,
+                    SIM_KV, SIM_KA);
 
     private final Debouncer encoderConnectedDebouncer = new Debouncer(
-            Elevator.ENCODER_CONNECTED_DEBAUNCER_SEC);
+            ENCODER_CONNECTED_DEBAUNCER_SEC);
 
-    private final RotationalSensorHelper elevatorRotationalSensorHelper;
+    private double maxHeight = MAX_HEIGHT_METERS;
+    private double minHeight = MIN_HEIGHT_METERS;
 
-    private double maxHeight = Elevator.MAX_HEIGHT_METERS;
-    private double minHeight = Elevator.MIN_HEIGHT_METERS;
+    private double previousHeight;
+    private double currTimeSec;
+    private double prevTimeSec;
 
-    public Climber() {
+    public Elevator() {
         fieldsTable.update();
 
-        TunablesManager.add("Climber", (Tunable) this);
-
-        elevatorRotationalSensorHelper = new RotationalSensorHelper(io.encoderAngle.getAsDouble());
+        TunablesManager.add("Elevator", (Tunable) this);
     }
 
     @Override
     public void periodic() {
         realVisualizer.update(getHeightMeters());
-        elevatorRotationalSensorHelper.update(getAngleDegrees());
 
         fieldsTable.recordOutput("Current command",
                 getCurrentCommand() != null ? getCurrentCommand().getName() : "None");
         fieldsTable.recordOutput("Elevator Height", getHeightMeters());
         fieldsTable.recordOutput("Elevator Motor Current", io.elevatorMotorCurrect.getAsDouble());
-        fieldsTable.recordOutput("Encoder Connected Debouncer",  getEncoderConnectedDebouncer());
+        fieldsTable.recordOutput("Encoder Connected Debouncer", getEncoderConnectedDebouncer());
+
+        prevTimeSec = currTimeSec;
+        currTimeSec = Timer.getFPGATimestamp();
+        previousHeight = getHeightMeters();
     }
 
     public boolean getEncoderConnectedDebouncer() {
         return encoderConnectedDebouncer.calculate(io.isEncoderConnected.getAsBoolean());
     }
-    
+
     public void setElevatorVoltage(double voltage) {
         if ((getHeightMeters() > maxHeight && voltage > 0)
                 || (getHeightMeters() < minHeight && voltage < 0)) {
             voltage = 0.0;
         }
-        voltage = MathUtil.clamp(voltage, -Elevator.MAX_VOLTAGE,
-                Elevator.MAX_VOLTAGE);
+        voltage = MathUtil.clamp(voltage, -MAX_VOLTAGE,
+                MAX_VOLTAGE);
         fieldsTable.recordOutput("Elevator Voltage", voltage);
         io.setElevatorVoltage(voltage);
     }
 
-    public double getAngleDegrees(){
-        return io.encoderAngle.getAsDouble();
-    }
-
     public double getHeightMeters() {
-        return (Units.degreesToRadians(getAngleDegrees()) - ClimberConstants.Elevator.HOMED_POSITION)
-                * ClimberConstants.Elevator.DRUM_RADIUS;
-    }
-
-    public double getAngularVelocity() {
-        return elevatorRotationalSensorHelper.getVelocity();
+        return io.elevatorHeight.getAsDouble();
     }
 
     public double getHeightVelocity() {
-        return Units.degreesToRadians(getAngularVelocity())
-                * Elevator.DRUM_RADIUS;
+        double deltaTime = currTimeSec - prevTimeSec;
+        if (deltaTime == 0) {
+            DriverStation.reportWarning(
+                    "You should not request velocity after no time passed (probably called in initial loop).", true);
+            return 0;
+        }
+        return (getHeightMeters() - previousHeight) / deltaTime;
     }
 
     public double calculateFeedForward(double desiredHeight, double desiredSpeed, boolean usePID) {
@@ -123,7 +122,7 @@ public class Climber extends SubsystemBase {
     }
 
     public boolean isAtHeight(double desiredHeight) {
-        return Math.abs(desiredHeight - getHeightMeters()) <= Elevator.HEIGHT_TOLERENCE;
+        return Math.abs(desiredHeight - getHeightMeters()) <= HEIGHT_TOLERENCE;
     }
 
     public void resetPID() {
@@ -133,11 +132,11 @@ public class Climber extends SubsystemBase {
     public void stop() {
         io.setElevatorVoltage(0);
     }
+
     public void initTunable(TunableBuilder builder) {
-        builder.addChild("Climber PID", elevatorPidController);
-        builder.addChild("Climber feedforward", elevatorFeedforward);
-        builder.addChild("Climber Trapezoid profile", elevatorTrapezoid);
-        builder.addChild("Climber rotational helper", elevatorRotationalSensorHelper);
+        builder.addChild("Elevator PID", elevatorPidController);
+        builder.addChild("Elevator feedforward", elevatorFeedforward);
+        builder.addChild("Elevator Trapezoid profile", elevatorTrapezoid);
         builder.addDoubleProperty("Elevator max height", () -> maxHeight, (height) -> maxHeight = height);
         builder.addDoubleProperty("Elevator min angle", () -> minHeight, (height) -> minHeight = height);
     }

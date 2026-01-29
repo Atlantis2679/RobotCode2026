@@ -1,4 +1,4 @@
-package frc.robot.subsystems.climber;
+package frc.robot.subsystems.elevator;
 
 import org.littletonrobotics.junction.mechanism.LoggedMechanism2d;
 import org.littletonrobotics.junction.mechanism.LoggedMechanismLigament2d;
@@ -7,7 +7,7 @@ import org.littletonrobotics.junction.mechanism.LoggedMechanismRoot2d;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 import team2679.atlantiskit.logfields.LogFieldsTable;
 
-public class ClimberVisualizer {
+public class ElevatorVisualizer {
     private final LogFieldsTable fieldsTable;
     private String name;
 
@@ -15,7 +15,7 @@ public class ClimberVisualizer {
     private final LoggedMechanismRoot2d elevatorRoot = elevatorMech.getRoot("root", 0.75, 0);
     private final LoggedMechanismLigament2d elevatorTower;
 
-    public ClimberVisualizer(LogFieldsTable fieldsTable, String name, Color8Bit color1){
+    public ElevatorVisualizer(LogFieldsTable fieldsTable, String name, Color8Bit color1){
         this.fieldsTable = fieldsTable;
         this.name = name;
 

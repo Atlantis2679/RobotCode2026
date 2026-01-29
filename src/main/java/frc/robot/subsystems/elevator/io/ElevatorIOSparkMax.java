@@ -1,4 +1,4 @@
-package frc.robot.subsystems.climber.io;
+package frc.robot.subsystems.elevator.io;
 
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
@@ -7,11 +7,11 @@ import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import frc.robot.RobotMap.CANBUS;
 import team2679.atlantiskit.logfields.LogFieldsTable;
 
-public class ClimberIOSparkMax extends ClimberIO {
+public class ElevatorIOSparkMax extends ElevatorIO {
     private SparkMax elevatorMotor = new SparkMax(CANBUS.ELEVATOR_ID, MotorType.kBrushless);
     private DutyCycleEncoder encoder = new DutyCycleEncoder(CANBUS.ELEVATOR_ENCODER_ID);
 
-    public ClimberIOSparkMax(LogFieldsTable fieldsTable) {
+    public ElevatorIOSparkMax(LogFieldsTable fieldsTable) {
         super(fieldsTable);
     }
 
