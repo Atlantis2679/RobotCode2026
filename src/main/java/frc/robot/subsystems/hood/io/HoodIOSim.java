@@ -35,7 +35,8 @@ public class HoodIOSim extends HoodIO{
     public void setVoltage(double volt) {
         hoodMotor.setInputVoltage(volt);
     }
-        @Override
+    
+    @Override
     protected boolean getIsEncoderConnected() {
         return false;
     }
