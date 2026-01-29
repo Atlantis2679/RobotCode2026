@@ -36,4 +36,8 @@ public class SlapdownCommands {
             slapdown.setVoltage(ignore_mg + speed.getAsDouble()*SlapdownConstants.MAX_VOLTAGE);
         });
     }
+
+    public Command stop() {
+        return slapdown.run(slapdown::stop);
+    }
 }
