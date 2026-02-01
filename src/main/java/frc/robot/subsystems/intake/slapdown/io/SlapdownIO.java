@@ -1,0 +1,25 @@
+package frc.robot.subsystems.intake.slapdown.io;
+
+import java.util.function.BooleanSupplier;
+import java.util.function.DoubleSupplier;
+
+import team2679.atlantiskit.logfields.IOBase;
+import team2679.atlantiskit.logfields.LogFieldsTable;
+
+public abstract class SlapdownIO extends IOBase{
+    private LogFieldsTable fields;
+
+    public DoubleSupplier getCurrent = fields.addDouble("Current", this::getCurrent);
+    public BooleanSupplier isEncoderConnected = fields.addBoolean("Encoder Connected", this::isEncoderConnected);
+    public DoubleSupplier getAngleDegrees = fields.addDouble("Angle Degrees", this::getAngleDegrees);
+
+    public SlapdownIO(LogFieldsTable fields){
+        super(fields);
+    }
+
+    protected abstract double getCurrent();
+    protected abstract boolean isEncoderConnected();
+    protected abstract double getAngleDegrees();
+
+    public abstract void setVolt(double volt);
+}
