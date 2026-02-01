@@ -10,7 +10,7 @@ import frc.robot.utils.LinearInterpolation;
 import team2679.atlantiskit.logfields.LogFieldsTable;
 
 public class ShootingCalculator {
-    private static final double G = 9.8;
+    private static final double G = -9.8;
 
     private final LogFieldsTable fieldsTable = new LogFieldsTable("ShootingCalculations");
 
@@ -55,7 +55,7 @@ public class ShootingCalculator {
         hoodAngleDegrees = hoodAngleDegreesLinearInterpolation.calculate(distanceFromTarget);
         flyWheelRPM = flyWheelRPMLinearInterpolation.calculate(distanceFromTarget);
 
-        flightTimeEstimateSeconds = solveKinematicsTime(targetPose.getX(), flyWheelRPM, hoodAngleDegrees);
+        flightTimeEstimateSeconds = solveKinematicsTime(targetPose.getZ(), flyWheelRPM, hoodAngleDegrees);
 
         fieldsTable.recordOutput("distanceFromTarget", distanceFromTarget);
         fieldsTable.recordOutput("robotYawDegreesCCW", robotYawDegreesCCW);
@@ -81,14 +81,16 @@ public class ShootingCalculator {
     }
 
     private static double solveKinematicsTime(double deltaHeight, double startRPM, double angleDegrees) {
-        return solveRealQuadratic(0.5 * G, Math.sin(angleDegrees) * startRPM, -deltaHeight);
+        return solvePositiveQuadratic(0.5 * G, Math.sin(angleDegrees) * startRPM, -deltaHeight);
     }
 
-    private static double solveRealQuadratic(double a, double b, double c) {
+    private static double solvePositiveQuadratic(double a, double b, double c) {
         double discriminant = b * b - 4 * a * c;
+        if (discriminant < 0) return 0;
         double root1 = -b + Math.sqrt(discriminant) / (2 * a);
         double root2 = -b + Math.sqrt(discriminant) / (2 * a);
         if (root1 > 0) return root1;
-        return root2;
+        if (root2 > 0) return root2;
+        return 0;
     }
 }
