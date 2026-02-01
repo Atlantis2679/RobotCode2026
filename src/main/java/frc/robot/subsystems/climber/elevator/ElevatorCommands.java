@@ -1,6 +1,6 @@
-package frc.robot.subsystems.elevator;
+package frc.robot.subsystems.climber.elevator;
 
-import static frc.robot.subsystems.elevator.ElevatorConstants.*;
+import static frc.robot.subsystems.climber.elevator.ElevatorConstants.*;
 
 import java.util.function.DoubleSupplier;
 
@@ -49,6 +49,6 @@ public class ElevatorCommands {
     }
 
     public Command stop() {
-        return elevator.run(() -> elevator.setElevatorVoltage(0)).withName("stopElevator");
+        return elevator.run(() -> elevator.stop()).withName("stopElevator");
     }
 }

@@ -1,4 +1,4 @@
-package frc.robot.subsystems.elevator;
+package frc.robot.subsystems.climber.elevator;
 
 import org.littletonrobotics.junction.mechanism.LoggedMechanism2d;
 import org.littletonrobotics.junction.mechanism.LoggedMechanismLigament2d;
@@ -23,7 +23,7 @@ public class ElevatorVisualizer {
     }
     public void update(double height){
         elevatorTower.setLength(height);
-        fieldsTable.recordOutput("Visualizer Elevator Height", height);
+        fieldsTable.recordOutput("Elevator Visualizer Height", height);
         fieldsTable.recordOutput(name, elevatorMech);
     }
 }
