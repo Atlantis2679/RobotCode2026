@@ -6,6 +6,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Robot;
 import frc.robot.subsystems.flywheel.io.*;
+import static frc.robot.subsystems.flywheel.FlyWheelConstants.*;
 import team2679.atlantiskit.logfields.LogFieldsTable;
 import team2679.atlantiskit.tunables.extensions.TunableSimpleMotorFeedforward;
 
@@ -13,53 +14,39 @@ public class FlyWheel extends SubsystemBase{
     
     private final LogFieldsTable fieldsTable = new LogFieldsTable(getName());
 
-    private final FlyWheelIO io = Robot.isReal()?new FlyWheelIOSparkMax(fieldsTable) :
-        new FlyWheelIOSim(fieldsTable);
+    private final FlyWheelIO io = Robot.isReal() 
+        ? new FlyWheelIOSparkMax(fieldsTable) 
+        : new FlyWheelIOSim(fieldsTable);
 
-
-    private PIDController flyWheelPidController = new PIDController(
-        FlyWheelConstants.KP,
-        FlyWheelConstants.KI,
-        FlyWheelConstants.KD
-    );
-    private TunableSimpleMotorFeedforward flyWheelFeedforward = Robot.isSimulation()?
-        new TunableSimpleMotorFeedforward(
-            FlyWheelConstants.Sim.SIM_KS,
-            FlyWheelConstants.Sim.SIM_KV,
-            FlyWheelConstants.Sim.SIM_KA
-            ):
-        new TunableSimpleMotorFeedforward(
-            FlyWheelConstants.KS,
-            FlyWheelConstants.KV,
-            FlyWheelConstants.KA
-    );
-
+    private PIDController flyWheelPidController = new PIDController(KP, KI, KD);
+    
+    private TunableSimpleMotorFeedforward flyWheelFeedforward = Robot.isSimulation() ?
+        new TunableSimpleMotorFeedforward(Sim.SIM_KS, Sim.SIM_KV, Sim.SIM_KA) :
+        new TunableSimpleMotorFeedforward(KS, KV, KA);
 
     public FlyWheel() {
         fieldsTable.update();
-
     }
 
     @Override
     public void periodic(){
-
-        fieldsTable.recordOutput("current command", getCurrentCommand() == null?
-        getCurrentCommand().getName() : "None");
-
-        SmartDashboard.putNumber("Motors RPM",getMotorsRPM());
+        fieldsTable.recordOutput("current command", getCurrentCommand() != null ? getCurrentCommand().getName() : "None");
+        SmartDashboard.putNumber("Motors RPM", getMotorsRPM());
     }
-
 
     public double getMotorsRPM(){
-        return io.getMotorsRPM();
-    }
-    public void setVoltage(double volt){
-        io.setVoltage(MathUtil.clamp(volt, -FlyWheelConstants.MAX_VOLTAGE, FlyWheelConstants.MAX_VOLTAGE));
+        return io.getMotorsRPM.getAsDouble();
     }
 
-    public double calcVoltsforRPM(double desiredSpeed){
+    public void setVoltage(double volt){
+        io.setVoltage(MathUtil.clamp(volt, -MAX_VOLTAGE, MAX_VOLTAGE));
+    }
+
+    public double calculateFeedForward(double desiredSpeed, boolean usePID) {
         double speed = flyWheelFeedforward.calculate(desiredSpeed);
-        speed += flyWheelPidController.calculate(getMotorsRPM(), desiredSpeed);
+        if (usePID) {
+            speed += flyWheelPidController.calculate(getMotorsRPM(), desiredSpeed);
+        }
         return speed;
     }
 
@@ -73,6 +60,7 @@ public class FlyWheel extends SubsystemBase{
     public void stop(){
         io.setVoltage(0);
     }
+
     public void resetPID(){
         flyWheelPidController.reset();
     }

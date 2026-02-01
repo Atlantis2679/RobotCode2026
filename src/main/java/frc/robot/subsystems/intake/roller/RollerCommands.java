@@ -16,6 +16,10 @@ public class RollerCommands {
         .finallyDo(roller::stop)
         .withName("Take ball in");
     }
+
+    public Command spin (double speed){
+        return spin(() -> speed);
+    }
     
     public Command manualController(DoubleSupplier speed){
         return roller.run(() -> roller.setSpeedRPM(speed.getAsDouble()*RollerConstants.MAX_RPM))

@@ -45,4 +45,8 @@ public class HoodCommands {
             hood.setHoodVoltage(feedForward + demandSpeed * HOOD_MAX_VOLTAGE);
         });
     }
+
+    public Command stop(){
+        return hood.run(hood::stop);
+    }
 }
