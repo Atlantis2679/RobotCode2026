@@ -111,4 +111,16 @@ public class AllCommands {
         .ignoringDisable(true)
         .withName("Stop All");
     }
+
+    public Command manualController(DoubleSupplier flywheelSpeed, DoubleSupplier hoodSpeed, 
+        DoubleSupplier slapdwonSpeed, DoubleSupplier rollerSpeed, DoubleSupplier indexVolt){
+            return Commands.parallel(
+                flyWheelCMDs.manualController(flywheelSpeed),
+                hoodCMDs.manualController(hoodSpeed),
+                slapdownCMDs.manualController(slapdwonSpeed),
+                rollerCMDs.manualController(rollerSpeed),
+                indexCMDs.manualController(indexVolt)
+            );
+    }
+
 }
