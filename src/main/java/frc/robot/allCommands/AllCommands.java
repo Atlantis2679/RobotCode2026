@@ -1,5 +1,7 @@
 package frc.robot.allCommands;
 
+import frc.robot.subsystems.elevator.Elevator;
+import frc.robot.subsystems.elevator.ElevatorCommands;
 import frc.robot.subsystems.flywheel.FlyWheel;
 import frc.robot.subsystems.flywheel.FlyWheelCommands;
 import frc.robot.subsystems.hood.Hood;
@@ -29,6 +31,7 @@ public class AllCommands {
     private Hood hood;
     private Swerve swerve;
     private Index index;
+    private Elevator elevator;
 
     private SlapdownCommands slapdownCMDs;
     private RollerCommands rollerCMDs;
@@ -36,17 +39,16 @@ public class AllCommands {
     private HoodCommands hoodCMDs;
     private SwerveCommands swerveCMDs;
     private IndexCommands indexCMDs;
+    private ElevatorCommands elevatorCMDs;
 
-    public double current_speed_test;
-    public double current_angle_test;
-
-    public AllCommands(Slapdown slapdown, Roller roller, FlyWheel flyWheel, Hood hood, Swerve swerve, Index index) {
+    public AllCommands(Slapdown slapdown, Roller roller, FlyWheel flyWheel, Hood hood, Swerve swerve, Index index, Elevator elevator) {
         this.slapdown = slapdown;
         this.roller = roller;
         this.flyWheel = flyWheel;
         this.hood = hood;
         this.swerve = swerve;
         this.index = index;
+        this.elevator = elevator;
 
         slapdownCMDs = new SlapdownCommands(this.slapdown);
         rollerCMDs = new RollerCommands(this.roller);
@@ -54,36 +56,7 @@ public class AllCommands {
         hoodCMDs = new HoodCommands(this.hood);
         swerveCMDs = new SwerveCommands(this.swerve);
         indexCMDs = new IndexCommands(this.index);
-    }
-
-    public Command shoot(DoubleSupplier speed, DoubleSupplier angle){
-        return Commands.waitUntil(() -> 
-            flyWheel.isAtSpeed(speed.getAsDouble())&&hood.isAtAngle(angle.getAsDouble()))
-            .andThen(indexCMDs.spinBoth(() -> INDEXER_VOLTAGE, () -> SPINDEX_VOLTAGE));
-    }
-
-    public Command shoot(){
-        return shoot(() -> current_speed_test, () -> current_angle_test);
-    }
-
-    public Command shootPrep(DoubleSupplier speedRPM, DoubleSupplier angle){
-        return Commands.parallel(
-            hoodCMDs.moveToAngle(angle),
-            flyWheelCMDs.setSpeed(speedRPM)
-        );
-    }
-
-    public TunableCommand tunableShootPrep(){
-        return TunableCommand.wrap((tunablesTable) -> {
-            DoubleHolder speedHolder = tunablesTable.addNumber("speed", FLYWHEEL_SCORING_SPEED_RPM);
-            DoubleHolder angleHolder = tunablesTable.addNumber("angle", HOOD_SCORING_ANGLE);
-
-            current_angle_test = angleHolder.get();
-            current_speed_test = speedHolder.get();
-
-            return shootPrep(() -> speedHolder.get(), () -> angleHolder.get())
-            .withName("Delivery tunable command");
-        });
+        elevatorCMDs = new ElevatorCommands(this.elevator);
     }
 
     public Command startIntake(){
@@ -92,12 +65,47 @@ public class AllCommands {
             rollerCMDs.spin(ROLLER_SPEED_RPM)
         );
     }
-
+    
     public Command stopIntake(){
         return Commands.parallel(
             slapdownCMDs.goToAngleDeg(SLAPDOWN_MID_ANGLE_DEG),
             Commands.waitUntil(() -> (slapdown.isAtAngle(SLAPDOWN_MID_ANGLE_DEG)))
                 .andThen(rollerCMDs.stop()));
+    }
+    
+    public Command getReadyToShoot(double speedRPM, double angle){
+        return Commands.parallel(
+            hoodCMDs.moveToAngle(angle),
+            flyWheelCMDs.setSpeed(speedRPM)
+        );
+    }
+
+    public TunableCommand tunableGetReadyToShoot(){
+        return TunableCommand.wrap((tunablesTable) -> {
+            DoubleHolder speedHolder = tunablesTable.addNumber("speed", FLYWHEEL_SPEED_RPM);
+            DoubleHolder hoodAngleHolder = tunablesTable.addNumber("angle", HOOD_ANGLE);
+            return getReadyToShoot(speedHolder.get(), hoodAngleHolder.get())
+            .withName("Get Ready To Shoot Tunable");
+        });
+    }
+
+    public Command getReadyAndShoot(double speedRPM, double angle){
+        return Commands.parallel(
+            Commands.none().until(() -> 
+                    flyWheel.isAtSpeed(speedRPM)&&hood.isAtAngle(angle))
+                .andThen(indexCMDs.spinBoth(INDEXER_VOLTAGE, SPINDEX_VOLTAGE)),
+
+            hoodCMDs.moveToAngle(angle),
+            flyWheelCMDs.setSpeed(speedRPM));
+    }
+
+    public TunableCommand tunableGetReadyAndShoot(){
+        return TunableCommand.wrap((tunablesTable) -> {
+            DoubleHolder speedHolder = tunablesTable.addNumber("Flywheel Speed RPM", FLYWHEEL_SPEED_RPM);
+            DoubleHolder hoodAngleHolder = tunablesTable.addNumber("Hood Angle", HOOD_ANGLE);
+            return getReadyAndShoot(speedHolder.get(), hoodAngleHolder.get())
+            .withName("Tunable Get Ready And Shoot");
+        });
     }
 
     public Command stopAll(){
@@ -107,7 +115,8 @@ public class AllCommands {
             flyWheel.stop();
             hood.stop();
             swerve.stop();
-        }, slapdown, roller, flyWheel, hood, swerve)
+            elevator.stop();
+        }, slapdown, roller, flyWheel, hood, swerve, elevator)
         .ignoringDisable(true)
         .withName("Stop All");
     }
