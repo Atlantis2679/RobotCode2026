@@ -11,10 +11,10 @@ public class FlyWheelCommands {
         this.flyWheel = flyWheel;
     }
 
-    public Command setSpeed(DoubleSupplier speedRPM){
+    public Command setSpeed(double speedRPM){
         return flyWheel.runOnce(flyWheel::resetPID)
         .andThen(flyWheel.run(() ->{
-            flyWheel.setVoltage(flyWheel.calculateFeedForward(speedRPM.getAsDouble(), true));
+            flyWheel.setVoltage(flyWheel.calculateFeedForward(speedRPM, true));
         })).withName("Flywheel set speed");
     }
 
@@ -25,6 +25,7 @@ public class FlyWheelCommands {
     }
 
     public Command stop(){
-        return setSpeed(() -> 0);
+        return flyWheel.run(flyWheel::stop)
+        .withName("Stop");
     }
 }
