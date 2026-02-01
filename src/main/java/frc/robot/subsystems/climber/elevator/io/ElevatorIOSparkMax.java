@@ -20,18 +20,22 @@ public class ElevatorIOSparkMax extends ElevatorIO {
         super(fieldsTable);
     }
 
+    @Override
     public double getElevatorHeight(){
         return (Units.degreesToRadians(encoder.get()) - HOMED_POSITION) * DRUM_RADIUS;
     }
 
+    @Override
     public double getElevatorMotorCurrent() {
         return elevatorMotor.getOutputCurrent();
     }
 
+    @Override
     protected boolean getIsEncoderConnected() {
         return encoder.isConnected();
     }
 
+    @Override
     public void setElevatorVoltage(double voltage) {
         elevatorMotor.setVoltage(voltage);
     }
