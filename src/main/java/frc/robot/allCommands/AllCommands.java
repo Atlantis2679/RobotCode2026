@@ -37,8 +37,8 @@ public class AllCommands {
     private SwerveCommands swerveCMDs;
     private IndexCommands indexCMDs;
 
-    public double current_speed_test = 0;
-    public double current_angle_test = 0;
+    public double current_speed_test;
+    public double current_angle_test;
 
     public AllCommands(Slapdown slapdown, Roller roller, FlyWheel flyWheel, Hood hood, Swerve swerve, Index index) {
         this.slapdown = slapdown;
@@ -62,9 +62,8 @@ public class AllCommands {
             .andThen(indexCMDs.spinBoth(() -> INDEXER_VOLTAGE, () -> SPINDEX_VOLTAGE));
     }
 
-    //no speed checks for testing
     public Command shoot(){
-        return indexCMDs.spinBoth(INDEXER_VOLTAGE, SPINDEX_VOLTAGE);
+        return shoot(() -> current_speed_test, () -> current_angle_test);
     }
 
     public Command shootPrep(DoubleSupplier speedRPM, DoubleSupplier angle){
@@ -78,6 +77,10 @@ public class AllCommands {
         return TunableCommand.wrap((tunablesTable) -> {
             DoubleHolder speedHolder = tunablesTable.addNumber("speed", FLYWHEEL_SCORING_SPEED_RPM);
             DoubleHolder angleHolder = tunablesTable.addNumber("angle", HOOD_SCORING_ANGLE);
+
+            current_angle_test = angleHolder.get();
+            current_speed_test = speedHolder.get();
+
             return shootPrep(() -> speedHolder.get(), () -> angleHolder.get())
             .withName("Delivery tunable command");
         });
