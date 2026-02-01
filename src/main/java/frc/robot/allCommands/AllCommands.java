@@ -102,11 +102,11 @@ public class AllCommands {
 
     public Command stopAll(){
         return Commands.run(() -> {
-            slapdownCMDs.stop();
-            rollerCMDs.stop();
-            flyWheelCMDs.stop();
-            hoodCMDs.stop();
-            swerveCMDs.stop();
+            slapdown.stop();
+            roller.stop();
+            flyWheel.stop();
+            hood.stop();
+            swerve.stop();
         }, slapdown, roller, flyWheel, hood, swerve)
         .ignoringDisable(true)
         .withName("Stop All");
