@@ -66,13 +66,13 @@ public class Hood extends SubsystemBase{
 
         TunablesManager.add("Hood", (Tunable) this);
 
-        rotationalHelpr = new RotationalSensorHelper(io.getHoodMotorAngleDegree(), HoodConstants.ANGLE_OFFSET); 
+        rotationalHelpr = new RotationalSensorHelper(getAngleDegrees(), HoodConstants.ANGLE_OFFSET); 
         rotationalHelpr.enableContinuousWrap(lowerBound, upperBound);   
     }
 
     public void periodic(){
         realVisualizer.update(getAngleDegrees());
-        rotationalHelpr.update(io.getHoodMotorAngleDegree());
+        rotationalHelpr.update(getAngleDegrees());
         fieldsTable.recordOutput("angle", getAngleDegrees());
         fieldsTable.recordOutput("velocity", rotationalHelpr.getVelocity());
     }
@@ -94,7 +94,7 @@ public class Hood extends SubsystemBase{
         io.setVoltage(0);
     }
     public double getAngleDegrees(){
-        return io.getHoodMotorAngleDegree();
+        return io.hoodMotorAngle.getAsDouble();
     }
     public double getVelocity(){
         return rotationalHelpr.getVelocity();

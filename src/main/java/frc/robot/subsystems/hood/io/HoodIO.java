@@ -17,7 +17,7 @@ public abstract class HoodIO extends IOBase{
         super(fieldsTable);
     }
 
-    public abstract double getHoodMotorAngleDegree();
+    protected abstract double getHoodMotorAngleDegree();
 
     public abstract void setVoltage(double volt);
         

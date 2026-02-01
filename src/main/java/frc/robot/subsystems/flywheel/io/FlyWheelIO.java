@@ -18,6 +18,6 @@ public abstract class FlyWheelIO extends IOBase{
 
     public abstract void setVoltage(double volt);
         
-    public abstract double getMotorsRPM();
+    protected abstract double getMotorsRPM();
 
 }
