@@ -37,6 +37,9 @@ public class AllCommands {
     private SwerveCommands swerveCMDs;
     private IndexCommands indexCMDs;
 
+    public double current_speed_test = 0;
+    public double current_angle_test = 0;
+
     public AllCommands(Slapdown slapdown, Roller roller, FlyWheel flyWheel, Hood hood, Swerve swerve, Index index) {
         this.slapdown = slapdown;
         this.roller = roller;
@@ -92,5 +95,17 @@ public class AllCommands {
             slapdownCMDs.goToAngleDeg(SLAPDOWN_MID_ANGLE_DEG),
             Commands.waitUntil(() -> (slapdown.isAtAngle(SLAPDOWN_MID_ANGLE_DEG)))
                 .andThen(rollerCMDs.stop()));
+    }
+
+    public Command stopAll(){
+        return Commands.run(() -> {
+            slapdownCMDs.stop();
+            rollerCMDs.stop();
+            flyWheelCMDs.stop();
+            hoodCMDs.stop();
+            swerveCMDs.stop();
+        }, slapdown, roller, flyWheel, hood, swerve)
+        .ignoringDisable(true)
+        .withName("Stop All");
     }
 }
