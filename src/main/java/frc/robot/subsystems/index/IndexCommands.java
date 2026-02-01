@@ -4,6 +4,8 @@ import java.util.function.DoubleSupplier;
 
 import edu.wpi.first.wpilibj2.command.Command;
 
+import static frc.robot.subsystems.index.IndexConstants.*;
+
 public class IndexCommands {
     private Index index;
 
@@ -53,5 +55,9 @@ public class IndexCommands {
 
     public Command stop() {
         return index.run(index::stop);
+    }
+
+    public Command manualController(DoubleSupplier volt){
+        return spinBoth(volt.getAsDouble()*MAX_VOLT, volt.getAsDouble()*MAX_VOLT);
     }
 }
