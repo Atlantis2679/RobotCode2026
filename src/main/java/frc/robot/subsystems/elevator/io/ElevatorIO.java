@@ -1,4 +1,4 @@
-package frc.robot.subsystems.climber.elevator.io;
+package frc.robot.subsystems.elevator.io;
 
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
@@ -7,9 +7,9 @@ import team2679.atlantiskit.logfields.IOBase;
 import team2679.atlantiskit.logfields.LogFieldsTable;
 
 public abstract class ElevatorIO extends IOBase {
-    public final DoubleSupplier elevatorMotorCurrect = fields.addDouble("elevatorMotorCurrect",
-            this::getElevatorMotorCurrent);
-    public final DoubleSupplier elevatorHeight = fields.addDouble("elevatorHeight", this::getElevatorHeight);
+    public final DoubleSupplier motorCurrent = fields.addDouble("motorCurrent",
+            this::getMotorCurrent);
+    public final DoubleSupplier heightMeters = fields.addDouble("height", this::getHeightMeters);
     public final BooleanSupplier isEncoderConnected = fields.addBoolean("isEncoderConnected", this::getIsEncoderConnected);
 
 
@@ -17,15 +17,11 @@ public abstract class ElevatorIO extends IOBase {
         super(fieldsTable);
     }
 
-    // Outputs:
+    protected abstract double getHeightMeters();
     
-    protected abstract double getElevatorHeight();
-    
-    protected abstract double getElevatorMotorCurrent();
+    protected abstract double getMotorCurrent();
 
     protected abstract boolean getIsEncoderConnected();
 
-    // Inputs:
-
-    public abstract void setElevatorVoltage(double voltage);
+    public abstract void setVoltage(double voltage);
 }

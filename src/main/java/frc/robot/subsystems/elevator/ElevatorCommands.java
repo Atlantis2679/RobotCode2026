@@ -1,6 +1,6 @@
-package frc.robot.subsystems.climber.elevator;
+package frc.robot.subsystems.elevator;
 
-import static frc.robot.subsystems.climber.elevator.ElevatorConstants.*;
+import static frc.robot.subsystems.elevator.ElevatorConstants.*;
 
 import java.util.function.DoubleSupplier;
 
@@ -15,7 +15,7 @@ public class ElevatorCommands {
         this.elevator = elevator;
     }
 
-    public Command moveToHeight(DoubleSupplier desiredHeight) {
+    public Command moveToHeightMeters(DoubleSupplier desiredHeight) {
         ValueHolder<TrapezoidProfile.State> referenceState = new ValueHolder<TrapezoidProfile.State>(null);
         return elevator.runOnce(() -> {
             elevator.resetPID();
@@ -31,24 +31,18 @@ public class ElevatorCommands {
                     referenceState.get().velocity, true);
 
             elevator.setElevatorVoltage(voltage);
-        }));
+        })).withName("Elevator move to height");
     }
 
     public Command moveToHeight(double desiredHeight) {
-        return moveToHeight(() -> desiredHeight);
+        return moveToHeightMeters(() -> desiredHeight);
     }
 
     public Command elevatorManualController(DoubleSupplier elevatorSpeed) {
         return elevator.run(() -> {
             double demandSpeed = elevatorSpeed.getAsDouble();
-
             double feedForward = elevator.calculateFeedForward(elevator.getHeightMeters(), 0, false);
-
             elevator.setElevatorVoltage(feedForward + demandSpeed * MAX_VOLTAGE);
         }).withName("elevatorManualController");
-    }
-
-    public Command stop() {
-        return elevator.run(() -> elevator.stop()).withName("stopElevator");
     }
 }

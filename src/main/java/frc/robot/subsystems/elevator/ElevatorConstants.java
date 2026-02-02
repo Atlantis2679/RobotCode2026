@@ -1,12 +1,14 @@
-package frc.robot.subsystems.climber.pivot;
+package frc.robot.subsystems.elevator;
 
-public class PivotConstants {
-    public static final double MAX_VOLTAGE = 0;
-    public static final double MAX_VELOCITY_DEG_PER_SEC = 360 * 0;
-    public static final double MAX_ACCELERATION_DEG_PER_SEC_SQUEARD = 0;
+public class ElevatorConstants {
+    public static final double MAX_VOLTAGE = 0;     
+    public static final int CURRENT_LIMIT = 0;
 
-    public static final double MAX_ANGLE_DEGREES = 0;
-    public static final double MIN_ANGLE_DEGREES = 0;
+    public static final double MAX_VELOCITY_METERS_PER_SEC = 0;
+    public static final double MAX_ACCELERATION_METER_PER_SEC_SQUARED = 0;
+
+    public static final double MAX_HEIGHT_METERS = 0;
+    public static final double MIN_HEIGHT_METERS = 0;
 
     public static final double KP = 0;
     public static final double KI = 0;
@@ -18,12 +20,11 @@ public class PivotConstants {
     public static final double KA = 0;
 
     public static final double HOMED_POSITION = 0;
+    public static final double DRUM_RADIUS_METERS = 0;
 
     public static final double ENCODER_CONNECTED_DEBAUNCER_SEC = 0;
 
-    public static final double ANGLE_TOLERENCE = 0;
-    public static final double ANGLE_OFFSET = 0;
-
+    public static final double HEIGHT_TOLERENCE = 0;
 
     public class Sim {
         public static final double SIM_KS = 0;
@@ -32,7 +33,6 @@ public class PivotConstants {
         public static final double SIM_KA = 0;
 
         public static final double GEARING = 0;
-        public static final double JKG_METERS_SQUEARED = 0;
-        public static final double ARM_LENGTH_M = 0;
+        public static final double CARRIGE_MASS_KG = 0;
     }
 }
