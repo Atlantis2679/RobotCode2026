@@ -63,7 +63,7 @@ public class Pivot extends SubsystemBase{
         fieldsTable.recordOutput("Current command",
                 getCurrentCommand() != null ? getCurrentCommand().getName() : "None");
         fieldsTable.recordOutput("Pivot Angle", getAngleDegrees());
-        fieldsTable.recordOutput("Pivot Motor Current", io.elevatorMotorCurrect.getAsDouble());
+        fieldsTable.recordOutput("Pivot Motor Current", io.pivotMotorCurrect.getAsDouble());
         fieldsTable.recordOutput("Pivot Connected Debouncer", getEncoderConnectedDebouncer());
 
         realVisualizer.update(getAngleDegrees());

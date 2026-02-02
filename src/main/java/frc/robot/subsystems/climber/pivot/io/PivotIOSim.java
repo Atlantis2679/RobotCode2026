@@ -18,8 +18,14 @@ public class PivotIOSim extends PivotIO{
         true,
         ANGLE_OFFSET    
     );
+    
     public PivotIOSim(LogFieldsTable fieldsTable){
         super(fieldsTable);
+    }
+
+    @Override
+    protected void periodicBeforeFields() {
+        pivotMotor.update(0.02);
     }
     
     @Override
@@ -29,7 +35,7 @@ public class PivotIOSim extends PivotIO{
 
     @Override
     public double getPivotMotorCurrent(){
-        return 0;
+        return pivotMotor.getCurrentDrawAmps();
     }
 
     @Override
