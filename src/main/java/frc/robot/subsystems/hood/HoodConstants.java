@@ -34,8 +34,6 @@ public final class HoodConstants {
 
         public static final double JOINT_GEAR_RATIO = 0/1;
         public static final double JKG_METERS_SQUEARED = 0;
-        public static final double TURNING_MIN_DEGREES = 0;
-        public static final double TURINIG_MAX_DEGREES = 0;
         public static final double ARM_LENGTH_M = 0.0;
     }
 
