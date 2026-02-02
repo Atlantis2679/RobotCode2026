@@ -7,7 +7,7 @@ import team2679.atlantiskit.logfields.IOBase;
 import team2679.atlantiskit.logfields.LogFieldsTable;
 
 public abstract class PivotIO extends IOBase{
-    public final DoubleSupplier elevatorMotorCurrect = fields.addDouble("pivotMotorCurrent",
+    public final DoubleSupplier pivotMotorCurrect = fields.addDouble("pivotMotorCurrent",
             this::getPivotMotorCurrent);
     public final DoubleSupplier pivotAngleDegrees = fields.addDouble("pivotAngleDegrees", this::getPivotAngleDegrees);
     public final BooleanSupplier isEncoderConnected = fields.addBoolean("isEncoderConnected", this::getIsEncoderConnected);
