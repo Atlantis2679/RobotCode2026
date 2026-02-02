@@ -13,7 +13,7 @@ public class PivotCommands {
         this.pivot = pivot;
     }
 
-    public Command moveToAngle(DoubleSupplier desiredAngle) {
+    public Command moveToAngleDegrees(DoubleSupplier desiredAngle) {
         ValueHolder<TrapezoidProfile.State> referenceState = new ValueHolder<TrapezoidProfile.State>(null);
             return pivot.runOnce(() -> {
                 pivot.resetPID();
@@ -31,10 +31,7 @@ public class PivotCommands {
                 pivot.setPivotVoltage(voltage);
             }));
     }
-    public Command moveToAngle(double desiredAngle) {
-        return moveToAngle(() -> desiredAngle);
-    }
-    public Command stop() {
-        return pivot.run(() -> pivot.stop()).withName("stopPivot");
+    public Command moveToAngleDegrees(double desiredAngle) {
+        return moveToAngleDegrees(() -> desiredAngle);
     }
 }

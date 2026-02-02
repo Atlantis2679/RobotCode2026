@@ -22,27 +22,27 @@ import team2679.atlantiskit.tunables.TunablesManager;
 import team2679.atlantiskit.tunables.extensions.TunableArmFeedforward;
 import team2679.atlantiskit.tunables.extensions.TunableTrapezoidProfile;
 
-public class Pivot extends SubsystemBase{
+public class Pivot extends SubsystemBase {
     private final LogFieldsTable fieldsTable = new LogFieldsTable(getName());
     private final PivotIO io = Robot.isReal() ? new PivotIOSparkMax(fieldsTable) : new PivotIOSim(fieldsTable);
 
-        private final RotationalSensorHelper rotationalSensorHelper;
+    private final RotationalSensorHelper rotationalSensorHelper;
 
-        private final TunableTrapezoidProfile pivotTrapezoid = new TunableTrapezoidProfile(
-        new TrapezoidProfile.Constraints(MAX_VELOCITY_DEG_PER_SEC,
+    private final TunableTrapezoidProfile pivotTrapezoid = new TunableTrapezoidProfile(
+            new TrapezoidProfile.Constraints(MAX_VELOCITY_DEG_PER_SEC,
                     MAX_ACCELERATION_DEG_PER_SEC_SQUEARD));
 
     private PIDController pivotPIDController = new PIDController(KP, KI, KD);
-    
+
     private TunableArmFeedforward pivotFeedforward = Robot.isReal()
             ? new TunableArmFeedforward(KS, KG,
                     KV, KA)
             : new TunableArmFeedforward(SIM_KS, SIM_KG,
                     SIM_KV, SIM_KA);
-            
+
     private final Debouncer encoderConnectedDebouncer = new Debouncer(
             ENCODER_CONNECTED_DEBAUNCER_SEC);
-    
+
     private double maxAngle = MAX_ANGLE_DEGREES;
     private double minAngle = MIN_ANGLE_DEGREES;
 
@@ -50,20 +50,21 @@ public class Pivot extends SubsystemBase{
             new Color8Bit(Color.kPurple));
     private final PivotVisualizer desiredVisualizer = new PivotVisualizer(fieldsTable, "Desired Visualizer",
             new Color8Bit(Color.kYellow));
-    public Pivot(){
+
+    public Pivot() {
         fieldsTable.update();
-    
+
         TunablesManager.add("Pivot", (Tunable) this);
 
-        rotationalSensorHelper = new RotationalSensorHelper(io.pivotAngleDegrees.getAsDouble(), ANGLE_OFFSET); 
+        rotationalSensorHelper = new RotationalSensorHelper(io.angleDegrees.getAsDouble(), ANGLE_OFFSET);
     }
-    
+
     @Override
     public void periodic() {
         fieldsTable.recordOutput("Current command",
                 getCurrentCommand() != null ? getCurrentCommand().getName() : "None");
         fieldsTable.recordOutput("Pivot Angle", getAngleDegrees());
-        fieldsTable.recordOutput("Pivot Motor Current", io.pivotMotorCurrect.getAsDouble());
+        fieldsTable.recordOutput("Pivot Motor Current", io.motorCurrent.getAsDouble());
         fieldsTable.recordOutput("Pivot Connected Debouncer", getEncoderConnectedDebouncer());
 
         realVisualizer.update(getAngleDegrees());
@@ -85,7 +86,7 @@ public class Pivot extends SubsystemBase{
     }
 
     public double getAngleDegrees() {
-        return io.pivotAngleDegrees.getAsDouble();
+        return io.angleDegrees.getAsDouble();
     }
 
     public double getAngularVelocity() {
@@ -129,4 +130,3 @@ public class Pivot extends SubsystemBase{
         builder.addDoubleProperty("Pivot min angle", () -> minAngle, (height) -> minAngle = height);
     }
 }
-

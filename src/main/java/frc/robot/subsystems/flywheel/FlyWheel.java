@@ -35,7 +35,7 @@ public class FlyWheel extends SubsystemBase{
     }
 
     public double getMotorsRPM(){
-        return io.flywheelmotorsRPM.getAsDouble();
+        return io.motorsRPM.getAsDouble();
     }
 
     public void setVoltage(double volt){

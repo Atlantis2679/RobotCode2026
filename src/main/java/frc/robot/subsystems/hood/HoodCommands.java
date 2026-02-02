@@ -11,24 +11,24 @@ import static frc.robot.subsystems.hood.HoodConstants.*;
 public class HoodCommands {
     private final Hood hood;
 
-    public HoodCommands(Hood hood){
+    public HoodCommands(Hood hood) {
         this.hood = hood;
     }
 
-    public Command moveToAngle(DoubleSupplier angle){
+    public Command moveToAngle(DoubleSupplier angle) {
         ValueHolder<TrapezoidProfile.State> referenceState = new ValueHolder<TrapezoidProfile.State>(null);
         return hood.runOnce(() -> {
             hood.resetPID();
             referenceState.set(new TrapezoidProfile.State(hood.getAngleDegrees(), hood.getVelocity()));
         }).andThen(hood.run(() -> {
             referenceState.set(hood.calculateTrapezoidProfile(
-                0.02,
-                referenceState.get(),
-                new TrapezoidProfile.State(angle.getAsDouble(), 0)));
+                    0.02,
+                    referenceState.get(),
+                    new TrapezoidProfile.State(angle.getAsDouble(), 0)));
 
             double volt = hood.calculateFeedForward(
-                referenceState.get().position,
-                referenceState.get().velocity, true);
+                    referenceState.get().position,
+                    referenceState.get().velocity, true);
 
             hood.setHoodVoltage(volt);
         }));
@@ -38,15 +38,11 @@ public class HoodCommands {
         return moveToAngle(() -> angle);
     }
 
-    public Command manualController(DoubleSupplier speed){
+    public Command manualController(DoubleSupplier speed) {
         return hood.run(() -> {
             double demandSpeed = speed.getAsDouble();
             double feedForward = hood.calculateFeedForward(hood.getAngleDegrees(), 0, false);
-            hood.setHoodVoltage(feedForward + demandSpeed * HOOD_MAX_VOLTAGE);
+            hood.setHoodVoltage(feedForward + demandSpeed * MAX_VOLTAGE);
         });
-    }
-
-    public Command stop(){
-        return hood.run(hood::stop);
     }
 }

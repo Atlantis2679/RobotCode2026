@@ -6,18 +6,19 @@ import java.util.function.DoubleSupplier;
 import team2679.atlantiskit.logfields.IOBase;
 import team2679.atlantiskit.logfields.LogFieldsTable;
 
-public abstract class PivotIO extends IOBase{
-    public final DoubleSupplier pivotMotorCurrect = fields.addDouble("pivotMotorCurrent",
+public abstract class PivotIO extends IOBase {
+    public final DoubleSupplier motorCurrent = fields.addDouble("motorCurrent",
             this::getPivotMotorCurrent);
-    public final DoubleSupplier pivotAngleDegrees = fields.addDouble("pivotAngleDegrees", this::getPivotAngleDegrees);
-    public final BooleanSupplier isEncoderConnected = fields.addBoolean("isEncoderConnected", this::getIsEncoderConnected);
+    public final DoubleSupplier angleDegrees = fields.addDouble("angleDegrees", this::getAngleDegrees);
+    public final BooleanSupplier isEncoderConnected = fields.addBoolean("isEncoderConnected",
+            this::getIsEncoderConnected);
 
-    public PivotIO(LogFieldsTable fieldsTable){
+    public PivotIO(LogFieldsTable fieldsTable) {
         super(fieldsTable);
     }
 
-    protected abstract double getPivotAngleDegrees();
-    
+    protected abstract double getAngleDegrees();
+
     protected abstract double getPivotMotorCurrent();
 
     protected abstract boolean getIsEncoderConnected();
@@ -26,4 +27,3 @@ public abstract class PivotIO extends IOBase{
 
     public abstract void setPivotVoltage(double voltage);
 }
-

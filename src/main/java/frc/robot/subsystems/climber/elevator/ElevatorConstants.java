@@ -18,7 +18,7 @@ public class ElevatorConstants {
     public static final double KA = 0;
 
     public static final double HOMED_POSITION = 0;
-    public static final double DRUM_RADIUS = 0;
+    public static final double DRUM_RADIUS_METERS = 0;
 
     public static final double ENCODER_CONNECTED_DEBAUNCER_SEC = 0;
 

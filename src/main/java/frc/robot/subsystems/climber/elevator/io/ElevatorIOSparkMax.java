@@ -11,7 +11,7 @@ import team2679.atlantiskit.logfields.LogFieldsTable;
 import static frc.robot.subsystems.climber.elevator.ElevatorConstants.*;
 
 public class ElevatorIOSparkMax extends ElevatorIO {
-    private SparkMax elevatorMotor = new SparkMax(CANBUS.ELEVATOR_ID, MotorType.kBrushless);
+    private SparkMax motor = new SparkMax(CANBUS.ELEVATOR_ID, MotorType.kBrushless);
     private DutyCycleEncoder encoder = new DutyCycleEncoder(DIO.ELEVATOR_ENCODER_ID);
 
     public ElevatorIOSparkMax(LogFieldsTable fieldsTable) {
@@ -19,13 +19,13 @@ public class ElevatorIOSparkMax extends ElevatorIO {
     }
 
     @Override
-    protected double getElevatorHeight() {
-        return (Units.degreesToRadians(encoder.get()) - HOMED_POSITION) * DRUM_RADIUS;
+    protected double getHeightMeters() {
+        return (Units.degreesToRadians(encoder.get()) - HOMED_POSITION) * DRUM_RADIUS_METERS;
     }
     
     @Override
-    public double getElevatorMotorCurrent() {
-        return elevatorMotor.getOutputCurrent();
+    public double getMotorCurrent() {
+        return motor.getOutputCurrent();
     }
 
     @Override
@@ -34,7 +34,7 @@ public class ElevatorIOSparkMax extends ElevatorIO {
     }
 
     @Override
-    public void setElevatorVoltage(double voltage) {
-        elevatorMotor.setVoltage(voltage);
+    public void setVoltage(double voltage) {
+        motor.setVoltage(voltage);
     }
 }

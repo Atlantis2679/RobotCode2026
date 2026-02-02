@@ -6,17 +6,18 @@ import java.util.function.DoubleSupplier;
 import team2679.atlantiskit.logfields.IOBase;
 import team2679.atlantiskit.logfields.LogFieldsTable;
 
-public abstract class HoodIO extends IOBase{
-    
-    public final DoubleSupplier hoodMotorAngleDegrees = fields.addDouble("Hood Motor Angle Degree", this::getHoodMotorAngleDegree);
-    public final BooleanSupplier isEncoderConnected = fields.addBoolean("isEncoderConnected", this::getIsEncoderConnected);
+public abstract class HoodIO extends IOBase {
+    public final DoubleSupplier motorAngleDegrees = fields.addDouble("motorAngleDegrees",
+            this::getHoodMotorAngleDegree);
+    public final BooleanSupplier isEncoderConnected = fields.addBoolean("isEncoderConnected",
+            this::getIsEncoderConnected);
 
-    public HoodIO(LogFieldsTable fieldsTable){
+    public HoodIO(LogFieldsTable fieldsTable) {
         super(fieldsTable);
     }
 
     protected abstract double getHoodMotorAngleDegree();
-        
+
     protected abstract boolean getIsEncoderConnected();
 
     public abstract void setVoltage(double volt);

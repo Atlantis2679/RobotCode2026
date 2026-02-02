@@ -9,55 +9,43 @@ import static frc.robot.subsystems.index.IndexConstants.*;
 public class IndexCommands {
     private Index index;
 
-    public IndexCommands(Index index){
+    public IndexCommands(Index index) {
         this.index = index;
     }
 
-    public Command spin(DoubleSupplier volt){
+    public Command spinSpindexer(DoubleSupplier volt) {
         return index.run(() -> index.setSpindexVolt(volt.getAsDouble()))
-            .finallyDo(() -> index.setSpindexVolt(0))
-            .withName("Rotate Spindex");
+                .finallyDo(() -> index.setSpindexVolt(0))
+                .withName("Rotate Spindex");
     }
 
-    public Command spin(double volt){
-        return spin(() -> volt);
+    public Command spinSpindexer(double volt) {
+        return spinSpindexer(() -> volt);
     }
 
-    public Command insert(DoubleSupplier volt){
+    public Command spinIndexer(DoubleSupplier volt) {
         return index.run(() -> index.setIndexerVolt(volt.getAsDouble()))
-            .finallyDo(()-> index.setIndexerVolt(0))
-            .withName("Rotate Indexer");
-    }
-    
-    public Command insert(double volt){
-        return insert(() -> volt);
+                .finallyDo(() -> index.setIndexerVolt(0))
+                .withName("Rotate Indexer");
     }
 
-    public Command spinBoth(DoubleSupplier indexerVolt, DoubleSupplier spindexVolt){
+    public Command spinIndexer(double volt) {
+        return spinIndexer(() -> volt);
+    }
+
+    public Command spinBoth(DoubleSupplier indexerVolt, DoubleSupplier spindexVolt) {
         return index.run(() -> {
             index.setIndexerVolt(indexerVolt.getAsDouble());
             index.setSpindexVolt(spindexVolt.getAsDouble());
         }).finallyDo(index::stop)
-        .withName("Set voltage for both motors");    
+                .withName("Set voltage for both motors");
     }
 
-    public Command spinBoth(double indexerVolt, double spindexVolt){
+    public Command spinBoth(double indexerVolt, double spindexVolt) {
         return spinBoth(() -> indexerVolt, () -> spindexVolt);
     }
 
-    public Command stopSpin(){
-        return index.run(() -> index.setSpindexVolt(0));
-    }
-
-    public Command stopIn(){
-        return index.run(() -> index.setIndexerVolt(0));
-    }
-
-    public Command stop() {
-        return index.run(index::stop);
-    }
-
-    public Command manualController(DoubleSupplier volt){
-        return spinBoth(volt.getAsDouble()*MAX_VOLT, volt.getAsDouble()*MAX_VOLT);
+    public Command manualController(DoubleSupplier volt) {
+        return spinBoth(() -> volt.getAsDouble() * MAX_INDEXER_VOLT, () -> volt.getAsDouble() * MAX_SPINDEX_VOLT);
     }
 }

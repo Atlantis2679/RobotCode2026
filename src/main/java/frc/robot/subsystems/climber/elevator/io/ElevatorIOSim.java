@@ -1,6 +1,6 @@
 package frc.robot.subsystems.climber.elevator.io;
 
-import static frc.robot.subsystems.climber.elevator.ElevatorConstants.DRUM_RADIUS;
+import static frc.robot.subsystems.climber.elevator.ElevatorConstants.DRUM_RADIUS_METERS;
 import static frc.robot.subsystems.climber.elevator.ElevatorConstants.MAX_HEIGHT_METERS;
 import static frc.robot.subsystems.climber.elevator.ElevatorConstants.MIN_HEIGHT_METERS;
 import static frc.robot.subsystems.climber.elevator.ElevatorConstants.Sim.CARRIGE_MASS_KG;
@@ -11,11 +11,11 @@ import edu.wpi.first.wpilibj.simulation.ElevatorSim;
 import team2679.atlantiskit.logfields.LogFieldsTable;
 
 public class ElevatorIOSim extends ElevatorIO {
-    private final ElevatorSim elevatorMotor = new ElevatorSim(
+    private final ElevatorSim motor = new ElevatorSim(
         DCMotor.getNEO(1), 
         GEARING, 
         CARRIGE_MASS_KG, 
-        DRUM_RADIUS, 
+        DRUM_RADIUS_METERS, 
         MIN_HEIGHT_METERS, 
         MAX_HEIGHT_METERS, 
         true, 
@@ -27,13 +27,18 @@ public class ElevatorIOSim extends ElevatorIO {
     }
 
     @Override
-    public double getElevatorHeight() {
-        return elevatorMotor.getPositionMeters();
+    protected void periodicBeforeFields() {
+        motor.update(0.02);
     }
 
     @Override
-    public double getElevatorMotorCurrent() {
-        return 0;
+    public double getHeightMeters() {
+        return motor.getPositionMeters();
+    }
+
+    @Override
+    public double getMotorCurrent() {
+        return motor.getCurrentDrawAmps();
     }
 
     @Override
@@ -42,7 +47,7 @@ public class ElevatorIOSim extends ElevatorIO {
     }
 
     @Override
-    public void setElevatorVoltage(double voltage) {
-        elevatorMotor.setInputVoltage(voltage);
+    public void setVoltage(double voltage) {
+        motor.setInputVoltage(voltage);
     }
 }

@@ -2,6 +2,8 @@ package frc.robot.subsystems.climber.pivot;
 
 public class PivotConstants {
     public static final double MAX_VOLTAGE = 0;
+    public static final int MAX_CURRENT = 0;
+
     public static final double MAX_VELOCITY_DEG_PER_SEC = 360 * 0;
     public static final double MAX_ACCELERATION_DEG_PER_SEC_SQUEARD = 0;
 
@@ -23,7 +25,6 @@ public class PivotConstants {
 
     public static final double ANGLE_TOLERENCE = 0;
     public static final double ANGLE_OFFSET = 0;
-
 
     public class Sim {
         public static final double SIM_KS = 0;
