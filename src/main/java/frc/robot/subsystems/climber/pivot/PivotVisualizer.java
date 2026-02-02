@@ -21,6 +21,7 @@ public class PivotVisualizer {
 
         pivotTower = pivotRoot.append(new LoggedMechanismLigament2d("elevator", 0.5, 90, 3, color1));
     }
+    
     public void update(double angle){
         pivotTower.setAngle(angle);
         fieldsTable.recordOutput("Pivot Visualizer Angle", angle);

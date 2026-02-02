@@ -124,8 +124,9 @@ public class Pivot extends SubsystemBase{
         builder.addChild("Pivot PID", pivotPIDController);
         builder.addChild("Pivot feedforward", pivotFeedforward);
         builder.addChild("Pivot Trapezoid profile", pivotTrapezoid);
+        builder.addChild("Pivot RotationalSensorHelper", rotationalSensorHelper);
         builder.addDoubleProperty("Pivot max angle", () -> maxAngle, (height) -> maxAngle = height);
-        builder.addDoubleProperty("Elevator min angle", () -> minAngle, (height) -> minAngle = height);
+        builder.addDoubleProperty("Pivot min angle", () -> minAngle, (height) -> minAngle = height);
     }
 }
 

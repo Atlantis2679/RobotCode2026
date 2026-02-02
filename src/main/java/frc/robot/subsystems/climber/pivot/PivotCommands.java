@@ -35,6 +35,6 @@ public class PivotCommands {
         return moveToAngle(() -> desiredAngle);
     }
     public Command stop() {
-        return pivot.run(() -> pivot.stop()).withName("stopElevator");
+        return pivot.run(() -> pivot.stop()).withName("stopPivot");
     }
 }
