@@ -15,8 +15,8 @@ import frc.robot.allCommands.AllCommands;
 import frc.robot.subsystems.flywheel.FlyWheel;
 import frc.robot.subsystems.hood.Hood;
 import frc.robot.subsystems.index.Index;
+import frc.robot.subsystems.intake.forbar.Forbar;
 import frc.robot.subsystems.intake.roller.Roller;
-import frc.robot.subsystems.intake.slapdown.Slapdown;
 import frc.robot.subsystems.swerve.Swerve;
 import frc.robot.subsystems.swerve.SwerveCommands;
 import frc.robot.utils.NaturalXboxController;
@@ -25,7 +25,7 @@ import team2679.atlantiskit.tunables.extensions.TunableCommand;
 
 public class RobotContainer {
     private final Swerve swerve = new Swerve();
-    private final Slapdown slapdown = new Slapdown();
+    private final Forbar slapdown = new Forbar();
     private final Roller roller = new Roller();
     private final Index index = new Index();
     private final Hood hood = new Hood();
@@ -77,24 +77,9 @@ public class RobotContainer {
         operatorController.rightTrigger().whileTrue(allCommands.shoot());
 
         TunablesManager.add("Shoot Prep Commad", allCommands.tunableShootPrep().fullTunable());
-
     }
 
     public void configureAuto(){
-        NamedCommands.registerCommand("stopAll", allCommands.stopAll());
-
-        NamedCommands.registerCommand("startIntake", allCommands.startIntake());
-        NamedCommands.registerCommand("stopIntake", allCommands.stopIntake());
-
-        NamedCommands.registerCommand("shoot", allCommands.shoot());
-
-        autoChooser = AutoBuilder.buildAutoChooser();
-
-        SmartDashboard.putData("Auto Chooser", autoChooser);
-        Field2d field = new Field2d();
-
-        SmartDashboard.putData(field);
-
     }
 
     public void enterSwerveIntoTest() {

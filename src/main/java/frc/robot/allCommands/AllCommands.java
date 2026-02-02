@@ -1,17 +1,17 @@
 package frc.robot.allCommands;
 
-import frc.robot.subsystems.elevator.Elevator;
-import frc.robot.subsystems.elevator.ElevatorCommands;
+import frc.robot.subsystems.climber.elevator.Elevator;
+import frc.robot.subsystems.climber.elevator.ElevatorCommands;
 import frc.robot.subsystems.flywheel.FlyWheel;
 import frc.robot.subsystems.flywheel.FlyWheelCommands;
 import frc.robot.subsystems.hood.Hood;
 import frc.robot.subsystems.hood.HoodCommands;
 import frc.robot.subsystems.index.Index;
 import frc.robot.subsystems.index.IndexCommands;
+import frc.robot.subsystems.intake.forbar.Forbar;
+import frc.robot.subsystems.intake.forbar.ForbarCommands;
 import frc.robot.subsystems.intake.roller.Roller;
 import frc.robot.subsystems.intake.roller.RollerCommands;
-import frc.robot.subsystems.intake.slapdown.Slapdown;
-import frc.robot.subsystems.intake.slapdown.SlapdownCommands;
 import frc.robot.subsystems.swerve.Swerve;
 import frc.robot.subsystems.swerve.SwerveCommands;
 import team2679.atlantiskit.tunables.extensions.TunableCommand;
@@ -25,7 +25,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 
 public class AllCommands {
-    private Slapdown slapdown;
+    private Forbar slapdown;
     private Roller roller;
     private FlyWheel flyWheel;
     private Hood hood;
@@ -33,7 +33,7 @@ public class AllCommands {
     private Index index;
     private Elevator elevator;
 
-    private SlapdownCommands slapdownCMDs;
+    private ForbarCommands slapdownCMDs;
     private RollerCommands rollerCMDs;
     private FlyWheelCommands flyWheelCMDs;
     private HoodCommands hoodCMDs;
@@ -41,7 +41,7 @@ public class AllCommands {
     private IndexCommands indexCMDs;
     private ElevatorCommands elevatorCMDs;
 
-    public AllCommands(Slapdown slapdown, Roller roller, FlyWheel flyWheel, Hood hood, Swerve swerve, Index index, Elevator elevator) {
+    public AllCommands(Forbar slapdown, Roller roller, FlyWheel flyWheel, Hood hood, Swerve swerve, Index index, Elevator elevator) {
         this.slapdown = slapdown;
         this.roller = roller;
         this.flyWheel = flyWheel;
@@ -50,7 +50,7 @@ public class AllCommands {
         this.index = index;
         this.elevator = elevator;
 
-        slapdownCMDs = new SlapdownCommands(this.slapdown);
+        slapdownCMDs = new ForbarCommands(this.slapdown);
         rollerCMDs = new RollerCommands(this.roller);
         flyWheelCMDs = new FlyWheelCommands(this.flyWheel);
         hoodCMDs = new HoodCommands(this.hood);
@@ -61,14 +61,14 @@ public class AllCommands {
 
     public Command startIntake(){
         return Commands.parallel(
-            slapdownCMDs.goToAngleDeg(SLAPDOWN_OPEN_ANGLE_DEG),
+            slapdownCMDs.getToAngleDegrees(SLAPDOWN_OPEN_ANGLE_DEG),
             rollerCMDs.spin(ROLLER_SPEED_RPM)
         );
     }
     
     public Command stopIntake(){
         return Commands.parallel(
-            slapdownCMDs.goToAngleDeg(SLAPDOWN_MID_ANGLE_DEG),
+            slapdownCMDs.getToAngleDegrees(SLAPDOWN_MID_ANGLE_DEG),
             Commands.waitUntil(() -> (slapdown.isAtAngle(SLAPDOWN_MID_ANGLE_DEG)))
                 .andThen(rollerCMDs.stop()));
     }

@@ -1,4 +1,4 @@
-package frc.robot.subsystems.intake.slapdown;
+package frc.robot.subsystems.intake.forbar;
 
 import java.util.function.DoubleSupplier;
 
@@ -6,13 +6,13 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj2.command.Command;
 import team2679.atlantiskit.valueholders.ValueHolder;
 
-public class SlapdownCommands {
-    private Slapdown slapdown;
-    public SlapdownCommands(Slapdown slapdown){
+public class ForbarCommands {
+    private Forbar slapdown;
+    public ForbarCommands(Forbar slapdown){
         this.slapdown = slapdown;
     }
 
-    public Command goToAngleDeg(DoubleSupplier angle){
+    public Command getToAngleDegrees(DoubleSupplier angle){
         ValueHolder<TrapezoidProfile.State> state = new ValueHolder<TrapezoidProfile.State>(null);
         return slapdown.runOnce( () -> {
                 state.set(new TrapezoidProfile.State(slapdown.getAngleDegrees(), slapdown.getVelocity()));
@@ -26,14 +26,14 @@ public class SlapdownCommands {
             }));
     }
 
-    public Command goToAngleDeg(double angle){
-        return goToAngleDeg(() -> angle);
+    public Command getToAngleDegrees(double angle){
+        return getToAngleDegrees(() -> angle);
     }
 
     public Command manualController(DoubleSupplier speed){
         return slapdown.run(() -> {
             double ignore_mg = slapdown.calculateFeedforward(slapdown.getAngleDegrees(), slapdown.getVelocity(), false);
-            slapdown.setVoltage(ignore_mg + speed.getAsDouble()*SlapdownConstants.MAX_VOLTAGE);
+            slapdown.setVoltage(ignore_mg + speed.getAsDouble()*ForbarConstants.MAX_VOLTAGE);
         });
     }
 
