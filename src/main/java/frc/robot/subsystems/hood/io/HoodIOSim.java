@@ -1,16 +1,15 @@
 package frc.robot.subsystems.hood.io;
 
-import static frc.robot.subsystems.climber.pivot.PivotConstants.MAX_ANGLE_DEGREES;
-import static frc.robot.subsystems.climber.pivot.PivotConstants.MIN_ANGLE_DEGREES;
-
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import team2679.atlantiskit.logfields.LogFieldsTable;
 import frc.robot.subsystems.hood.*;
+
+import static frc.robot.subsystems.hood.HoodConstants.MAX_ANGLE_DEGREES;
+import static frc.robot.subsystems.hood.HoodConstants.MIN_ANGLE_DEGREES;
 import static frc.robot.subsystems.hood.HoodConstants.Sim.*;
 
 public class HoodIOSim extends HoodIO {
-
     private final SingleJointedArmSim hoodMotor = new SingleJointedArmSim(
             DCMotor.getNeo550(1),
             JOINT_GEAR_RATIO,

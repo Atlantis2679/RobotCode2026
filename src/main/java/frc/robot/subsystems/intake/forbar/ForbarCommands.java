@@ -13,7 +13,7 @@ public class ForbarCommands {
         this.forbar = slapdown;
     }
 
-    public Command getToAngleDegrees(DoubleSupplier angle) {
+    public Command moveToAngle(DoubleSupplier angle) {
         ValueHolder<TrapezoidProfile.State> state = new ValueHolder<TrapezoidProfile.State>(null);
         return forbar.runOnce(() -> {
             state.set(new TrapezoidProfile.State(forbar.getAngleDegrees(), forbar.getVelocity()));
@@ -24,17 +24,17 @@ public class ForbarCommands {
             double voltage = forbar.calculateFeedforward(
                     state.get().position, state.get().velocity, true);
             forbar.setVoltage(voltage);
-        }));
+        })).withName("Forbar move to angle");
     }
 
     public Command getToAngleDegrees(double angle) {
-        return getToAngleDegrees(() -> angle);
+        return moveToAngle(() -> angle);
     }
 
     public Command manualController(DoubleSupplier speed) {
         return forbar.run(() -> {
             double ignore_mg = forbar.calculateFeedforward(forbar.getAngleDegrees(), forbar.getVelocity(), false);
             forbar.setVoltage(ignore_mg + speed.getAsDouble() * ForbarConstants.MAX_VOLTAGE);
-        });
+        }).withName("Forbar manual controller");
     }
 }

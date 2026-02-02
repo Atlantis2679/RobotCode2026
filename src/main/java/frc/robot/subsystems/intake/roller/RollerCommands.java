@@ -14,7 +14,7 @@ public class RollerCommands {
     public Command spin(DoubleSupplier speed) {
         return roller.run(() -> roller.setSpeedRPM(speed.getAsDouble()))
                 .finallyDo(roller::stop)
-                .withName("spin");
+                .withName("Roller Spin");
     }
 
     public Command spin(double speed) {
@@ -24,6 +24,6 @@ public class RollerCommands {
     public Command manualController(DoubleSupplier speed) {
         return roller.run(() -> roller.setSpeedRPM(speed.getAsDouble() * RollerConstants.MAX_RPM))
                 .finallyDo(roller::stop)
-                .withName("Manual Controller");
+                .withName("Roller manual controller");
     }
 }

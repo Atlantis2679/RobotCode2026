@@ -31,7 +31,7 @@ public class HoodCommands {
                     referenceState.get().velocity, true);
 
             hood.setHoodVoltage(volt);
-        }));
+        })).withName("Hood move to angle");
     }
 
     public Command moveToAngle(double angle) {
@@ -43,6 +43,6 @@ public class HoodCommands {
             double demandSpeed = speed.getAsDouble();
             double feedForward = hood.calculateFeedForward(hood.getAngleDegrees(), 0, false);
             hood.setHoodVoltage(feedForward + demandSpeed * MAX_VOLTAGE);
-        });
+        }).finallyDo(hood::stop).withName("Hood manual controller");
     }
 }

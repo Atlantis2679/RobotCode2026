@@ -6,12 +6,12 @@ import java.util.function.DoubleSupplier;
 import team2679.atlantiskit.logfields.IOBase;
 import team2679.atlantiskit.logfields.LogFieldsTable;
 
-public abstract class SlapdownIO extends IOBase {
+public abstract class ForbarIO extends IOBase {
     public DoubleSupplier current = fields.addDouble("Current", this::getCurrent);
     public BooleanSupplier isEncoderConnected = fields.addBoolean("Encoder Connected", this::isEncoderConnected);
     public DoubleSupplier angleDegrees = fields.addDouble("Angle Degrees", this::getAngleDegrees);
 
-    public SlapdownIO(LogFieldsTable fields) {
+    public ForbarIO(LogFieldsTable fields) {
         super(fields);
     }
 

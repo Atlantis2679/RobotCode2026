@@ -1,4 +1,4 @@
-package frc.robot.subsystems.climber.elevator;
+package frc.robot.subsystems.elevator;
 
 import org.littletonrobotics.junction.mechanism.LoggedMechanism2d;
 import org.littletonrobotics.junction.mechanism.LoggedMechanismLigament2d;

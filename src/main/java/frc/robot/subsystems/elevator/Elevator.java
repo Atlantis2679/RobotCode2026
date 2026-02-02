@@ -1,4 +1,4 @@
-package frc.robot.subsystems.climber.elevator;
+package frc.robot.subsystems.elevator;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
@@ -10,12 +10,12 @@ import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Robot;
-import frc.robot.subsystems.climber.elevator.io.ElevatorIO;
-import frc.robot.subsystems.climber.elevator.io.ElevatorIOSim;
-import frc.robot.subsystems.climber.elevator.io.ElevatorIOSparkMax;
+import frc.robot.subsystems.elevator.io.ElevatorIO;
+import frc.robot.subsystems.elevator.io.ElevatorIOSim;
+import frc.robot.subsystems.elevator.io.ElevatorIOSparkMax;
 
-import static frc.robot.subsystems.climber.elevator.ElevatorConstants.*;
-import static frc.robot.subsystems.climber.elevator.ElevatorConstants.Sim.*;
+import static frc.robot.subsystems.elevator.ElevatorConstants.Sim.*;
+import static frc.robot.subsystems.elevator.ElevatorConstants.*;
 
 import team2679.atlantiskit.logfields.LogFieldsTable;
 import team2679.atlantiskit.tunables.Tunable;
