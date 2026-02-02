@@ -122,7 +122,7 @@ public class VisionAprilTagsIOPhoton extends VisionAprilTagsIO {
     protected double[] getTagsAmbiguities() {
         double[] ambiguities = new double[visionData.length];
         for (int i = 0; i < ambiguities.length; i++) {
-            ambiguities[i] = visionData[i].timestamp;
+            ambiguities[i] = visionData[i].ambiguity;
         }
         return ambiguities;
     }

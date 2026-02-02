@@ -21,7 +21,7 @@ public class VisionConstants {
   public static AprilTagFieldLayout APRTIL_TAGS_FIELD_LAYOUT;
   static {
     try {
-      APRTIL_TAGS_FIELD_LAYOUT = new AprilTagFieldLayout(Filesystem.getDeployDirectory() + "/vision_test.json");
+      APRTIL_TAGS_FIELD_LAYOUT = new AprilTagFieldLayout(Filesystem.getDeployDirectory() + "/2026-rebuilt-welded-edit.json");
     } catch (IOException e) {
       APRTIL_TAGS_FIELD_LAYOUT = null;
     }
@@ -48,8 +48,8 @@ public class VisionConstants {
       //         new Rotation3d(Degrees.of(-1), Degrees.of(-13), Degrees.of(0)))),
       new CameraConfig(
           "BackCam", 1.0,
-          new Transform3d(new Translation3d(-0.29, 0, 0.6),
-              new Rotation3d(Degrees.of(0), Degrees.of(-23.5), Degrees.of(180))))
+          new Transform3d(new Translation3d(0.175, -0.21, 0.11),
+              new Rotation3d(Degrees.of(0), Degrees.of(-38), Degrees.of(180))))
   };
 
   public static class Sim {
