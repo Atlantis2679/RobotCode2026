@@ -25,10 +25,19 @@ public class SlapdownCommands {
                 slapdown.setVoltage(voltage);
             }));
     }
+
+    public Command goToAngleDeg(double angle){
+        return goToAngleDeg(() -> angle);
+    }
+
     public Command manualController(DoubleSupplier speed){
         return slapdown.run(() -> {
             double ignore_mg = slapdown.calculateFeedforward(slapdown.getAngleDegrees(), slapdown.getVelocity(), false);
             slapdown.setVoltage(ignore_mg + speed.getAsDouble()*SlapdownConstants.MAX_VOLTAGE);
         });
+    }
+
+    public Command stop() {
+        return slapdown.run(slapdown::stop);
     }
 }

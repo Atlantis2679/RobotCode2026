@@ -8,7 +8,8 @@ import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import team2679.atlantiskit.logfields.LogFieldsTable;
 import frc.robot.subsystems.hood.*;
 import frc.robot.subsystems.hood.HoodConstants.Sim;
-public class HoodIOSim extends HoodIO{
+
+public class HoodIOSim extends HoodIO {
     
     private final SingleJointedArmSim hoodMotor = new SingleJointedArmSim(
         DCMotor.getNeo550(1),
@@ -38,9 +39,9 @@ public class HoodIOSim extends HoodIO{
     public void setVoltage(double volt) {
         hoodMotor.setInputVoltage(volt);
     }
+  
     @Override
     protected boolean getIsEncoderConnected() {
         return false;
     }
-    
 }

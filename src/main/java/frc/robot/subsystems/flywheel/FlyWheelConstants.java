@@ -19,10 +19,8 @@ public class FlyWheelConstants {
     public static final double KG = 0;
 
     public static final double GEAR_RATIO = 2;
-
-
-
-    public class Sim{
+    
+    public static class Sim{
         public static final double SIM_KS = 0;
         public static final double SIM_KA = 0;
         public static final double SIM_KV = 0;

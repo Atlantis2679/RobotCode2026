@@ -12,11 +12,9 @@ public class FlyWheelIOSparkMax extends FlyWheelIO{
     private final SparkMax motor1 = new SparkMax(CANBUS.FLYWHEEL_MOTOR1_ID, MotorType.kBrushless);
     private final SparkMax motor2 = new SparkMax(CANBUS.FLYWHEEL_MOTOR2_ID, MotorType.kBrushless);
 
-
     public FlyWheelIOSparkMax(LogFieldsTable fieldsTable){
         super(fieldsTable);
     }
-
 
     @Override
     public void setVoltage(double volt) {
@@ -25,7 +23,7 @@ public class FlyWheelIOSparkMax extends FlyWheelIO{
     }
 
     @Override
-    public double getMotorsRPM(){
+    protected double getMotorsRPM(){
         return motor1.getAbsoluteEncoder().getVelocity() * FlyWheelConstants.GEAR_RATIO;
     }
     

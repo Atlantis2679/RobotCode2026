@@ -24,9 +24,7 @@ import static frc.robot.subsystems.hood.HoodConstants.*;
 public class Hood extends SubsystemBase{
 
     private final LogFieldsTable fieldsTable = new LogFieldsTable(getName());
-    private final HoodIO io = Robot.isReal()?
-        new HoodIOSparkMax(fieldsTable):
-        new HoodIOSim(fieldsTable);
+    private final HoodIO io = Robot.isReal() ? new HoodIOSparkMax(fieldsTable) : new HoodIOSim(fieldsTable);
 
     private final HoodVisualizer realVisualizer = new HoodVisualizer(fieldsTable, "Real Visualizer",
         new Color8Bit(Color.kPurple));
@@ -36,22 +34,11 @@ public class Hood extends SubsystemBase{
     private final RotationalSensorHelper rotationalHelpr;
 
     private final TunableTrapezoidProfile trapezoidProfile = new TunableTrapezoidProfile(
-        new TrapezoidProfile.Constraints(
-            HoodConstants.MAX_VELOCITY_DEG_PER_SEC,
-            HoodConstants.MAX_ACCELERATION_DEG_PER_SEC_SQUEARD)
-    );
+        new TrapezoidProfile.Constraints(MAX_VELOCITY_DEG_PER_SEC, MAX_ACCELERATION_DEG_PER_SEC_SQUEARD));
 
-    private final PIDController hoodPidController = new PIDController(
-        HoodConstants.KP,
-        HoodConstants.KI,
-        HoodConstants.KD
-    );
-    private final TunableArmFeedforward hoodFeedForward = new TunableArmFeedforward(
-        HoodConstants.KS,
-        HoodConstants.KG,
-        HoodConstants.KV,
-        HoodConstants.KA
-    );
+    private final PIDController hoodPidController = new PIDController(KP, KI, KD);
+
+    private final TunableArmFeedforward hoodFeedForward = new TunableArmFeedforward(KS, KG, KV, KA);
 
     private final Debouncer encoderConnectedDebouncer = new Debouncer(ENCODER_CONNECTED_DEBAUNCER_SEC);
 
@@ -66,7 +53,7 @@ public class Hood extends SubsystemBase{
 
         TunablesManager.add("Hood", (Tunable) this);
 
-        rotationalHelpr = new RotationalSensorHelper(getAngleDegrees(), HoodConstants.ANGLE_OFFSET); 
+        rotationalHelpr = new RotationalSensorHelper(io.getHoodMotorAngleDeg.getAsDouble(),  ANGLE_OFFSET); 
         rotationalHelpr.enableContinuousWrap(lowerBound, upperBound);   
     }
 

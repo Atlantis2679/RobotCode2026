@@ -18,12 +18,12 @@ public class FlyWheelIOSim extends FlyWheelIO{
         flyWheelMotorSim.update(0.02);
     }
 
-    public FlyWheelIOSim(LogFieldsTable fieldsTable){
+    public FlyWheelIOSim(LogFieldsTable fieldsTable) {
         super(fieldsTable);
     }
 
     @Override
-    public double getMotorsRPM(){
+    protected double getMotorsRPM() {
         return flyWheelMotorSim.getAngularVelocityRPM();
     }
 
