@@ -59,7 +59,7 @@ public class Hood extends SubsystemBase{
 
     public void periodic(){
         realVisualizer.update(getAngleDegrees());
-        rotationalHelpr.update(io.getHoodMotorAngleDeg.getAsDouble());
+        rotationalHelpr.update(getAngleDegrees());
         fieldsTable.recordOutput("angle", getAngleDegrees());
         fieldsTable.recordOutput("velocity", rotationalHelpr.getVelocity());
     }
@@ -81,7 +81,7 @@ public class Hood extends SubsystemBase{
         io.setVoltage(0);
     }
     public double getAngleDegrees(){
-        return io.getHoodMotorAngleDeg.getAsDouble();
+        return io.hoodMotorAngle.getAsDouble();
     }
     public double getVelocity(){
         return rotationalHelpr.getVelocity();

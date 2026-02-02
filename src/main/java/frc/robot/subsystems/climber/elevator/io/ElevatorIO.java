@@ -1,4 +1,4 @@
-package frc.robot.subsystems.elevator.io;
+package frc.robot.subsystems.climber.elevator.io;
 
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;

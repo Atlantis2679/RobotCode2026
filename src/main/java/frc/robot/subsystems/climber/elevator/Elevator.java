@@ -1,4 +1,4 @@
-package frc.robot.subsystems.elevator;
+package frc.robot.subsystems.climber.elevator;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
@@ -10,12 +10,12 @@ import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Robot;
-import frc.robot.subsystems.elevator.io.ElevatorIO;
-import frc.robot.subsystems.elevator.io.ElevatorIOSim;
-import frc.robot.subsystems.elevator.io.ElevatorIOSparkMax;
+import frc.robot.subsystems.climber.elevator.io.ElevatorIO;
+import frc.robot.subsystems.climber.elevator.io.ElevatorIOSim;
+import frc.robot.subsystems.climber.elevator.io.ElevatorIOSparkMax;
 
-import static frc.robot.subsystems.elevator.ElevatorConstants.Sim.*;
-import static frc.robot.subsystems.elevator.ElevatorConstants.*;
+import static frc.robot.subsystems.climber.elevator.ElevatorConstants.*;
+import static frc.robot.subsystems.climber.elevator.ElevatorConstants.Sim.*;
 
 import team2679.atlantiskit.logfields.LogFieldsTable;
 import team2679.atlantiskit.tunables.Tunable;
@@ -30,14 +30,14 @@ public class Elevator extends SubsystemBase {
 
     private final ElevatorVisualizer realVisualizer = new ElevatorVisualizer(fieldsTable, "Real Visualizer",
             new Color8Bit(Color.kPurple));
-    private final ElevatorVisualizer desiredHoodVisualizer = new ElevatorVisualizer(fieldsTable, "Desired Visualizer",
+    private final ElevatorVisualizer desiredVisualizer = new ElevatorVisualizer(fieldsTable, "Desired Visualizer",
             new Color8Bit(Color.kYellow));
 
     private final TunableTrapezoidProfile elevatorTrapezoid = new TunableTrapezoidProfile(
-            new TrapezoidProfile.Constraints(ElevatorConstants.MAX_VELOCITY_METERS_PER_SEC,
+            new TrapezoidProfile.Constraints(MAX_VELOCITY_METERS_PER_SEC,
                     MAX_ACCELERATION_METER_PER_SEC_SQUARED));
 
-    private PIDController elevatorPidController = new PIDController(KP, KI, KD);
+    private PIDController elevatorPIDController = new PIDController(KP, KI, KD);
 
     private TunableArmFeedforward elevatorFeedforward = Robot.isReal()
             ? new TunableArmFeedforward(KS, KG,
@@ -108,10 +108,10 @@ public class Elevator extends SubsystemBase {
     public double calculateFeedForward(double desiredHeight, double desiredSpeed, boolean usePID) {
         fieldsTable.recordOutput("Desired Height", desiredHeight);
         fieldsTable.recordOutput("Desired Speed", desiredSpeed);
-        desiredHoodVisualizer.update(desiredHeight);
+        desiredVisualizer.update(desiredHeight);
         double speed = elevatorFeedforward.calculate(desiredHeight, desiredSpeed);
         if (usePID && !isAtHeight(desiredHeight)) {
-            speed += elevatorPidController.calculate(getHeightMeters(), desiredHeight);
+            speed += elevatorPIDController.calculate(getHeightMeters(), desiredHeight);
         }
         return speed;
     }
@@ -126,7 +126,7 @@ public class Elevator extends SubsystemBase {
     }
 
     public void resetPID() {
-        elevatorPidController.reset();
+        elevatorPIDController.reset();
     }
 
     public void stop() {
@@ -134,10 +134,10 @@ public class Elevator extends SubsystemBase {
     }
 
     public void initTunable(TunableBuilder builder) {
-        builder.addChild("Elevator PID", elevatorPidController);
+        builder.addChild("Elevator PID", elevatorPIDController);
         builder.addChild("Elevator feedforward", elevatorFeedforward);
         builder.addChild("Elevator Trapezoid profile", elevatorTrapezoid);
         builder.addDoubleProperty("Elevator max height", () -> maxHeight, (height) -> maxHeight = height);
-        builder.addDoubleProperty("Elevator min angle", () -> minHeight, (height) -> minHeight = height);
+        builder.addDoubleProperty("Elevator min height", () -> minHeight, (height) -> minHeight = height);
     }
 }
