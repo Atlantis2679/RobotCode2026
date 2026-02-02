@@ -17,4 +17,3 @@ public class ForbarConstants {
     public static final double MAX_VOLTAGE = 0;
     public static final double ANGLE_TOLLERANCE = 0;
 }
-

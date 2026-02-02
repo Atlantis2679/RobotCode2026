@@ -15,26 +15,25 @@ import frc.robot.utils.AlertsFactory;
 import team2679.atlantiskit.logfields.LogFieldsTable;
 import team2679.atlantiskit.periodicalerts.PeriodicAlertsGroup;
 
-public class SlapdownIOSparkMax extends SlapdownIO {
+public class ForbarIOSparkMax extends ForbarIO {
 
-    private SparkMax motor = new SparkMax(RobotMap.CANBUS.SLAPDOWN_ID, MotorType.kBrushless);
+    private SparkMax motor = new SparkMax(RobotMap.CANBUS.FORBAR_ID, MotorType.kBrushless);
     private SparkMaxConfig motorConfig = new SparkMaxConfig();
-    private DutyCycleEncoder encoder = new DutyCycleEncoder(RobotMap.DIO.SLAPDOWN_ENCODER_ID);
+    private DutyCycleEncoder encoder = new DutyCycleEncoder(RobotMap.DIO.FORBAR_ENCODER_ID);
 
-    public SlapdownIOSparkMax(LogFieldsTable fields) {
+    public ForbarIOSparkMax(LogFieldsTable fields) {
         super(fields);
 
         motorConfig.smartCurrentLimit(ForbarConstants.CURRENT_LIMIT);
         motorConfig.idleMode(IdleMode.kCoast);
         REVLibError motorConfigError = motor.configure(motorConfig, ResetMode.kNoResetSafeParameters,
                 PersistMode.kNoPersistParameters);
-        AlertsFactory.revMotor(PeriodicAlertsGroup.defaultInstance,
-                () -> motorConfigError, motor::getWarnings, motor::getFaults, "Slapdown motor");
+        AlertsFactory.revMotor(PeriodicAlertsGroup.defaultInstance.getSubGroup("Forbar"),
+                () -> motorConfigError, motor::getWarnings, motor::getFaults, "motor");
 
         encoder.setDutyCycleRange(0, 1);
     }
 
-    // input:
     protected double getAngleDegrees() {
         return encoder.get();
     }
@@ -47,7 +46,6 @@ public class SlapdownIOSparkMax extends SlapdownIO {
         return motor.getOutputCurrent();
     }
 
-    // output:
     public void setVolt(double volt) {
         motor.setVoltage(volt);
     }

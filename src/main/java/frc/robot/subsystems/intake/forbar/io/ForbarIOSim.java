@@ -2,9 +2,8 @@ package frc.robot.subsystems.intake.forbar.io;
 
 import team2679.atlantiskit.logfields.LogFieldsTable;
 
-public class SlapdownIOSim extends SlapdownIO {
-
-    public SlapdownIOSim(LogFieldsTable fieldsTable) {
+public class ForbarIOSim extends ForbarIO {
+    public ForbarIOSim(LogFieldsTable fieldsTable) {
         super(fieldsTable);
     }
 

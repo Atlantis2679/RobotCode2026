@@ -9,9 +9,9 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Robot;
-import frc.robot.subsystems.intake.forbar.io.SlapdownIO;
-import frc.robot.subsystems.intake.forbar.io.SlapdownIOSim;
-import frc.robot.subsystems.intake.forbar.io.SlapdownIOSparkMax;
+import frc.robot.subsystems.intake.forbar.io.ForbarIO;
+import frc.robot.subsystems.intake.forbar.io.ForbarIOSim;
+import frc.robot.subsystems.intake.forbar.io.ForbarIOSparkMax;
 import team2679.atlantiskit.helpers.RotationalSensorHelper;
 import team2679.atlantiskit.logfields.LogFieldsTable;
 import team2679.atlantiskit.tunables.Tunable;
@@ -26,7 +26,7 @@ public class Forbar extends SubsystemBase implements Tunable {
             new Constraints(MAX_VELOCITY, MAX_ACCELERATION));
     private PIDController pid = new PIDController(KP, KI, KD);
     private LogFieldsTable fieldsTable = new LogFieldsTable(getName());
-    private SlapdownIO io = Robot.isReal() ? new SlapdownIOSparkMax(fieldsTable) : new SlapdownIOSim(fieldsTable);
+    private ForbarIO io = Robot.isReal() ? new ForbarIOSparkMax(fieldsTable) : new ForbarIOSim(fieldsTable);
     private RotationalSensorHelper sensorHelper;
 
     private double minAngle = MIN_ANGLE;
