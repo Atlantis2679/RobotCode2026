@@ -38,7 +38,7 @@ public class ElevatorIOSparkMax extends ElevatorIO {
     }
 
     @Override
-    public double getCurrent() {
+    public double getMotorCurrent() {
         return motor.getOutputCurrent();
     }
 
