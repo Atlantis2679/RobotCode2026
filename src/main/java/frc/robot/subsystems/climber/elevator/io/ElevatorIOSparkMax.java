@@ -6,6 +6,11 @@ import static frc.robot.subsystems.climber.elevator.ElevatorConstants.*;
 
 import com.revrobotics.spark.SparkMax;
 
+<<<<<<< HEAD:src/main/java/frc/robot/subsystems/climber/elevator/io/ElevatorIOSparkMax.java
+=======
+import static frc.robot.subsystems.elevator.ElevatorConstants.*;
+
+>>>>>>> 9ce40bc287b65772dfab444b3bf35fb7c4d0a362:src/main/java/frc/robot/subsystems/elevator/io/ElevatorIOSparkMax.java
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import frc.robot.RobotMap.CANBUS;
@@ -21,10 +26,10 @@ public class ElevatorIOSparkMax extends ElevatorIO {
     }
 
     @Override
-    public double getElevatorHeight(){
+    protected double getElevatorHeight() {
         return (Units.degreesToRadians(encoder.get()) - HOMED_POSITION) * DRUM_RADIUS;
     }
-
+    
     @Override
     public double getElevatorMotorCurrent() {
         return elevatorMotor.getOutputCurrent();
