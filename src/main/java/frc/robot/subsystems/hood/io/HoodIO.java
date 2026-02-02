@@ -8,9 +8,8 @@ import team2679.atlantiskit.logfields.LogFieldsTable;
 
 public abstract class HoodIO extends IOBase{
     
-    public final DoubleSupplier hoodMotorAngle = fields.addDouble("Hood Motor Angle Degree", this::getHoodMotorAngleDegree);
+    public final DoubleSupplier hoodMotorAngleDegrees = fields.addDouble("Hood Motor Angle Degree", this::getHoodMotorAngleDegree);
     public final BooleanSupplier isEncoderConnected = fields.addBoolean("isEncoderConnected", this::getIsEncoderConnected);
-
 
     public HoodIO(LogFieldsTable fieldsTable){
         super(fieldsTable);

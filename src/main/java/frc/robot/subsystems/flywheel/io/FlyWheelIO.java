@@ -7,7 +7,7 @@ import team2679.atlantiskit.logfields.LogFieldsTable;
 
 public abstract class FlyWheelIO extends IOBase{
     
-    public final DoubleSupplier getMotorsRPM = fields.addDouble("FlyWheel rpm", this::getMotorsRPM);
+    public final DoubleSupplier flywheelmotorsRPM = fields.addDouble("FlyWheel rpm", this::getMotorsRPM);
 
     public FlyWheelIO(LogFieldsTable fieldsTable){
         super(fieldsTable);
