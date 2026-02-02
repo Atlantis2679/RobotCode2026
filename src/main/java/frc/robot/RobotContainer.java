@@ -4,11 +4,13 @@ import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.allCommands.AllCommands;
+import frc.robot.allCommands.AllCommandsConstants;
 import frc.robot.shooting.ShootingCalculator;
 import frc.robot.shooting.ShootingMeasurments;
 import frc.robot.subsystems.elevator.Elevator;
@@ -40,6 +42,8 @@ public class RobotContainer {
     private final SwerveCommands swerveCommands = new SwerveCommands(swerve);
     private final AllCommands allCommands = new AllCommands(forbar, roller, flyWheel, hood, index, elevator);
 
+    private final PowerDistribution pdh = new PowerDistribution();
+
     private SendableChooser<Command> autoChooser = new SendableChooser<Command>();
 
     private final NaturalXboxController driverController = new NaturalXboxController(
@@ -48,8 +52,11 @@ public class RobotContainer {
             RobotMap.Controllers.OPERATOR_PORT);
 
     public RobotContainer() {
-        new Trigger(DriverStation::isDisabled).whileTrue(swerveCommands.stop());
+        pdh.setSwitchableChannel(true);
+        new Trigger(DriverStation::isDisabled).whileTrue(swerveCommands.stop().alongWith(allCommands.stopAll()));
         configureDrive();
+        configureOperator();
+        configureAuto();
     }
 
     private void configureDrive() {
@@ -83,6 +90,10 @@ public class RobotContainer {
                 : deliveryShootingCalculator).getHoodAngleDegrees();
         DoubleSupplier flywheelSpeedSupplier = () -> (isShootingHub.getAsBoolean() ? hubShootingCalculator
                 : deliveryShootingCalculator).getFlyWheelRPM();
+
+        hood.setDefaultCommand(allCommands.hoodCMDs.moveToAngle(hoodAngleSupplier));
+        forbar.setDefaultCommand(allCommands.forbarCMDs.getToAngleDegrees(AllCommandsConstants.FORBAR_MID_ANGLE_DEG));
+
         operatorController.leftTrigger().whileTrue(allCommands.getReadyToShoot(flywheelSpeedSupplier, hoodAngleSupplier));
         operatorController.rightTrigger().whileTrue(allCommands.shoot(flywheelSpeedSupplier, hoodAngleSupplier));
 

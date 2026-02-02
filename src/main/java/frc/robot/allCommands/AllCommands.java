@@ -32,12 +32,12 @@ public class AllCommands {
     private Index index;
     private Elevator elevator;
 
-    private ForbarCommands forbarCMDs;
-    private RollerCommands rollerCMDs;
-    private FlyWheelCommands flyWheelCMDs;
-    private HoodCommands hoodCMDs;
-    private IndexCommands indexCMDs;
-    private ElevatorCommands elevatorCMDs;
+    public ForbarCommands forbarCMDs;
+    public RollerCommands rollerCMDs;
+    public FlyWheelCommands flyWheelCMDs;
+    public HoodCommands hoodCMDs;
+    public IndexCommands indexCMDs;
+    public ElevatorCommands elevatorCMDs;
 
     public AllCommands(Forbar forbar, Roller roller, FlyWheel flyWheel, Hood hood, Index index,
             Elevator elevator) {
@@ -79,15 +79,19 @@ public class AllCommands {
 
     public TunableCommand tunableShoot() {
         return TunableCommand.wrap((tunablesTable) -> {
-            DoubleHolder speedHolder = tunablesTable.addNumber("speedRPM", FLYWHEEL_SPEED_RPM);
-            DoubleHolder hoodAngleHolder = tunablesTable.addNumber("angle", HOOD_ANGLE);
+            DoubleHolder speedHolder = tunablesTable.addNumber("speedRPM", 0.0);
+            DoubleHolder hoodAngleHolder = tunablesTable.addNumber("angle", 0.0);
             return shoot(speedHolder::get, hoodAngleHolder::get)
                     .withName("tunableShoot");
         });
     }
 
     public Command climb() {
-        return elevatorCMDs.moveToHeight(ELEVATOR_HEIGHT_METERS).withName("climb");
+        return elevatorCMDs.moveToHeight(ELEVATOR_CLIMB_HEIGHT_METERS).withName("climb");
+    }
+
+    public Command unclimb() {
+        return elevatorCMDs.moveToHeight(ELEVATOR_UNCLIMB_HEIGHT_METERS).withName("unclimb");
     }
 
     public Command stopAll() {
@@ -100,7 +104,7 @@ public class AllCommands {
             elevator.stop();
         }, forbar, roller, flyWheel, hood, swerve, elevator)
                 .ignoringDisable(true)
-                .withName("Stop All");
+                .withName("stopAll");
     }
 
     public Command manualController(DoubleSupplier flywheelSpeed, DoubleSupplier hoodSpeed,
