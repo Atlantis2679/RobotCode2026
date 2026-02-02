@@ -23,18 +23,22 @@ public class ElevatorIOSim extends ElevatorIO {
         super(fieldsTable);
     }
 
+    @Override
     public double getElevatorHeight() {
         return elevatorMotor.getPositionMeters();
     }
 
+    @Override
     public double getElevatorMotorCurrent() {
         return 0;
     }
 
+    @Override
     protected boolean getIsEncoderConnected() {
         return true;
     }
 
+    @Override
     public void setElevatorVoltage(double voltage) {
         elevatorMotor.setInputVoltage(voltage);
     }
