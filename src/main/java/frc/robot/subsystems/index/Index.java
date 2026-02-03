@@ -5,20 +5,20 @@ import frc.robot.Robot;
 import frc.robot.subsystems.index.io.*;
 import team2679.atlantiskit.logfields.LogFieldsTable;
 
-public class Index extends SubsystemBase{
+public class Index extends SubsystemBase {
     private final LogFieldsTable fieldsTable = new LogFieldsTable(getName());
     private final IndexIO io = Robot.isReal() ? new IndexIOSparkMax(fieldsTable) : new IndexIOSim(fieldsTable);
-    
+
     public Index() {
     }
 
     @Override
     public void periodic() {
-        fieldsTable.recordOutput("Current command", 
-            getCurrentCommand() != null ? getCurrentCommand().getName() : "None");
+        fieldsTable.recordOutput("Current command",
+                getCurrentCommand() != null ? getCurrentCommand().getName() : "None");
     }
 
-    public void stop(){
+    public void stop() {
         io.setSpindexVolt(0);
         io.setIndexerVolt(0);
     }
