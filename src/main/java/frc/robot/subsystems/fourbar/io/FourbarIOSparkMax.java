@@ -28,7 +28,7 @@ public class FourbarIOSparkMax extends FourbarIO {
         motorConfig.idleMode(IdleMode.kCoast);
         REVLibError motorConfigError = motor.configure(motorConfig, ResetMode.kNoResetSafeParameters,
                 PersistMode.kNoPersistParameters);
-        AlertsFactory.revMotor(PeriodicAlertsGroup.defaultInstance.getSubGroup("Fournar"),
+        AlertsFactory.revMotor(PeriodicAlertsGroup.defaultInstance.getSubGroup("Fourbar"),
                 () -> motorConfigError, motor::getWarnings, motor::getFaults, "motor");
 
         encoder.setDutyCycleRange(0, 1);

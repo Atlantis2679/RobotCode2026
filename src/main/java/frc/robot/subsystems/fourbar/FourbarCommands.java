@@ -24,7 +24,7 @@ public class FourbarCommands {
             double voltage = fourbar.calculateFeedforward(
                     state.get().position, state.get().velocity, true);
             fourbar.setVoltage(voltage);
-        })).withName("Fournar move to angle");
+        })).withName("Fourbar move to angle");
     }
 
     public Command getToAngleDegrees(double angle) {
@@ -35,6 +35,6 @@ public class FourbarCommands {
         return fourbar.run(() -> {
             double ignore_mg = fourbar.calculateFeedforward(fourbar.getAngleDegrees(), fourbar.getVelocity(), false);
             fourbar.setVoltage(ignore_mg + speed.getAsDouble() * FourbarConstants.MAX_VOLTAGE);
-        }).withName("Fournar manual controller");
+        }).withName("Fourbar manual controller");
     }
 }
