@@ -24,7 +24,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 
 public class AllCommands {
-    private Forebar forbar;
+    private Forebar forebar;
     private Roller roller;
     private FlyWheel flyWheel;
     private Hood hood;
@@ -41,14 +41,14 @@ public class AllCommands {
 
     public AllCommands(Forebar forebar, Roller roller, FlyWheel flyWheel, Hood hood, Index index,
             Elevator elevator) {
-        this.forbar = forebar;
+        this.forebar = forebar;
         this.roller = roller;
         this.flyWheel = flyWheel;
         this.hood = hood;
         this.index = index;
         this.elevator = elevator;
 
-        forebarCMDs = new ForebarCommands(this.forbar);
+        forebarCMDs = new ForebarCommands(this.forebar);
         rollerCMDs = new RollerCommands(this.roller);
         flyWheelCMDs = new FlyWheelCommands(this.flyWheel);
         hoodCMDs = new HoodCommands(this.hood);
@@ -96,13 +96,13 @@ public class AllCommands {
 
     public Command stopAll() {
         return Commands.run(() -> {
-            forbar.stop();
+            forebar.stop();
             roller.stop();
             flyWheel.stop();
             hood.stop();
             swerve.stop();
             elevator.stop();
-        }, forbar, roller, flyWheel, hood, swerve, elevator)
+        }, forebar, roller, flyWheel, hood, swerve, elevator)
                 .ignoringDisable(true)
                 .withName("stopAll");
     }
