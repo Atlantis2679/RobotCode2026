@@ -37,7 +37,7 @@ public final class RobotMap {
     public static final int ELEVATOR_ID = 0;
     public static final int PIVOT_ID = 0;
 
-    public static final int FORBAR_ID = 0;
+    public static final int FOURBAR_ID = 0;
     public static final int FLYWHEEL_MOTOR1_ID = 0;
     public static final int FLYWHEEL_MOTOR2_ID = 0;
     public static final int ROLLER_ID = 0;
@@ -46,7 +46,7 @@ public final class RobotMap {
   }
 
   public static final class DIO {
-    public static final int FORBAR_ENCODER_ID = 0;
+    public static final int FOURBAR_ENCODER_ID = 0;
     public final static int HOOD_ENCODER_ID = 0;
     public static final int ELEVATOR_ENCODER_ID = 0;
     public static final int PIVOT_ENCODER_ID = 0;

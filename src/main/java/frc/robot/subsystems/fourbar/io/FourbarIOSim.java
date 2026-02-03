@@ -1,9 +1,9 @@
-package frc.robot.subsystems.forebar.io;
+package frc.robot.subsystems.fourbar.io;
 
 import team2679.atlantiskit.logfields.LogFieldsTable;
 
-public class ForebarIOSim extends ForebarIO {
-    public ForebarIOSim(LogFieldsTable fieldsTable) {
+public class FourbarIOSim extends FourbarIO {
+    public FourbarIOSim(LogFieldsTable fieldsTable) {
         super(fieldsTable);
     }
 

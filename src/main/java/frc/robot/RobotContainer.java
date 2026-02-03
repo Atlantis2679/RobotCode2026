@@ -15,10 +15,10 @@ import frc.robot.shooting.ShootingCalculator;
 import frc.robot.shooting.ShootingMeasurments;
 import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.flywheel.FlyWheel;
+import frc.robot.subsystems.fourbar.Fourbar;
 import frc.robot.subsystems.hood.Hood;
 import frc.robot.subsystems.index.Index;
 import frc.robot.subsystems.roller.Roller;
-import frc.robot.subsystems.forebar.Forebar;
 import frc.robot.subsystems.swerve.Swerve;
 import frc.robot.subsystems.swerve.SwerveCommands;
 import frc.robot.utils.NaturalXboxController;
@@ -27,7 +27,7 @@ import team2679.atlantiskit.tunables.extensions.TunableCommand;
 
 public class RobotContainer {
     private final Swerve swerve = new Swerve();
-    private final Forebar forebar = new Forebar();
+    private final Fourbar fourbar = new Fourbar();
     private final Roller roller = new Roller();
     private final Index index = new Index();
     private final Hood hood = new Hood();
@@ -40,7 +40,7 @@ public class RobotContainer {
             FieldContants.BLUE_DELIVERY_POSE, ShootingMeasurments.ALL_MEASURMENTS_DELIVRY);
 
     private final SwerveCommands swerveCommands = new SwerveCommands(swerve);
-    private final AllCommands allCommands = new AllCommands(forebar, roller, flyWheel, hood, index, elevator);
+    private final AllCommands allCommands = new AllCommands(fourbar, roller, flyWheel, hood, index, elevator);
 
     private final PowerDistribution pdh = new PowerDistribution();
 
@@ -92,7 +92,7 @@ public class RobotContainer {
                 : deliveryShootingCalculator).getFlyWheelRPM();
 
         hood.setDefaultCommand(allCommands.hoodCMDs.moveToAngle(hoodAngleSupplier));
-        forebar.setDefaultCommand(allCommands.forebarCMDs.getToAngleDegrees(AllCommandsConstants.FORBAR_MID_ANGLE_DEG));
+        fourbar.setDefaultCommand(allCommands.fourbarCMDs.getToAngleDegrees(AllCommandsConstants.FOURBAR_MID_ANGLE_DEG));
 
         operatorController.leftTrigger().whileTrue(allCommands.getReadyToShoot(flywheelSpeedSupplier, hoodAngleSupplier));
         operatorController.rightTrigger().whileTrue(allCommands.shoot(flywheelSpeedSupplier, hoodAngleSupplier));

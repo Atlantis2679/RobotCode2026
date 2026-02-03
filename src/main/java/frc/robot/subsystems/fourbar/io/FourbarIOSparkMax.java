@@ -1,4 +1,4 @@
-package frc.robot.subsystems.forebar.io;
+package frc.robot.subsystems.fourbar.io;
 
 import com.revrobotics.PersistMode;
 import com.revrobotics.REVLibError;
@@ -10,25 +10,25 @@ import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import frc.robot.RobotMap;
-import frc.robot.subsystems.forebar.ForebarConstants;
+import frc.robot.subsystems.fourbar.FourbarConstants;
 import frc.robot.utils.AlertsFactory;
 import team2679.atlantiskit.logfields.LogFieldsTable;
 import team2679.atlantiskit.periodicalerts.PeriodicAlertsGroup;
 
-public class ForebarIOSparkMax extends ForebarIO {
+public class FourbarIOSparkMax extends FourbarIO {
 
-    private SparkMax motor = new SparkMax(RobotMap.CANBUS.FORBAR_ID, MotorType.kBrushless);
+    private SparkMax motor = new SparkMax(RobotMap.CANBUS.FOURBAR_ID, MotorType.kBrushless);
     private SparkMaxConfig motorConfig = new SparkMaxConfig();
-    private DutyCycleEncoder encoder = new DutyCycleEncoder(RobotMap.DIO.FORBAR_ENCODER_ID);
+    private DutyCycleEncoder encoder = new DutyCycleEncoder(RobotMap.DIO.FOURBAR_ENCODER_ID);
 
-    public ForebarIOSparkMax(LogFieldsTable fields) {
+    public FourbarIOSparkMax(LogFieldsTable fields) {
         super(fields);
 
-        motorConfig.smartCurrentLimit(ForebarConstants.CURRENT_LIMIT);
+        motorConfig.smartCurrentLimit(FourbarConstants.CURRENT_LIMIT);
         motorConfig.idleMode(IdleMode.kCoast);
         REVLibError motorConfigError = motor.configure(motorConfig, ResetMode.kNoResetSafeParameters,
                 PersistMode.kNoPersistParameters);
-        AlertsFactory.revMotor(PeriodicAlertsGroup.defaultInstance.getSubGroup("Forbar"),
+        AlertsFactory.revMotor(PeriodicAlertsGroup.defaultInstance.getSubGroup("Fournar"),
                 () -> motorConfigError, motor::getWarnings, motor::getFaults, "motor");
 
         encoder.setDutyCycleRange(0, 1);
