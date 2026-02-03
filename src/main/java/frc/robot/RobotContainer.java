@@ -44,8 +44,6 @@ public class RobotContainer {
 
     private final PowerDistribution pdh = new PowerDistribution();
 
-    private SendableChooser<Command> autoChooser = new SendableChooser<Command>();
-
     private final NaturalXboxController driverController = new NaturalXboxController(
             RobotMap.Controllers.DRIVER_PORT);
     private final NaturalXboxController operatorController = new NaturalXboxController(
@@ -108,6 +106,6 @@ public class RobotContainer {
     }
 
     public Command getAutonomousCommand() {
-        return autoChooser.getSelected();
+        return Commands.print("No autonomous command configured");
     }
 }
