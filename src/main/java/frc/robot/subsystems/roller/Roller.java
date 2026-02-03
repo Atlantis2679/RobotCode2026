@@ -1,9 +1,9 @@
-package frc.robot.subsystems.intake.roller;
+package frc.robot.subsystems.roller;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Robot;
-import frc.robot.subsystems.intake.roller.io.*;
+import frc.robot.subsystems.roller.io.*;
 import team2679.atlantiskit.logfields.LogFieldsTable;
 
 public class Roller extends SubsystemBase {

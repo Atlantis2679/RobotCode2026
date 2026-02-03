@@ -1,4 +1,4 @@
-package frc.robot.subsystems.intake.roller.io;
+package frc.robot.subsystems.roller.io;
 
 import com.revrobotics.PersistMode;
 import com.revrobotics.REVLibError;
@@ -9,7 +9,7 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
 import frc.robot.RobotMap;
-import frc.robot.subsystems.intake.roller.RollerConstants;
+import frc.robot.subsystems.roller.RollerConstants;
 import frc.robot.utils.AlertsFactory;
 import team2679.atlantiskit.logfields.LogFieldsTable;
 import team2679.atlantiskit.periodicalerts.PeriodicAlertsGroup;

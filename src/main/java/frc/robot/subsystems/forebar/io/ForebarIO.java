@@ -1,4 +1,4 @@
-package frc.robot.subsystems.intake.forbar.io;
+package frc.robot.subsystems.forebar.io;
 
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
@@ -6,12 +6,12 @@ import java.util.function.DoubleSupplier;
 import team2679.atlantiskit.logfields.IOBase;
 import team2679.atlantiskit.logfields.LogFieldsTable;
 
-public abstract class ForbarIO extends IOBase {
+public abstract class ForebarIO extends IOBase {
     public DoubleSupplier current = fields.addDouble("Current", this::getCurrent);
     public BooleanSupplier isEncoderConnected = fields.addBoolean("Encoder Connected", this::isEncoderConnected);
     public DoubleSupplier angleDegrees = fields.addDouble("Angle Degrees", this::getAngleDegrees);
 
-    public ForbarIO(LogFieldsTable fields) {
+    public ForebarIO(LogFieldsTable fields) {
         super(fields);
     }
 

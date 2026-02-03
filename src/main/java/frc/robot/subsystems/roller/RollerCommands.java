@@ -1,4 +1,4 @@
-package frc.robot.subsystems.intake.roller;
+package frc.robot.subsystems.roller;
 
 import java.util.function.DoubleSupplier;
 

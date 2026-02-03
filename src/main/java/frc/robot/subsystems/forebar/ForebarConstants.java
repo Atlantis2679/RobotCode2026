@@ -1,6 +1,6 @@
-package frc.robot.subsystems.intake.forbar;
+package frc.robot.subsystems.forebar;
 
-public class ForbarConstants {
+public class ForebarConstants {
     public static final int CURRENT_LIMIT = 0;
     public static final double KV = 0;
     public static final double KG = 0;

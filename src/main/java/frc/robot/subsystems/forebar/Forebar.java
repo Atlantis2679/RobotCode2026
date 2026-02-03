@@ -1,6 +1,6 @@
-package frc.robot.subsystems.intake.forbar;
+package frc.robot.subsystems.forebar;
 
-import static frc.robot.subsystems.intake.forbar.ForbarConstants.*;
+import static frc.robot.subsystems.forebar.ForebarConstants.*;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
@@ -9,9 +9,9 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Robot;
-import frc.robot.subsystems.intake.forbar.io.ForbarIO;
-import frc.robot.subsystems.intake.forbar.io.ForbarIOSim;
-import frc.robot.subsystems.intake.forbar.io.ForbarIOSparkMax;
+import frc.robot.subsystems.forebar.io.ForebarIO;
+import frc.robot.subsystems.forebar.io.ForebarIOSim;
+import frc.robot.subsystems.forebar.io.ForebarIOSparkMax;
 import team2679.atlantiskit.helpers.RotationalSensorHelper;
 import team2679.atlantiskit.logfields.LogFieldsTable;
 import team2679.atlantiskit.tunables.Tunable;
@@ -19,20 +19,20 @@ import team2679.atlantiskit.tunables.TunableBuilder;
 import team2679.atlantiskit.tunables.extensions.TunableArmFeedforward;
 import team2679.atlantiskit.tunables.extensions.TunableTrapezoidProfile;
 
-public class Forbar extends SubsystemBase implements Tunable {
+public class Forebar extends SubsystemBase implements Tunable {
     private Debouncer encoderConnectedDebouncer = new Debouncer(DEBOUNCER_DELAY);
     private TunableArmFeedforward feedforward = new TunableArmFeedforward(KS, KG, KV);
     private TunableTrapezoidProfile trapezoidProfile = new TunableTrapezoidProfile(
             new Constraints(MAX_VELOCITY, MAX_ACCELERATION));
     private PIDController pid = new PIDController(KP, KI, KD);
     private LogFieldsTable fieldsTable = new LogFieldsTable(getName());
-    private ForbarIO io = Robot.isReal() ? new ForbarIOSparkMax(fieldsTable) : new ForbarIOSim(fieldsTable);
+    private ForebarIO io = Robot.isReal() ? new ForebarIOSparkMax(fieldsTable) : new ForebarIOSim(fieldsTable);
     private RotationalSensorHelper sensorHelper;
 
     private double minAngle = MIN_ANGLE;
     private double maxAngle = MAX_ANGLE;
 
-    public Forbar() {
+    public Forebar() {
         sensorHelper = new RotationalSensorHelper(getAngleDegrees(), ANGLE_OFFSET);
         sensorHelper.enableContinuousWrap(MIN_ANGLE, MAX_ANGLE);
     }
