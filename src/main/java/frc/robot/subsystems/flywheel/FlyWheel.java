@@ -15,7 +15,7 @@ public class FlyWheel extends SubsystemBase{
     private final LogFieldsTable fieldsTable = new LogFieldsTable(getName());
 
     private final FlyWheelIO io = Robot.isReal() 
-        ? new FlyWheelIOSparkMax(fieldsTable) 
+        ? new FlyWheelIOFalcon(fieldsTable) 
         : new FlyWheelIOSim(fieldsTable);
 
     private PIDController flyWheelPidController = new PIDController(KP, KI, KD);

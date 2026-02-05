@@ -1,10 +1,13 @@
 package frc.robot.subsystems.flywheel;
 
 public class FlyWheelConstants {
-    public static final double MAX_VOLTAGE = 11;
-    public static final double CURRENT_LIMIT = 0;
+    public static final double MAX_VOLTAGE = 12;
+    public static final double STATOR_CURRENT_LIMIT = 90;
+    public static final double SUPPLY_CURRENT_LIMIT = 40;
+    public static final double SUPPLY_CURRENT_LOWER_LIMIT = 0;
+    public static final double SUPPLY_CURRENT_LOWER_TIME = 0;
 
-    public static final double SPEED_TOLERANCE_RPM = 0;
+    public static final double SPEED_TOLERANCE_RPM = 0.5;
 
     public static final double KP = 0;
     public static final double KI = 0;
