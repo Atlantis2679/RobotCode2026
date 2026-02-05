@@ -16,4 +16,19 @@ public class ImuIOSim extends ImuIO {
     protected boolean getIsConnected() {
         return false;
     }
+
+    @Override
+    protected double getxAcceleration() {
+        return 0;
+    }
+
+    @Override
+    protected double getyAcceleration() {
+        return 0;
+    }
+
+    @Override
+    protected double getzAcceleration() {
+        return 0;
+    }
 }

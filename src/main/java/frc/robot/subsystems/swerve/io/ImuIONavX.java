@@ -20,4 +20,18 @@ public class ImuIONavX extends ImuIO {
   protected boolean getIsConnected() {
     return navX.isConnected();
   }
+
+  @Override
+  protected double getxAcceleration() {
+    return navX.getRawAccelX();
+  }
+
+  @Override
+  protected double getyAcceleration() {
+    return navX.getRawAccelY();
+  }
+  @Override
+  protected double getzAcceleration() {
+    return navX.getRawAccelZ();
+  }
 }
