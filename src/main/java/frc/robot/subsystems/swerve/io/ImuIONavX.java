@@ -4,10 +4,10 @@ import com.studica.frc.AHRS;
 
 import team2679.atlantiskit.logfields.LogFieldsTable;
 
-public class GyroIONavX extends GyroIO {
+public class ImuIONavX extends ImuIO {
   private final AHRS navX = new AHRS(AHRS.NavXComType.kMXP_SPI);
 
-  public GyroIONavX(LogFieldsTable fieldsTable) {
+  public ImuIONavX(LogFieldsTable fieldsTable) {
     super(fieldsTable);
   }
 

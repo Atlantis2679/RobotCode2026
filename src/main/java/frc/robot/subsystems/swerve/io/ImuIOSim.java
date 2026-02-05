@@ -2,8 +2,8 @@ package frc.robot.subsystems.swerve.io;
 
 import team2679.atlantiskit.logfields.LogFieldsTable;
 
-public class GyroIOSim extends GyroIO {
-    public GyroIOSim(LogFieldsTable fieldsTable) {
+public class ImuIOSim extends ImuIO {
+    public ImuIOSim(LogFieldsTable fieldsTable) {
         super(fieldsTable);
     }
 
