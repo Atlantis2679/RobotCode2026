@@ -172,6 +172,29 @@ public class Swerve extends SubsystemBase implements Tunable {
     }
   }
 
+  public double getXAcceleration() {
+    return imuIO.xAcceleration.getAsDouble();
+  }
+  public double getYAcceleration() {
+    return imuIO.yAcceleration.getAsDouble();
+  }
+  public double getZAcceleration() {
+    return imuIO.zAcceleration.getAsDouble();
+  }
+  public double getAcceleration() {
+    return Math.sqrt(
+      Math.pow(getXAcceleration(), 2)
+      + Math.pow(getYAcceleration(), 2));
+  }
+  
+  public double[] getCurrent() {
+    double[] currents = new double[4];
+    for (int i = 0; i<4; ++i){
+      currents[i] = modules[i].getCurrent();
+    }
+    return currents;
+  }
+  
   @Override
   public void initTunable(TunableBuilder builder) {
     builder.addChild("Swerve Subsystem", (Sendable) this);
