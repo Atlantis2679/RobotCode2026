@@ -9,6 +9,7 @@ import com.revrobotics.REVLibError;
 import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkMaxConfig;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import frc.robot.RobotMap.*;
@@ -24,6 +25,7 @@ public class HoodIOSparkMax extends HoodIO {
         super(fieldsTable);
         SparkMaxConfig config = new SparkMaxConfig();
         config.smartCurrentLimit(CURRENT_LIMIT);
+        config.idleMode(IdleMode.kBrake);
         REVLibError configError = motor.configure(config, ResetMode.kNoResetSafeParameters,
                 PersistMode.kNoPersistParameters);
         AlertsFactory.revMotor(new PeriodicAlertsGroup("Hood"), () -> configError, motor::getWarnings, motor::getFaults,

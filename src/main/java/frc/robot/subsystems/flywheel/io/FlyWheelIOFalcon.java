@@ -18,7 +18,7 @@ import team2679.atlantiskit.periodicalerts.PeriodicAlertsGroup;
 
 public class FlyWheelIOFalcon extends FlyWheelIO {
     private final TalonFX motor1 = new TalonFX(CANBUS.FLYWHEEL_MOTOR1_ID);
-    private final TalonFX motor2 = new TalonFX(CANBUS.FLYWHEEL_MOTOR1_ID);
+    private final TalonFX motor2 = new TalonFX(CANBUS.FLYWHEEL_MOTOR2_ID);
 
     private StatusCode motor1Status;
     private StatusCode motor2Status;

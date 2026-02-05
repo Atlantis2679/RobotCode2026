@@ -8,10 +8,12 @@ import frc.robot.Robot;
 import frc.robot.subsystems.flywheel.io.*;
 import static frc.robot.subsystems.flywheel.FlyWheelConstants.*;
 import team2679.atlantiskit.logfields.LogFieldsTable;
+import team2679.atlantiskit.tunables.Tunable;
+import team2679.atlantiskit.tunables.TunableBuilder;
+import team2679.atlantiskit.tunables.TunablesManager;
 import team2679.atlantiskit.tunables.extensions.TunableSimpleMotorFeedforward;
 
-public class FlyWheel extends SubsystemBase{
-    
+public class FlyWheel extends SubsystemBase implements Tunable {
     private final LogFieldsTable fieldsTable = new LogFieldsTable(getName());
 
     private final FlyWheelIO io = Robot.isReal() 
@@ -26,11 +28,13 @@ public class FlyWheel extends SubsystemBase{
 
     public FlyWheel() {
         fieldsTable.update();
+        TunablesManager.add(getName(), (Tunable) this);
     }
 
     @Override
     public void periodic(){
         fieldsTable.recordOutput("current command", getCurrentCommand() != null ? getCurrentCommand().getName() : "None");
+        fieldsTable.recordOutput("Current diff", Math.abs(io.motor1Current.getAsDouble() - io.motor2Current.getAsDouble()));
         SmartDashboard.putNumber("Motors RPM", getMotorsRPM());
     }
 
@@ -63,5 +67,11 @@ public class FlyWheel extends SubsystemBase{
 
     public void resetPID(){
         flyWheelPidController.reset();
+    }
+
+    @Override
+    public void initTunable(TunableBuilder builder) {
+        builder.addChild("PID Controller", flyWheelPidController);
+        builder.addChild("FeedForward", flyWheelFeedforward);
     }
 }
