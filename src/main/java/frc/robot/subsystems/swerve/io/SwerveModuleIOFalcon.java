@@ -156,4 +156,9 @@ public class SwerveModuleIOFalcon extends SwerveModuleIO {
     public void setTurnKD(double kD) {
         turnSlotConfigs.kD = kD;
     }
+
+    @Override
+    protected double getCurrent() {
+        return driveMotor.getTorqueCurrent().getValueAsDouble();
+    }
 }
