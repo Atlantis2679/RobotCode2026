@@ -1,0 +1,31 @@
+package frc.robot.utils;
+
+public class DynamicAvarage {
+    Double[] values;
+    int i = 0;
+    
+    public DynamicAvarage(int seconds) {
+        values = new Double[seconds*50];
+    }
+
+    public void update(Double val) {
+        values[i] = val;
+        ++i;
+        if (i>values.length) {
+            i=0;
+        }
+    }
+
+    public Double get() {
+        Double sum = 0.0;
+        int len = values.length;
+        for (Double num : values) {
+            if (num == null) {
+                --len;
+            } else {
+                sum += num;
+            }
+        }
+        return sum/len;
+    }
+}
