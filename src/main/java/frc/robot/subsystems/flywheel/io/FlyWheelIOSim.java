@@ -30,4 +30,14 @@ public class FlyWheelIOSim extends FlyWheelIO {
     public void setVoltage(double volt) {
         flyWheelMotorSim.setInputVoltage(volt);
     }
+    
+    @Override
+    protected double getMotor1Current() {
+        return flyWheelMotorSim.getCurrentDrawAmps();
+    }
+
+    @Override
+    protected double getMotor2Current() {
+        return flyWheelMotorSim.getCurrentDrawAmps();
+    }
 }

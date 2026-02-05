@@ -53,4 +53,14 @@ public class FlyWheelIOFalcon extends FlyWheelIO {
         // Both motors should be running at the same speed!
         return motor1.getVelocity().getValueAsDouble() * 60 * FlyWheelConstants.GEAR_RATIO;
     }
+
+    @Override
+    protected double getMotor1Current() {
+        return motor1.getSupplyCurrent().getValueAsDouble();
+    }
+
+    @Override
+    protected double getMotor2Current() {
+        return motor2.getSupplyCurrent().getValueAsDouble();
+    }
 }

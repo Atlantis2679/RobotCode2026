@@ -97,6 +97,8 @@ public class RobotContainer {
         operatorController.leftTrigger().whileTrue(allCommands.getReadyToShoot(flywheelSpeedSupplier, hoodAngleSupplier));
         // operatorController.rightTrigger().whileTrue(allCommands.shoot(flywheelSpeedSupplier, hoodAngleSupplier));
 
+        operatorController.leftBumper().whileTrue(allCommands.manualController(() -> operatorController.getLeftY(), () -> 0, () -> 0, () -> 0, () -> 0));
+
         TunablesManager.add("Tunable Shoot Command", allCommands.tunableShoot().fullTunable());
     }
 

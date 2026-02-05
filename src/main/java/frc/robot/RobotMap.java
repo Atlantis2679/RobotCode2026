@@ -38,11 +38,11 @@ public final class RobotMap {
     public static final int PIVOT_ID = 0;
 
     public static final int FOURBAR_ID = 0;
-    public static final int FLYWHEEL_MOTOR1_ID = 0;
-    public static final int FLYWHEEL_MOTOR2_ID = 0;
+    public static final int FLYWHEEL_MOTOR1_ID = 26;
+    public static final int FLYWHEEL_MOTOR2_ID = 31;
     public static final int ROLLER_ID = 0;
 
-    public final static int HOOD_MOTOR_ID = 0;
+    public final static int HOOD_MOTOR_ID = 15;
   }
 
   public static final class DIO {
