@@ -40,7 +40,7 @@ public class RobotContainer {
             FieldContants.BLUE_DELIVERY_POSE, ShootingMeasurments.ALL_MEASURMENTS_DELIVRY);
 
     private final SwerveCommands swerveCommands = new SwerveCommands(swerve);
-    private final AllCommands allCommands = new AllCommands(forebar, roller, flyWheel, hood, index, elevator);
+    //private final AllCommands allCommands = new AllCommands(forebar, roller, flyWheel, hood, index, elevator);
 
     private final PowerDistribution pdh = new PowerDistribution();
 
@@ -53,9 +53,10 @@ public class RobotContainer {
 
     public RobotContainer() {
         pdh.setSwitchableChannel(true);
-        new Trigger(DriverStation::isDisabled).whileTrue(swerveCommands.stop().alongWith(allCommands.stopAll()));
+        new Trigger(DriverStation::isDisabled).whileTrue(swerveCommands.stop()//.alongWith(allCommands.stopAll()));
+        );
         configureDrive();
-        configureOperator();
+        //configureOperator();  
         configureAuto();
     }
 
@@ -81,24 +82,24 @@ public class RobotContainer {
         driverController.a().onTrue(new InstantCommand(() -> swerve.resetYaw(0)));
     }
 
-    public void configureOperator() {
-        operatorController.a().whileTrue(allCommands.intake());
+//     public void configureOperator() {
+//         operatorController.a().whileTrue(allCommands.intake());
 
-        BooleanSupplier isShootingHub = operatorController.b();
+//         BooleanSupplier isShootingHub = operatorController.b();
 
-        DoubleSupplier hoodAngleSupplier = () -> (isShootingHub.getAsBoolean() ? hubShootingCalculator
-                : deliveryShootingCalculator).getHoodAngleDegrees();
-        DoubleSupplier flywheelSpeedSupplier = () -> (isShootingHub.getAsBoolean() ? hubShootingCalculator
-                : deliveryShootingCalculator).getFlyWheelRPM();
+//         DoubleSupplier hoodAngleSupplier = () -> (isShootingHub.getAsBoolean() ? hubShootingCalculator
+//                 : deliveryShootingCalculator).getHoodAngleDegrees();
+//         DoubleSupplier flywheelSpeedSupplier = () -> (isShootingHub.getAsBoolean() ? hubShootingCalculator
+//                 : deliveryShootingCalculator).getFlyWheelRPM();
 
-        hood.setDefaultCommand(allCommands.hoodCMDs.moveToAngle(hoodAngleSupplier));
-        forebar.setDefaultCommand(allCommands.forebarCMDs.getToAngleDegrees(AllCommandsConstants.FORBAR_MID_ANGLE_DEG));
+//         hood.setDefaultCommand(allCommands.hoodCMDs.moveToAngle(hoodAngleSupplier));
+//         forebar.setDefaultCommand(allCommands.forebarCMDs.getToAngleDegrees(AllCommandsConstants.FORBAR_MID_ANGLE_DEG));
 
-        operatorController.leftTrigger().whileTrue(allCommands.getReadyToShoot(flywheelSpeedSupplier, hoodAngleSupplier));
-        operatorController.rightTrigger().whileTrue(allCommands.shoot(flywheelSpeedSupplier, hoodAngleSupplier));
+//         operatorController.leftTrigger().whileTrue(allCommands.getReadyToShoot(flywheelSpeedSupplier, hoodAngleSupplier));
+//         operatorController.rightTrigger().whileTrue(allCommands.shoot(flywheelSpeedSupplier, hoodAngleSupplier));
 
-        TunablesManager.add("Tunable Shoot Command", allCommands.tunableShoot().fullTunable());
-    }
+//         TunablesManager.add("Tunable Shoot Command", allCommands.tunableShoot().fullTunable());
+//     }
 
     public void configureAuto() {
     }
