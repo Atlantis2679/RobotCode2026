@@ -7,10 +7,13 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Robot;
 import frc.robot.subsystems.flywheel.io.*;
 import static frc.robot.subsystems.flywheel.FlyWheelConstants.*;
+
 import team2679.atlantiskit.logfields.LogFieldsTable;
+import team2679.atlantiskit.tunables.Tunable;
+import team2679.atlantiskit.tunables.TunableBuilder;
 import team2679.atlantiskit.tunables.extensions.TunableSimpleMotorFeedforward;
 
-public class FlyWheel extends SubsystemBase{
+public class FlyWheel extends SubsystemBase implements Tunable {
     
     private final LogFieldsTable fieldsTable = new LogFieldsTable(getName());
 
@@ -18,9 +21,9 @@ public class FlyWheel extends SubsystemBase{
         ? new FlyWheelIOSparkMax(fieldsTable) 
         : new FlyWheelIOSim(fieldsTable);
 
-    private PIDController flyWheelPidController = new PIDController(KP, KI, KD);
+    private PIDController pid = new PIDController(KP, KI, KD);
     
-    private TunableSimpleMotorFeedforward flyWheelFeedforward = Robot.isSimulation() ?
+    private TunableSimpleMotorFeedforward feedforward = Robot.isSimulation() ?
         new TunableSimpleMotorFeedforward(Sim.SIM_KS, Sim.SIM_KV, Sim.SIM_KA) :
         new TunableSimpleMotorFeedforward(KS, KV, KA);
 
@@ -31,7 +34,7 @@ public class FlyWheel extends SubsystemBase{
     @Override
     public void periodic(){
         fieldsTable.recordOutput("current command", getCurrentCommand() != null ? getCurrentCommand().getName() : "None");
-        SmartDashboard.putNumber("Motors RPM", getMotorsRPM());
+        SmartDashboard.putNumber("Flywheel Motors RPM", getMotorsRPM());
     }
 
     public double getMotorsRPM(){
@@ -43,16 +46,16 @@ public class FlyWheel extends SubsystemBase{
     }
 
     public double calculateFeedForward(double desiredSpeed, boolean usePID) {
-        double speed = flyWheelFeedforward.calculate(desiredSpeed);
+        double speed = feedforward.calculate(desiredSpeed);
         if (usePID) {
-            speed += flyWheelPidController.calculate(getMotorsRPM(), desiredSpeed);
+            speed += pid.calculate(getMotorsRPM(), desiredSpeed);
         }
         return speed;
     }
 
     public boolean isAtSpeed(double targetSpeedRpm){
         boolean isAtSpeed = Math.abs(targetSpeedRpm - getMotorsRPM()) < FlyWheelConstants.SPEED_TOLERANCE_RPM;
-        SmartDashboard.putBoolean("Flywheel at speed:", isAtSpeed);
+        SmartDashboard.putBoolean("Flywheel at speed", isAtSpeed);
         fieldsTable.recordOutput("Flywheel at speed", isAtSpeed);
         return isAtSpeed;
     }
@@ -62,6 +65,12 @@ public class FlyWheel extends SubsystemBase{
     }
 
     public void resetPID(){
-        flyWheelPidController.reset();
+        pid.reset();
+    }
+
+    @Override
+    public void initTunable(TunableBuilder builder) {
+        builder.addChild("Flywheel PID", pid);
+        builder.addChild("Flywheel FeedForward", feedforward);
     }
 }

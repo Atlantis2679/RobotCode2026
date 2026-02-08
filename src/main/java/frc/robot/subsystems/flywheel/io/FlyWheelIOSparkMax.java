@@ -1,6 +1,6 @@
 package frc.robot.subsystems.flywheel.io;
 
-import static frc.robot.subsystems.hood.HoodConstants.CURRENT_LIMIT;
+import static frc.robot.subsystems.flywheel.FlyWheelConstants.SUPPLY_CURRENT_LOWER_LIMIT;
 
 import com.revrobotics.PersistMode;
 import com.revrobotics.REVLibError;
@@ -23,7 +23,7 @@ public class FlyWheelIOSparkMax extends FlyWheelIO {
         super(fieldsTable);
         PeriodicAlertsGroup alertsGroup = new PeriodicAlertsGroup("Flywheel");
         SparkMaxConfig motorConfig = new SparkMaxConfig();
-        motorConfig.smartCurrentLimit(CURRENT_LIMIT);
+        motorConfig.smartCurrentLimit((int)SUPPLY_CURRENT_LOWER_LIMIT);
 
         REVLibError motor1ConfigError = motor1.configure(motorConfig, ResetMode.kNoResetSafeParameters,
                 PersistMode.kNoPersistParameters);
@@ -44,5 +44,15 @@ public class FlyWheelIOSparkMax extends FlyWheelIO {
     protected double getMotorsRPM() {
         // Both motors should be running at the same speed!
         return motor1.getAbsoluteEncoder().getVelocity() * FlyWheelConstants.GEAR_RATIO;
+    }
+
+    @Override
+    protected double getMotor1Current() {
+        return motor1.getOutputCurrent();
+    }
+
+    @Override
+    protected double getMotor2Current() {
+        return motor2.getOutputCurrent();
     }
 }
