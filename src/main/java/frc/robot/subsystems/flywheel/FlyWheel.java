@@ -11,7 +11,7 @@ import team2679.atlantiskit.logfields.LogFieldsTable;
 import team2679.atlantiskit.tunables.Tunable;
 import team2679.atlantiskit.tunables.TunableBuilder;
 import team2679.atlantiskit.tunables.TunablesManager;
-import team2679.atlantiskit.tunables.extensions.TunableSimpleMotorFeedforward;
+// import team2679.atlantiskit.tunables.extensions.TunableSimpleMotorFeedforward;
 
 public class FlyWheel extends SubsystemBase implements Tunable {
     private final LogFieldsTable fieldsTable = new LogFieldsTable(getName());
@@ -34,7 +34,7 @@ public class FlyWheel extends SubsystemBase implements Tunable {
     @Override
     public void periodic(){
         fieldsTable.recordOutput("current command", getCurrentCommand() != null ? getCurrentCommand().getName() : "None");
-        fieldsTable.recordOutput("Current diff", Math.abs(io.motor1Current.getAsDouble() - io.motor2Current.getAsDouble()));
+        fieldsTable.recordOutput("current diff", Math.abs(io.motor1Current.getAsDouble() - io.motor2Current.getAsDouble()));
         SmartDashboard.putNumber("Motors RPM", getMotorsRPM());
     }
 
@@ -43,10 +43,13 @@ public class FlyWheel extends SubsystemBase implements Tunable {
     }
 
     public void setVoltage(double volt){
+        fieldsTable.recordOutput("Desired voltage", volt);
         io.setVoltage(MathUtil.clamp(volt, -MAX_VOLTAGE, MAX_VOLTAGE));
     }
 
     public double calculateFeedForward(double desiredSpeed, boolean usePID) {
+        fieldsTable.recordOutput("Desired RPM", desiredSpeed);
+        isAtSpeed(desiredSpeed);
         double speed = flyWheelFeedforward.calculate(desiredSpeed);
         if (usePID) {
             speed += flyWheelPidController.calculate(getMotorsRPM(), desiredSpeed);

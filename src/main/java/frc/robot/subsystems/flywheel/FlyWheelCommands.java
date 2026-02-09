@@ -16,7 +16,7 @@ public class FlyWheelCommands {
         return flyWheel.runOnce(flyWheel::resetPID)
                 .andThen(flyWheel.run(() -> {
                     flyWheel.setVoltage(flyWheel.calculateFeedForward(speedRPM.getAsDouble(), true));
-                })).withName("Flywheel reach speed");
+                })).finallyDo(flyWheel::stop).withName("Flywheel reach speed");
     }
 
     public Command manualController(DoubleSupplier precentageVoltage) {
@@ -28,6 +28,6 @@ public class FlyWheelCommands {
     public Command setVoltage(DoubleHolder volt){
         return flyWheel.run(() -> {
             flyWheel.setVoltage(volt.get());
-        }).withName("Set voltage");
+        }).finallyDo(flyWheel::stop).withName("Set voltage");
     }
 }
