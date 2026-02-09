@@ -3,6 +3,7 @@ package frc.robot.subsystems.flywheel;
 import java.util.function.DoubleSupplier;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import team2679.atlantiskit.valueholders.DoubleHolder;
 
 public class FlyWheelCommands {
     private final FlyWheel flyWheel;
@@ -22,5 +23,11 @@ public class FlyWheelCommands {
         return flyWheel.run(() -> {
             flyWheel.setVoltage(precentageVoltage.getAsDouble() * FlyWheelConstants.MAX_VOLTAGE);
         }).finallyDo(flyWheel::stop).withName("Flywheel manual controller");
+    }
+
+    public Command setVoltage(DoubleHolder volt){
+        return flyWheel.run(() -> {
+            flyWheel.setVoltage(volt.get());
+        }).withName("Set voltage");
     }
 }

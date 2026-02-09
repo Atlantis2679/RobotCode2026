@@ -100,6 +100,8 @@ public class RobotContainer {
         operatorController.leftBumper().whileTrue(allCommands.manualController(() -> operatorController.getLeftY(), () -> 0, () -> 0, () -> 0, () -> 0));
 
         TunablesManager.add("Tunable Shoot Command", allCommands.tunableShoot().fullTunable());
+
+        TunablesManager.add("Tunable shoot voltage", allCommands.tunableShootVolt().fullTunable());
     }
 
     public void configureAuto() {

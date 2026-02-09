@@ -84,6 +84,13 @@ public class AllCommands {
                     .withName("tunableShoot");
         });
     }
+    public TunableCommand tunableShootVolt(){
+        return TunableCommand.wrap((TunablesTable) -> {
+            DoubleHolder volt = TunablesTable.addNumber("volt", 0.0);
+            return flyWheelCMDs.setVoltage(volt);
+        });
+    }
+
 
     // public Command climb() {
     //     return elevatorCMDs.moveToHeight(ELEVATOR_CLIMB_HEIGHT_METERS).withName("climb");

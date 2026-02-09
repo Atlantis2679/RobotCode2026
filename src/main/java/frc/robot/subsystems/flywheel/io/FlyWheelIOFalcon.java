@@ -7,8 +7,10 @@ import static frc.robot.subsystems.flywheel.FlyWheelConstants.SUPPLY_CURRENT_LOW
 
 import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.MotorAlignmentValue;
 
 import frc.robot.RobotMap.CANBUS;
 import frc.robot.subsystems.flywheel.FlyWheelConstants;
@@ -37,6 +39,8 @@ public class FlyWheelIOFalcon extends FlyWheelIO {
         motor1Status = motor1.getConfigurator().apply(motorConfig);
         motor2Status = motor2.getConfigurator().apply(motorConfig);
 
+        motor2.setControl(new Follower(motor1.getDeviceID(), MotorAlignmentValue.Aligned));
+
         AlertsFactory.phoenixMotor(alertsGroup, () -> motor1Status, "Motor 1");
         AlertsFactory.phoenixMotor(alertsGroup, () -> motor2Status, "Motor 2");
     }
@@ -45,7 +49,6 @@ public class FlyWheelIOFalcon extends FlyWheelIO {
     public void setVoltage(double volt) {
         VoltageOut voltageOut = new VoltageOut(volt);
         motor1Status = motor1.setControl(voltageOut);
-        motor2Status = motor2.setControl(voltageOut);
     }
 
     @Override
