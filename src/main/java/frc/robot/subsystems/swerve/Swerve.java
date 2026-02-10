@@ -182,9 +182,7 @@ public class Swerve extends SubsystemBase implements Tunable {
     return imuIO.zAcceleration.getAsDouble();
   }
   public double getAcceleration() {
-    return Math.sqrt(
-      Math.pow(getXAcceleration(), 2)
-      + Math.pow(getYAcceleration(), 2));
+    return imuIO.acceleration.getAsDouble();
   }
   
   public double[] getCurrent() {

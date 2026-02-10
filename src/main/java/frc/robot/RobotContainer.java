@@ -27,12 +27,12 @@ import team2679.atlantiskit.tunables.extensions.TunableCommand;
 
 public class RobotContainer {
     private final Swerve swerve = new Swerve();
-    private final Forebar forebar = new Forebar();
-    private final Roller roller = new Roller();
-    private final Index index = new Index();
-    private final Hood hood = new Hood();
-    private final FlyWheel flyWheel = new FlyWheel();
-    private final Elevator elevator = new Elevator();
+    // private final Forebar forebar = new Forebar();
+    // private final Roller roller = new Roller();
+    // private final Index index = new Index();
+    // private final Hood hood = new Hood();
+    // private final FlyWheel flyWheel = new FlyWheel();
+    // private final Elevator elevator = new Elevator();
 
     private final ShootingCalculator hubShootingCalculator = new ShootingCalculator(FieldContants.BLUE_HUB_POSE,
             ShootingMeasurments.ALL_MEASURMENTS_HUB);

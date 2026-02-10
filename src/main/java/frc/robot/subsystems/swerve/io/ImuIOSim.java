@@ -18,17 +18,23 @@ public class ImuIOSim extends ImuIO {
     }
 
     @Override
-    protected double getxAcceleration() {
-        return 0;
+    protected double getXAcceleration() {
+    return 0;
+    }
+    
+    @Override
+    protected double getYAcceleration() {
+    return 0;
+    }
+    
+    @Override
+    protected double getZAcceleration() {
+    return 0;
     }
 
     @Override
-    protected double getyAcceleration() {
+    protected double getAcceleration() {
         return 0;
     }
 
-    @Override
-    protected double getzAcceleration() {
-        return 0;
-    }
 }
