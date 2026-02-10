@@ -38,6 +38,12 @@ public class HoodCommands {
         return moveToAngle(() -> angle);
     }
 
+    public Command setVoltage(DoubleSupplier volt){
+        return hood.run(() -> {
+            hood.setHoodVoltage(volt.getAsDouble());
+        }).finallyDo(hood::stop).withName("Set voltage");
+    }
+
     public Command manualController(DoubleSupplier speed) {
         return hood.run(() -> {
             double demandSpeed = speed.getAsDouble();

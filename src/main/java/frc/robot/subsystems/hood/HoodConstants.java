@@ -1,11 +1,13 @@
 package frc.robot.subsystems.hood;
 
 public final class HoodConstants {
-    public static final double MAX_VELOCITY_DEG_PER_SEC = 360 * 0;
-    public static final double MAX_ACCELERATION_DEG_PER_SEC_SQUEARD = 0;
+    public static final double MAX_VELOCITY_DEG_PER_SEC = 360 * 1000;
+    public static final double MAX_ACCELERATION_DEG_PER_SEC_SQUEARD = 1000;
+
+    public static final double GEAR_RATIO = 300/360;
 
     public static final int MAX_VOLTAGE = 12;
-    public static final int CURRENT_LIMIT = 12;
+    public static final int CURRENT_LIMIT = 40;
 
     public static final double MAX_ANGLE_DEGREES = 0;
     public static final double MIN_ANGLE_DEGREES = 0;
@@ -24,7 +26,7 @@ public final class HoodConstants {
     public static final double KG = 0;
 
     public static final double ENCODER_CONNECTED_DEBAUNCER_SEC = 0.1;
-    public static final double ANGLE_OFFSET = 0;
+    public static final double ANGLE_OFFSET = 30;
 
     public final class Sim {
         public static final double SIM_KS = 0;

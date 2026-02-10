@@ -102,12 +102,15 @@ public class RobotContainer {
         TunablesManager.add("Tunable Shoot Command", allCommands.tunableShoot().fullTunable());
 
         TunablesManager.add("Tunable shoot voltage", allCommands.tunableShootVolt().fullTunable());
+
+        TunablesManager.add("Tunable hood voltage", allCommands.tunableHoodVolt().fullTunable());
     }
 
     public void configureAuto() {
     }
 
     public void enterSwerveIntoTest() {
+        hood.coast();
         // swerve.costAll();
     }
 

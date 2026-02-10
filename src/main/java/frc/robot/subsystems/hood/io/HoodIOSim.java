@@ -39,6 +39,10 @@ public class HoodIOSim extends HoodIO {
     }
 
     @Override
+    public void setCoast() {
+    }
+
+    @Override
     protected boolean getIsEncoderConnected() {
         return true;
     }

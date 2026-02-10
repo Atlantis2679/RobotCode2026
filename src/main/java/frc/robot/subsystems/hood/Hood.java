@@ -83,6 +83,10 @@ public class Hood extends SubsystemBase implements Tunable {
         io.setVoltage(0);
     }
 
+    public void coast() {
+        io.setCoast();
+    }
+
     public double getAngleDegrees() {
         return io.motorAngleDegrees.getAsDouble();
     }

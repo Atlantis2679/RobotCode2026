@@ -20,5 +20,7 @@ public abstract class HoodIO extends IOBase {
 
     protected abstract boolean getIsEncoderConnected();
 
+    public abstract void setCoast();
+
     public abstract void setVoltage(double volt);
 }

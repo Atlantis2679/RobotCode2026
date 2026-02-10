@@ -91,6 +91,13 @@ public class AllCommands {
         });
     }
 
+    public TunableCommand tunableHoodVolt() {
+        return TunableCommand.wrap((table) -> {
+            DoubleHolder volt = table.addNumber("volt", 0.0);
+            return hoodCMDs.setVoltage(volt::get).withName("Hood set voltage");
+        });
+    }
+
 
     // public Command climb() {
     //     return elevatorCMDs.moveToHeight(ELEVATOR_CLIMB_HEIGHT_METERS).withName("climb");
