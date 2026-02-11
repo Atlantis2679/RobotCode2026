@@ -4,6 +4,9 @@ import java.util.function.DoubleSupplier;
 
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj2.command.Command;
+import team2679.atlantiskit.tunables.TunablesManager;
+import team2679.atlantiskit.tunables.extensions.TunableCommand;
+import team2679.atlantiskit.valueholders.DoubleHolder;
 import team2679.atlantiskit.valueholders.ValueHolder;
 
 import static frc.robot.subsystems.hood.HoodConstants.*;
@@ -13,6 +16,7 @@ public class HoodCommands {
 
     public HoodCommands(Hood hood) {
         this.hood = hood;
+        TunablesManager.add("TunableSetVoltages/HoodSetVoltage", tunableSetVoltage().fullTunable());
     }
 
     public Command moveToAngle(DoubleSupplier angle) {
@@ -30,7 +34,7 @@ public class HoodCommands {
                     referenceState.get().position,
                     referenceState.get().velocity, true);
 
-            hood.setHoodVoltage(volt);
+            hood.setVoltage(volt);
         })).withName("Hood move to angle");
     }
 
@@ -38,17 +42,22 @@ public class HoodCommands {
         return moveToAngle(() -> angle);
     }
 
-    public Command setVoltage(DoubleSupplier volt){
-        return hood.run(() -> {
-            hood.setHoodVoltage(volt.getAsDouble());
-        }).finallyDo(hood::stop).withName("Set voltage");
+    private TunableCommand tunableSetVoltage() {
+        // return hood.run(() -> {
+        // hood.setHoodVoltage(volt.getAsDouble());
+        // }).finallyDo(hood::stop).withName("Set voltage");
+        return TunableCommand.wrap((tunablesTable) -> {
+            DoubleHolder voltage = tunablesTable.addNumber("voltage", 0.0);
+            return hood.run(() -> hood.setVoltage(voltage.get())).finallyDo(hood::stop)
+                    .withName("Tunable hood set voltage");
+        });
     }
 
     public Command manualController(DoubleSupplier speed) {
         return hood.run(() -> {
             double demandSpeed = speed.getAsDouble();
             double feedForward = hood.calculateFeedForward(hood.getAngleDegrees(), 0, false);
-            hood.setHoodVoltage(feedForward + demandSpeed * MAX_VOLTAGE);
+            hood.setVoltage(feedForward + demandSpeed * MAX_VOLTAGE);
         }).finallyDo(hood::stop).withName("Hood manual controller");
     }
 }

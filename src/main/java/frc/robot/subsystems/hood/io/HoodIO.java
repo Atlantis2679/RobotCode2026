@@ -7,20 +7,24 @@ import team2679.atlantiskit.logfields.IOBase;
 import team2679.atlantiskit.logfields.LogFieldsTable;
 
 public abstract class HoodIO extends IOBase {
-    public final DoubleSupplier motorAngleDegrees = fields.addDouble("motorAngleDegrees",
-            this::getHoodMotorAngleDegree);
-    public final BooleanSupplier isEncoderConnected = fields.addBoolean("isEncoderConnected",
-            this::getIsEncoderConnected);
+    public final DoubleSupplier motorRotations = fields.addDouble("motorRotations",
+            this::getMotorRotations);
+    public final BooleanSupplier limitSwitch = fields.addBoolean("limitSwitch", this::limitSwitch);
+    public final DoubleSupplier motorCurrent = fields.addDouble("motorCurrent", motorRotations);
 
     public HoodIO(LogFieldsTable fieldsTable) {
         super(fieldsTable);
     }
 
-    protected abstract double getHoodMotorAngleDegree();
+    protected abstract double getMotorRotations();
 
-    protected abstract boolean getIsEncoderConnected();
+    protected abstract double getMotorCurrent();
+
+    protected abstract boolean limitSwitch();
 
     public abstract void setCoast();
+
+    public abstract void resetAngle();
 
     public abstract void setVoltage(double volt);
 }

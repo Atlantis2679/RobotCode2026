@@ -1,5 +1,7 @@
 package frc.robot.subsystems.flywheel;
 
+import edu.wpi.first.math.geometry.Transform3d;
+
 public class FlyWheelConstants {
     public static final double MAX_VOLTAGE = 10;
     public static final double STATOR_CURRENT_LIMIT = 90;
@@ -26,6 +28,8 @@ public class FlyWheelConstants {
     public static final double KV = 0.002;
 
     public static final double GEAR_RATIO = 1;
+
+    public static final Transform3d SHOOTER_OUTPUT_TRANSFORM = new Transform3d();
 
     public static class Sim {
         public static final double SIM_KS = 0;

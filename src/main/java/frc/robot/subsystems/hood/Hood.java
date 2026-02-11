@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Robot;
+import frc.robot.subsystems.flywheel.TunableSimpleMotorFeedforward;
 import frc.robot.subsystems.hood.io.HoodIO;
 import frc.robot.subsystems.hood.io.HoodIOSim;
 import frc.robot.subsystems.hood.io.HoodIOSparkMax;
@@ -16,7 +17,6 @@ import team2679.atlantiskit.logfields.LogFieldsTable;
 import team2679.atlantiskit.tunables.Tunable;
 import team2679.atlantiskit.tunables.TunableBuilder;
 import team2679.atlantiskit.tunables.TunablesManager;
-import team2679.atlantiskit.tunables.extensions.TunableArmFeedforward;
 import team2679.atlantiskit.tunables.extensions.TunableTrapezoidProfile;
 
 import static frc.robot.subsystems.hood.HoodConstants.*;
@@ -30,16 +30,16 @@ public class Hood extends SubsystemBase implements Tunable {
     private final HoodVisualizer desiredHoodVisualizer = new HoodVisualizer(fieldsTable, "Desired Visualizer",
             new Color8Bit(Color.kYellow));
 
-    private final RotationalSensorHelper rotationalHelpr;
+    private final RotationalSensorHelper angleDegrees;
 
     private final TunableTrapezoidProfile trapezoidProfile = new TunableTrapezoidProfile(
             new TrapezoidProfile.Constraints(MAX_VELOCITY_DEG_PER_SEC, MAX_ACCELERATION_DEG_PER_SEC_SQUEARD));
 
     private final PIDController pid = new PIDController(KP, KI, KD);
 
-    private final TunableArmFeedforward feedForward = new TunableArmFeedforward(KS, KG, KV, KA);
+    private final TunableSimpleMotorFeedforward feedForward = new TunableSimpleMotorFeedforward(KS, KV, KA);
 
-    private final Debouncer encoderConnectedDebouncer = new Debouncer(ENCODER_CONNECTED_DEBAUNCER_SEC);
+    private final Debouncer limitSwitchDebouncer = new Debouncer(LIMIT_SWITCH_DEBAUNCER_SEC);
 
     private double maxAngle = MAX_ANGLE_DEGREES;
     private double minAngle = MIN_ANGLE_DEGREES;
@@ -47,20 +47,26 @@ public class Hood extends SubsystemBase implements Tunable {
     private double upperBound = UPPER_BOUND;
     private double lowerBound = LOWER_BOUND;
 
+    private boolean isAngleCalibrated = false;
+
     public Hood() {
         fieldsTable.update();
 
         TunablesManager.add("Hood", (Tunable) this);
 
-        rotationalHelpr = new RotationalSensorHelper(getAngleDegrees(), ANGLE_OFFSET);
-        rotationalHelpr.enableContinuousWrap(lowerBound, upperBound);
+        angleDegrees = new RotationalSensorHelper(io.motorRotations.getAsDouble() * GEAR_RATIO);
+        angleDegrees.enableContinuousWrap(lowerBound, upperBound);
     }
 
     public void periodic() {
+        angleDegrees.update(io.motorRotations.getAsDouble() * GEAR_RATIO);
         realVisualizer.update(getAngleDegrees());
-        rotationalHelpr.update(getAngleDegrees());
         fieldsTable.recordOutput("angle", getAngleDegrees());
-        fieldsTable.recordOutput("velocity", rotationalHelpr.getVelocity());
+        fieldsTable.recordOutput("velocity", getVelocity());
+        fieldsTable.recordOutput("limitSwitchValue", getLimitSwitchValue());
+        if (getLimitSwitchValue()) {
+            io.resetAngle();
+        }
     }
 
     public double calculateFeedForward(double desiredAngleDegree, double desiredSpeed, boolean usePID) {
@@ -88,11 +94,11 @@ public class Hood extends SubsystemBase implements Tunable {
     }
 
     public double getAngleDegrees() {
-        return io.motorAngleDegrees.getAsDouble();
+        return angleDegrees.getAngle();
     }
 
     public double getVelocity() {
-        return rotationalHelpr.getVelocity();
+        return angleDegrees.getVelocity();
     }
 
     public void resetPID() {
@@ -103,11 +109,15 @@ public class Hood extends SubsystemBase implements Tunable {
         return Math.abs(desiredAngleDegrees - getAngleDegrees()) < ANGLE_TOLERENCE_DEGREES;
     }
 
-    public boolean getEncoderConnectedDebouncer() {
-        return encoderConnectedDebouncer.calculate(io.isEncoderConnected.getAsBoolean());
+    public boolean isAngleCalibrated() {
+        return isAngleCalibrated;
     }
 
-    public void setHoodVoltage(double voltage) {
+    public boolean getLimitSwitchValue() {
+        return limitSwitchDebouncer.calculate(io.limitSwitch.getAsBoolean());
+    }
+
+    public void setVoltage(double voltage) {
         if ((getAngleDegrees() > maxAngle && voltage > 0)
                 || (getAngleDegrees() < minAngle && voltage < 0)) {
             voltage = 0.0;
@@ -122,18 +132,18 @@ public class Hood extends SubsystemBase implements Tunable {
         builder.addChild("Hood PID", pid);
         builder.addChild("Hood feedforward", feedForward);
         builder.addChild("Hood Trapezoid profile", trapezoidProfile);
-        builder.addChild("Hood rotational helper", rotationalHelpr);
+        builder.addChild("Hood rotational helper", angleDegrees);
         builder.addDoubleProperty("Hood max angle", () -> maxAngle, (angle) -> maxAngle = angle);
         builder.addDoubleProperty("Hood min angle", () -> minAngle, (angle) -> minAngle = angle);
         builder.addDoubleProperty("Hood upper bound", () -> upperBound,
                 (newUpperBound) -> {
                     upperBound = newUpperBound;
-                    rotationalHelpr.enableContinuousWrap(lowerBound, newUpperBound);
+                    angleDegrees.enableContinuousWrap(lowerBound, newUpperBound);
                 });
         builder.addDoubleProperty("Hood lower bound", () -> lowerBound,
                 (newLowerBound) -> {
                     lowerBound = newLowerBound;
-                    rotationalHelpr.enableContinuousWrap(newLowerBound, upperBound);
+                    angleDegrees.enableContinuousWrap(newLowerBound, upperBound);
                 });
     }
 

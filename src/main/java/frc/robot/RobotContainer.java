@@ -27,32 +27,34 @@ import team2679.atlantiskit.tunables.TunablesManager;
 // import team2679.atlantiskit.tunables.extensions.TunableCommand;
 
 public class RobotContainer {
-//     private final Swerve swerve = new Swerve();
-//     private final Fourbar fourbar = new Fourbar();
-//     private final Roller roller = new Roller();
-//     private final Index index = new Index();
+    // private final Swerve swerve = new Swerve();
+    // private final Fourbar fourbar = new Fourbar();
+    // private final Roller roller = new Roller();
+    // private final Index index = new Index();
     private final Hood hood = new Hood();
     private final FlyWheel flyWheel = new FlyWheel();
-//     private final Elevator elevator = new Elevator();
+    // private final Elevator elevator = new Elevator();
 
     private final ShootingCalculator hubShootingCalculator = new ShootingCalculator(FieldContants.BLUE_HUB_POSE,
             ShootingMeasurments.ALL_MEASURMENTS_HUB);
     private final ShootingCalculator deliveryShootingCalculator = new ShootingCalculator(
             FieldContants.BLUE_DELIVERY_POSE, ShootingMeasurments.ALL_MEASURMENTS_DELIVRY);
 
-//     private final SwerveCommands swerveCommands = new SwerveCommands(swerve);
+    // private final SwerveCommands swerveCommands = new SwerveCommands(swerve);
     private final AllCommands allCommands = new AllCommands(flyWheel, hood);
 
     private final PowerDistribution pdh = new PowerDistribution();
 
-//     private final NaturalXboxController driverController = new NaturalXboxController(
-//             RobotMap.Controllers.DRIVER_PORT);
+    // private final NaturalXboxController driverController = new
+    // NaturalXboxController(
+    // RobotMap.Controllers.DRIVER_PORT);
     private final NaturalXboxController operatorController = new NaturalXboxController(
             RobotMap.Controllers.OPERATOR_PORT);
 
     public RobotContainer() {
         pdh.setSwitchableChannel(true);
-        // new Trigger(DriverStation::isDisabled).whileTrue(swerveCommands.stop().alongWith(allCommands.stopAll()));
+        // new
+        // Trigger(DriverStation::isDisabled).whileTrue(swerveCommands.stop().alongWith(allCommands.stopAll()));
         new Trigger(DriverStation::isDisabled).whileTrue(allCommands.stopAll());
         configureDrive();
         configureOperator();
@@ -61,11 +63,11 @@ public class RobotContainer {
 
     private void configureDrive() {
         // TunableCommand driveCommand = swerveCommands.driverController(
-        //         driverController::getLeftY,
-        //         driverController::getLeftX,
-        //         driverController::getRightX,
-        //         driverController.leftBumper().negate()::getAsBoolean,
-        //         driverController.rightBumper()::getAsBoolean);
+        // driverController::getLeftY,
+        // driverController::getLeftX,
+        // driverController::getRightX,
+        // driverController.leftBumper().negate()::getAsBoolean,
+        // driverController.rightBumper()::getAsBoolean);
 
         // swerve.setDefaultCommand(driveCommand);
         // TunablesManager.add("Swerve/drive command", driveCommand.fullTunable());
@@ -73,10 +75,10 @@ public class RobotContainer {
         // driverController.x().onTrue(swerveCommands.xWheelLock());
 
         // TunablesManager.add("Swerve/modules control mode",
-        //         swerveCommands.controlModules(
-        //                 driverController::getLeftX,
-        //                 driverController::getLeftY,
-        //                 driverController::getRightY).fullTunable());
+        // swerveCommands.controlModules(
+        // driverController::getLeftX,
+        // driverController::getLeftY,
+        // driverController::getRightY).fullTunable());
 
         // driverController.a().onTrue(new InstantCommand(() -> swerve.resetYaw(0)));
     }
@@ -94,22 +96,22 @@ public class RobotContainer {
         hood.setDefaultCommand(allCommands.hoodCMDs.moveToAngle(hoodAngleSupplier));
         // fourbar.setDefaultCommand(allCommands.fourbarCMDs.getToAngleDegrees(AllCommandsConstants.FOURBAR_MID_ANGLE_DEG));
 
-        operatorController.leftTrigger().whileTrue(allCommands.getReadyToShoot(flywheelSpeedSupplier, hoodAngleSupplier));
-        // operatorController.rightTrigger().whileTrue(allCommands.shoot(flywheelSpeedSupplier, hoodAngleSupplier));
+        operatorController.leftTrigger()
+                .whileTrue(allCommands.getReadyToShoot(flywheelSpeedSupplier, hoodAngleSupplier));
+        // operatorController.rightTrigger().whileTrue(allCommands.shoot(flywheelSpeedSupplier,
+        // hoodAngleSupplier));
 
-        operatorController.leftBumper().whileTrue(allCommands.manualController(() -> operatorController.getLeftY(), () -> 0, () -> 0, () -> 0, () -> 0));
+        operatorController.leftBumper()
+                .whileTrue(allCommands.manualController(operatorController::getLeftY, operatorController::getLeftX,
+                        operatorController::getRightY, operatorController::getRightX, operatorController::getRightX));
 
         TunablesManager.add("Tunable Shoot Command", allCommands.tunableShoot().fullTunable());
-
-        TunablesManager.add("Tunable shoot voltage", allCommands.tunableShootVolt().fullTunable());
-
-        TunablesManager.add("Tunable hood voltage", allCommands.tunableHoodVolt().fullTunable());
     }
 
     public void configureAuto() {
     }
 
-    public void enterSwerveIntoTest() {
+    public void enterSubsystemsIntoTest() {
         hood.coast();
         // swerve.costAll();
     }

@@ -47,7 +47,7 @@ public final class RobotMap {
 
   public static final class DIO {
     public static final int FOURBAR_ENCODER_ID = 0;
-    public final static int HOOD_ENCODER_ID = 0;
+    public final static int HOOD_LIMIT_SWITCH_ID = 0;
     public static final int ELEVATOR_ENCODER_ID = 0;
     public static final int PIVOT_ENCODER_ID = 0;
   }

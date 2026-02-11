@@ -3,14 +3,14 @@ package frc.robot.subsystems.hood.io;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import team2679.atlantiskit.logfields.LogFieldsTable;
-import frc.robot.subsystems.hood.*;
 
+import static frc.robot.subsystems.hood.HoodConstants.ANGLE_TOLERENCE_DEGREES;
 import static frc.robot.subsystems.hood.HoodConstants.MAX_ANGLE_DEGREES;
 import static frc.robot.subsystems.hood.HoodConstants.MIN_ANGLE_DEGREES;
 import static frc.robot.subsystems.hood.HoodConstants.Sim.*;
 
 public class HoodIOSim extends HoodIO {
-    private final SingleJointedArmSim hoodMotor = new SingleJointedArmSim(
+    private final SingleJointedArmSim motor = new SingleJointedArmSim(
             DCMotor.getNeo550(1),
             JOINT_GEAR_RATIO,
             JKG_METERS_SQUEARED,
@@ -18,24 +18,24 @@ public class HoodIOSim extends HoodIO {
             Math.toRadians(MIN_ANGLE_DEGREES),
             Math.toRadians(MAX_ANGLE_DEGREES),
             true,
-            HoodConstants.ANGLE_OFFSET);
+            0);
 
     public HoodIOSim(LogFieldsTable fieldsTable) {
         super(fieldsTable);
     }
 
     public void periodicBeforeFields() {
-        hoodMotor.update(0.02);
+        motor.update(0.02);
     }
 
     @Override
-    public double getHoodMotorAngleDegree() {
-        return Math.toDegrees(hoodMotor.getAngleRads());
+    public double getMotorRotations() {
+        return motor.getAngleRads() / (Math.PI * 2);
     }
 
     @Override
     public void setVoltage(double volt) {
-        hoodMotor.setInputVoltage(volt);
+        motor.setInputVoltage(volt);
     }
 
     @Override
@@ -43,7 +43,18 @@ public class HoodIOSim extends HoodIO {
     }
 
     @Override
-    protected boolean getIsEncoderConnected() {
-        return true;
+    protected boolean limitSwitch() {
+        return Math.abs(Math.toDegrees(motor.getAngleRads())) <= ANGLE_TOLERENCE_DEGREES;
     }
+
+    @Override
+    protected double getMotorCurrent() {
+        return motor.getCurrentDrawAmps();
+    }
+
+    @Override
+    public void resetAngle() {
+        motor.setState(0, motor.getVelocityRadPerSec());
+    }
+
 }
