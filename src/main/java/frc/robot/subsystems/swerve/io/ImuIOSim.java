@@ -31,10 +31,4 @@ public class ImuIOSim extends ImuIO {
     protected double getZAcceleration() {
     return 0;
     }
-
-    @Override
-    protected double getAcceleration() {
-        return 0;
-    }
-
 }

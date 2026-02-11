@@ -38,11 +38,4 @@ public class ImuIONavX extends ImuIO {
     return navX.getWorldLinearAccelZ();
   }
 
-  @Override
-  protected double getAcceleration() {
-    return Math.sqrt(
-      Math.pow(getXAcceleration(), 2)
-      + Math.pow(getYAcceleration(), 2));
-  }
-
 }

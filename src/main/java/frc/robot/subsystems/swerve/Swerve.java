@@ -93,6 +93,12 @@ public class Swerve extends SubsystemBase implements Tunable {
 
     fieldsTable.recordOutput("Is red alliance", isRedAlliance());
     SmartDashboard.putBoolean("isRedAlliance", isRedAlliance());
+
+    fieldsTable.recordOutput("Flat Acceleration", getFlatAcceleration());
+    fieldsTable.recordOutput("X Signed Acceleration", getFlatAccelerationXSign());
+    fieldsTable.recordOutput("Y Signed Acceleration", getFlatAccelerationYSign());
+    fieldsTable.recordOutput("X Acceleration Sign", getXAccelerationSign());
+    fieldsTable.recordOutput("Y Acceleration Sign", getYAccelerationSign());
   }
 
   public void drive(double vxSpeedMPS, double vySpeedMPS, double vAngleRandiansPS, boolean isFieldRelative,
@@ -181,11 +187,8 @@ public class Swerve extends SubsystemBase implements Tunable {
   public double getZAcceleration() {
     return imuIO.zAcceleration.getAsDouble();
   }
-  public double getAcceleration() {
-    return imuIO.acceleration.getAsDouble();
-  }
   
-  public double[] getCurrent() {
+  public double[] getCurrents() {
     double[] currents = new double[4];
     for (int i = 0; i<4; ++i){
       currents[i] = modules[i].getCurrent();
@@ -193,6 +196,34 @@ public class Swerve extends SubsystemBase implements Tunable {
     return currents;
   }
   
+  public double getFlatAcceleration() {
+    return Math.sqrt(
+      Math.pow(getXAcceleration(), 2)
+      + Math.pow(getYAcceleration(), 2));
+  }
+
+  public double getXAccelerationSign() {
+    if (getXAcceleration()==0) {
+      return 0;
+    }
+    return Math.abs(getXAcceleration())/getXAcceleration();
+  }
+
+  public double getYAccelerationSign() {
+    if (getYAcceleration()==0) {
+      return 0;
+    }
+    return Math.abs(getYAcceleration())/getYAcceleration();
+  }
+
+  public double getFlatAccelerationXSign() {
+    return getFlatAcceleration()*getXAccelerationSign();
+  }
+
+  public double getFlatAccelerationYSign() {
+    return getFlatAcceleration()*getYAccelerationSign();
+  }
+
   @Override
   public void initTunable(TunableBuilder builder) {
     builder.addChild("Swerve Subsystem", (Sendable) this);

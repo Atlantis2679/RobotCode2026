@@ -13,7 +13,6 @@ public abstract class ImuIO extends IOBase {
   public final DoubleSupplier xAcceleration = fields.addDouble("X Acceleration", this::getXAcceleration);
   public final DoubleSupplier yAcceleration = fields.addDouble("Y Acceleration", this::getYAcceleration);
   public final DoubleSupplier zAcceleration = fields.addDouble("Z Acceleration", this::getZAcceleration);
-  public final DoubleSupplier acceleration = fields.addDouble("Acceleration", this::getAcceleration);
 
   public ImuIO(LogFieldsTable fieldsTable) {
     super(fieldsTable);
@@ -26,5 +25,4 @@ public abstract class ImuIO extends IOBase {
   protected abstract double getXAcceleration();
   protected abstract double getYAcceleration();
   protected abstract double getZAcceleration();
-  protected abstract double getAcceleration();
 }
