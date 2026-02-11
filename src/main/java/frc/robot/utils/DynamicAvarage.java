@@ -4,8 +4,8 @@ public class DynamicAvarage {
     Double[] values;
     int i = 0;
     
-    public DynamicAvarage(int seconds) {
-        values = new Double[seconds*50];
+    public DynamicAvarage(int len) {
+        values = new Double[len];
     }
 
     public void update(Double val) {
