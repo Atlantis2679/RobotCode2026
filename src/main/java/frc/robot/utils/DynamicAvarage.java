@@ -26,6 +26,9 @@ public class DynamicAvarage {
                 sum += num;
             }
         }
+        if (len==0) {
+            return 0.0;
+        }
         return sum/len;
     }
 }
