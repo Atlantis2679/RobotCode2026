@@ -8,7 +8,6 @@ import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Robot;
-import frc.robot.subsystems.flywheel.TunableSimpleMotorFeedforward;
 import frc.robot.subsystems.hood.io.HoodIO;
 import frc.robot.subsystems.hood.io.HoodIOSim;
 import frc.robot.subsystems.hood.io.HoodIOSparkMax;
@@ -17,6 +16,7 @@ import team2679.atlantiskit.logfields.LogFieldsTable;
 import team2679.atlantiskit.tunables.Tunable;
 import team2679.atlantiskit.tunables.TunableBuilder;
 import team2679.atlantiskit.tunables.TunablesManager;
+import team2679.atlantiskit.tunables.extensions.TunableSimpleMotorFeedforward;
 import team2679.atlantiskit.tunables.extensions.TunableTrapezoidProfile;
 
 import static frc.robot.subsystems.hood.HoodConstants.*;
@@ -47,7 +47,7 @@ public class Hood extends SubsystemBase implements Tunable {
     private double upperBound = UPPER_BOUND;
     private double lowerBound = LOWER_BOUND;
 
-    private boolean isAngleCalibrated = false;
+    private boolean calibrated = false;
 
     public Hood() {
         fieldsTable.update();
@@ -64,8 +64,10 @@ public class Hood extends SubsystemBase implements Tunable {
         fieldsTable.recordOutput("angle", getAngleDegrees());
         fieldsTable.recordOutput("velocity", getVelocity());
         fieldsTable.recordOutput("limitSwitchValue", getLimitSwitchValue());
+        fieldsTable.recordOutput("current command", getCurrentCommand() != null ? getCurrentCommand().getName() : "None");
         if (getLimitSwitchValue()) {
-            io.resetAngle();
+            io.resetRotation();
+            calibrated = true;
         }
     }
 
@@ -109,8 +111,8 @@ public class Hood extends SubsystemBase implements Tunable {
         return Math.abs(desiredAngleDegrees - getAngleDegrees()) < ANGLE_TOLERENCE_DEGREES;
     }
 
-    public boolean isAngleCalibrated() {
-        return isAngleCalibrated;
+    public boolean isCalibrated() {
+        return calibrated;
     }
 
     public boolean getLimitSwitchValue() {

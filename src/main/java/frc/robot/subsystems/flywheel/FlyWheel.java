@@ -12,6 +12,7 @@ import team2679.atlantiskit.tunables.Tunable;
 import team2679.atlantiskit.tunables.TunableBuilder;
 import team2679.atlantiskit.tunables.TunablesManager;
 // import team2679.atlantiskit.tunables.extensions.TunableSimpleMotorFeedforward;
+import team2679.atlantiskit.tunables.extensions.TunableSimpleMotorFeedforward;
 
 public class FlyWheel extends SubsystemBase implements Tunable {
     private final LogFieldsTable fieldsTable = new LogFieldsTable(getName());

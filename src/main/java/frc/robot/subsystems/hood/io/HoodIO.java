@@ -24,7 +24,7 @@ public abstract class HoodIO extends IOBase {
 
     public abstract void setCoast();
 
-    public abstract void resetAngle();
+    public abstract void resetRotation();
 
     public abstract void setVoltage(double volt);
 }

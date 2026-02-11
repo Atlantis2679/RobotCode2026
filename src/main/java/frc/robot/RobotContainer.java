@@ -93,7 +93,7 @@ public class RobotContainer {
         DoubleSupplier flywheelSpeedSupplier = () -> (isShootingHub.getAsBoolean() ? hubShootingCalculator
                 : deliveryShootingCalculator).getFlyWheelRPM();
 
-        hood.setDefaultCommand(allCommands.hoodCMDs.moveToAngle(hoodAngleSupplier));
+        // hood.setDefaultCommand(allCommands.hoodCMDs.moveToAngle(hoodAngleSupplier));
         // fourbar.setDefaultCommand(allCommands.fourbarCMDs.getToAngleDegrees(AllCommandsConstants.FOURBAR_MID_ANGLE_DEG));
 
         operatorController.leftTrigger()

@@ -53,7 +53,7 @@ public class HoodIOSim extends HoodIO {
     }
 
     @Override
-    public void resetAngle() {
+    public void resetRotation() {
         motor.setState(0, motor.getVelocityRadPerSec());
     }
 

@@ -50,7 +50,7 @@ public class HoodIOSparkMax extends HoodIO {
 
     @Override
     protected boolean limitSwitch() {
-        return limitSwitch.get();
+        return !limitSwitch.get();
     }
 
     @Override
@@ -59,7 +59,7 @@ public class HoodIOSparkMax extends HoodIO {
     }
 
     @Override
-    public void resetAngle() {
+    public void resetRotation() {
         motor.getEncoder().setPosition(0);
     }
 }
