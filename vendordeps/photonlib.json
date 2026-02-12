@@ -1,9 +1,15 @@
 {
     "fileName": "photonlib.json",
     "name": "photonlib",
+<<<<<<< HEAD
     "version": "v2026.2.1",
     "uuid": "515fe07e-bfc6-11fa-b3de-0242ac130004",
     "frcYear": "2026",
+=======
+    "version": "v2025.3.1",
+    "uuid": "515fe07e-bfc6-11fa-b3de-0242ac130004",
+    "frcYear": "2025",
+>>>>>>> Swerve/vision
     "mavenUrls": [
         "https://maven.photonvision.org/repository/internal",
         "https://maven.photonvision.org/repository/snapshots"
@@ -13,7 +19,11 @@
         {
             "groupId": "org.photonvision",
             "artifactId": "photontargeting-cpp",
+<<<<<<< HEAD
             "version": "v2026.2.1",
+=======
+            "version": "v2025.3.1",
+>>>>>>> Swerve/vision
             "skipInvalidPlatforms": true,
             "isJar": false,
             "validPlatforms": [
@@ -28,7 +38,11 @@
         {
             "groupId": "org.photonvision",
             "artifactId": "photonlib-cpp",
+<<<<<<< HEAD
             "version": "v2026.2.1",
+=======
+            "version": "v2025.3.1",
+>>>>>>> Swerve/vision
             "libName": "photonlib",
             "headerClassifier": "headers",
             "sharedLibrary": true,
@@ -43,7 +57,11 @@
         {
             "groupId": "org.photonvision",
             "artifactId": "photontargeting-cpp",
+<<<<<<< HEAD
             "version": "v2026.2.1",
+=======
+            "version": "v2025.3.1",
+>>>>>>> Swerve/vision
             "libName": "photontargeting",
             "headerClassifier": "headers",
             "sharedLibrary": true,
@@ -60,12 +78,20 @@
         {
             "groupId": "org.photonvision",
             "artifactId": "photonlib-java",
+<<<<<<< HEAD
             "version": "v2026.2.1"
+=======
+            "version": "v2025.3.1"
+>>>>>>> Swerve/vision
         },
         {
             "groupId": "org.photonvision",
             "artifactId": "photontargeting-java",
+<<<<<<< HEAD
             "version": "v2026.2.1"
+=======
+            "version": "v2025.3.1"
+>>>>>>> Swerve/vision
         }
     ]
 }

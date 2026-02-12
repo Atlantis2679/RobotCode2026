@@ -72,7 +72,7 @@ public class Swerve extends SubsystemBase implements Tunable {
 
     PeriodicAlertsGroup.defaultInstance.addErrorAlert(() -> "Gyro Disconnected!", () -> !isGyroConnected());
 
-    resetYaw(isRedAlliance() ? 0 : 180);
+    resetYawZero();
   }
 
   @Override
@@ -148,6 +148,10 @@ public class Swerve extends SubsystemBase implements Tunable {
     Pose2d newPose = new Pose2d(PoseEstimator.getInstance().getEstimatedPose().getTranslation(),
         Rotation2d.fromDegrees(getGyroYawDegreesCCW()));
     PoseEstimator.getInstance().resetPose(newPose);
+  }
+
+  public void resetYawZero() {
+    resetYaw(isRedAlliance() ? 0 : 180);
   }
 
   public void resetModulesToAbsoulte() {
