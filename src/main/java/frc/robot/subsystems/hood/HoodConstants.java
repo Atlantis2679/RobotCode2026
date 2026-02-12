@@ -8,9 +8,7 @@ public final class HoodConstants {
 
     public static final double MAX_ANGLE_DEGREES = 0;
     public static final double MIN_ANGLE_DEGREES = 0;
-    public static final double UPPER_BOUND = 0;
-    public static final double LOWER_BOUND = 0;
-
+    
     public static final double ANGLE_TOLERENCE_DEGREES = 10;
 
     public static final double MAX_VELOCITY_DEG_PER_SEC = MAX_VOLTAGE * MOTOR_KV;

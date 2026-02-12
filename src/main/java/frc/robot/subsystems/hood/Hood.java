@@ -44,9 +44,6 @@ public class Hood extends SubsystemBase implements Tunable {
     private double maxAngle = MAX_ANGLE_DEGREES;
     private double minAngle = MIN_ANGLE_DEGREES;
 
-    private double upperBound = UPPER_BOUND;
-    private double lowerBound = LOWER_BOUND;
-
     private boolean calibrated = false;
 
     public Hood() {
@@ -55,7 +52,6 @@ public class Hood extends SubsystemBase implements Tunable {
         TunablesManager.add("Hood", (Tunable) this);
 
         angleDegrees = new RotationalSensorHelper(io.motorRotations.getAsDouble() * GEAR_RATIO);
-        angleDegrees.enableContinuousWrap(lowerBound, upperBound);
     }
 
     public void periodic() {
@@ -137,16 +133,5 @@ public class Hood extends SubsystemBase implements Tunable {
         builder.addChild("Hood rotational helper", angleDegrees);
         builder.addDoubleProperty("Hood max angle", () -> maxAngle, (angle) -> maxAngle = angle);
         builder.addDoubleProperty("Hood min angle", () -> minAngle, (angle) -> minAngle = angle);
-        builder.addDoubleProperty("Hood upper bound", () -> upperBound,
-                (newUpperBound) -> {
-                    upperBound = newUpperBound;
-                    angleDegrees.enableContinuousWrap(lowerBound, newUpperBound);
-                });
-        builder.addDoubleProperty("Hood lower bound", () -> lowerBound,
-                (newLowerBound) -> {
-                    lowerBound = newLowerBound;
-                    angleDegrees.enableContinuousWrap(newLowerBound, upperBound);
-                });
     }
-
 }
