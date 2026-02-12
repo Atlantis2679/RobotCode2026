@@ -1,4 +1,4 @@
-package frc.robot.subsystems.swerve;
+package frc.robot.subsystems.poseestimation;
 
 import java.util.Optional;
 
@@ -10,11 +10,12 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import team2679.atlantiskit.logfields.LogFieldsTable;
 
 public class PoseEstimator {
+    private static final PoseEstimator instance = new PoseEstimator();
+
     private Pose2d odomertryPose = Pose2d.kZero;
     private Pose2d estimatedPose = Pose2d.kZero;
-    private SwerveDriveKinematics kinematics;
 
-    private LogFieldsTable fieldsTable;
+    private LogFieldsTable fieldsTable = new LogFieldsTable("PoseEstimator");
 
     private SwerveModulePosition[] lastModulePositions = new SwerveModulePosition[] {
         new SwerveModulePosition(),
@@ -23,12 +24,13 @@ public class PoseEstimator {
         new SwerveModulePosition(),
     };
 
-    public PoseEstimator(LogFieldsTable fieldsTable, SwerveDriveKinematics kinematics) {
-        this.kinematics = kinematics;
-        this.fieldsTable = fieldsTable;
+    private PoseEstimator() { }
+
+    public static PoseEstimator getInstance() {
+        return instance;
     }
 
-    public void update(SwerveModulePosition[] modulePositions, Optional<Rotation2d> gyroAngle) {
+    public void update(SwerveDriveKinematics kinematics, SwerveModulePosition[] modulePositions, Optional<Rotation2d> gyroAngle) {
         Twist2d twist2d = kinematics.toTwist2d(lastModulePositions, modulePositions);
         lastModulePositions = modulePositions;
         Pose2d lastOdometryPose = odomertryPose;
@@ -47,6 +49,10 @@ public class PoseEstimator {
         estimatedPose = newPose;
         fieldsTable.recordOutput("Current Odomertry Pose", odomertryPose);
         fieldsTable.recordOutput("Current Estimated Pose", estimatedPose);
+    }
+
+    public void resetYaw(Rotation2d newYaw) {
+        resetPose(new Pose2d(estimatedPose.getTranslation(), newYaw));
     }
 
     public Pose2d getEstimatedPose() {
