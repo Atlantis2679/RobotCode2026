@@ -62,7 +62,7 @@ public class Hood extends SubsystemBase implements Tunable {
         fieldsTable.recordOutput("limitSwitchValue", getLimitSwitchValue());
         fieldsTable.recordOutput("current command", getCurrentCommand() != null ? getCurrentCommand().getName() : "None");
         if (getLimitSwitchValue()) {
-            io.resetRotation();
+            resetAngleDegrees(0);
             calibrated = true;
         }
     }
@@ -125,6 +125,10 @@ public class Hood extends SubsystemBase implements Tunable {
         io.setVoltage(voltage);
     }
 
+    public void resetAngleDegrees(double angle) {
+        io.resetRotation(angle / 360);
+    }
+
     @Override
     public void initTunable(TunableBuilder builder) {
         builder.addChild("Hood PID", pid);
@@ -133,5 +137,6 @@ public class Hood extends SubsystemBase implements Tunable {
         builder.addChild("Hood rotational helper", angleDegrees);
         builder.addDoubleProperty("Hood max angle", () -> maxAngle, (angle) -> maxAngle = angle);
         builder.addDoubleProperty("Hood min angle", () -> minAngle, (angle) -> minAngle = angle);
+        builder.addDoubleProperty("Reset angle degrees", this::getAngleDegrees, this::resetAngleDegrees);
     }
 }

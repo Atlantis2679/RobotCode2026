@@ -2,13 +2,13 @@ package frc.robot.subsystems.hood;
 
 public final class HoodConstants {
     public static final int MAX_VOLTAGE = 12;
-    public static final int CURRENT_LIMIT = 40;
+    public static final int CURRENT_LIMIT = 5;
 
     public static final double MOTOR_KV = 917;
 
-    public static final double MAX_ANGLE_DEGREES = 0;
+    public static final double MAX_ANGLE_DEGREES = 30;
     public static final double MIN_ANGLE_DEGREES = 0;
-    
+
     public static final double ANGLE_TOLERENCE_DEGREES = 10;
 
     public static final double MAX_VELOCITY_DEG_PER_SEC = MAX_VOLTAGE * MOTOR_KV;
@@ -20,7 +20,7 @@ public final class HoodConstants {
 
     public static final double KS = 0;
     public static final double KA = 0;
-    public static final double KV = 1 / MOTOR_KV;
+    public static final double KV = 1.0 / MOTOR_KV;
 
     public static final double GEAR_RATIO = 300/360.0;
 

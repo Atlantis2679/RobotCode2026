@@ -59,7 +59,7 @@ public class HoodIOSparkMax extends HoodIO {
     }
 
     @Override
-    public void resetRotation() {
-        motor.getEncoder().setPosition(0);
+    public void resetRotation(double rotations) {
+        motor.getEncoder().setPosition(rotations);
     }
 }

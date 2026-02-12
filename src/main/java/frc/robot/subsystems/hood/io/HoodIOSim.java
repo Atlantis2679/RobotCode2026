@@ -53,8 +53,8 @@ public class HoodIOSim extends HoodIO {
     }
 
     @Override
-    public void resetRotation() {
-        motor.setState(0, motor.getVelocityRadPerSec());
+    public void resetRotation(double rotations) {
+        motor.setState(rotations * Math.PI * 2, motor.getVelocityRadPerSec());
     }
 
 }
