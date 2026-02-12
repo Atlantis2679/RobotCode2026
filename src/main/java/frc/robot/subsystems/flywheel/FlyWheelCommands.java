@@ -19,8 +19,8 @@ public class FlyWheelCommands {
     }
 
     public Command manualController(DoubleSupplier precentageVoltage) {
-        return flyWheel.run(() -> {
-            flyWheel.setVoltage(precentageVoltage.getAsDouble() * FlyWheelConstants.MAX_VOLTAGE);
-        }).finallyDo(flyWheel::stop).withName("Flywheel manual controller");
+        return flyWheel.run(() -> 
+            flyWheel.setVoltage(precentageVoltage.getAsDouble() * FlyWheelConstants.MAX_VOLTAGE))
+            .finallyDo(flyWheel::stop).withName("Flywheel manual controller");
     }
 }

@@ -4,14 +4,14 @@ import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.elevator.ElevatorCommands;
 import frc.robot.subsystems.flywheel.FlyWheel;
 import frc.robot.subsystems.flywheel.FlyWheelCommands;
+import frc.robot.subsystems.fourbar.Fourbar;
+import frc.robot.subsystems.fourbar.FourbarCommands;
 import frc.robot.subsystems.hood.Hood;
 import frc.robot.subsystems.hood.HoodCommands;
 import frc.robot.subsystems.index.Index;
 import frc.robot.subsystems.index.IndexCommands;
 import frc.robot.subsystems.roller.Roller;
 import frc.robot.subsystems.roller.RollerCommands;
-import frc.robot.subsystems.forebar.Forebar;
-import frc.robot.subsystems.forebar.ForebarCommands;
 import frc.robot.subsystems.swerve.Swerve;
 import team2679.atlantiskit.tunables.extensions.TunableCommand;
 import team2679.atlantiskit.valueholders.DoubleHolder;
@@ -24,7 +24,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 
 public class AllCommands {
-    private Forebar forebar;
+    private Fourbar fourbar;
     private Roller roller;
     private FlyWheel flyWheel;
     private Hood hood;
@@ -32,23 +32,23 @@ public class AllCommands {
     private Index index;
     private Elevator elevator;
 
-    public ForebarCommands forebarCMDs;
+    public FourbarCommands fourbarCMDs;
     public RollerCommands rollerCMDs;
     public FlyWheelCommands flyWheelCMDs;
     public HoodCommands hoodCMDs;
     public IndexCommands indexCMDs;
     public ElevatorCommands elevatorCMDs;
 
-    public AllCommands(Forebar forebar, Roller roller, FlyWheel flyWheel, Hood hood, Index index,
+    public AllCommands(Fourbar fourbar, Roller roller, FlyWheel flyWheel, Hood hood, Index index,
             Elevator elevator) {
-        this.forebar = forebar;
+        this.fourbar = fourbar;
         this.roller = roller;
         this.flyWheel = flyWheel;
         this.hood = hood;
         this.index = index;
         this.elevator = elevator;
 
-        forebarCMDs = new ForebarCommands(this.forebar);
+        fourbarCMDs = new FourbarCommands(this.fourbar);
         rollerCMDs = new RollerCommands(this.roller);
         flyWheelCMDs = new FlyWheelCommands(this.flyWheel);
         hoodCMDs = new HoodCommands(this.hood);
@@ -58,7 +58,7 @@ public class AllCommands {
 
     public Command intake() {
         return Commands.parallel(
-                forebarCMDs.getToAngleDegrees(FORBAR_OPEN_ANGLE_DEG),
+                fourbarCMDs.getToAngleDegrees(FOURBAR_OPEN_ANGLE_DEG),
                 rollerCMDs.spin(ROLLER_SPEED_RPM)).withName("intake");
     }
 
@@ -96,23 +96,23 @@ public class AllCommands {
 
     public Command stopAll() {
         return Commands.run(() -> {
-            forebar.stop();
+            fourbar.stop();
             roller.stop();
             flyWheel.stop();
             hood.stop();
             swerve.stop();
             elevator.stop();
-        }, forebar, roller, flyWheel, hood, swerve, elevator)
+        }, fourbar, roller, flyWheel, hood, swerve, elevator)
                 .ignoringDisable(true)
                 .withName("stopAll");
     }
 
     public Command manualController(DoubleSupplier flywheelSpeed, DoubleSupplier hoodSpeed,
-            DoubleSupplier forbarSpeed, DoubleSupplier rollerSpeed, DoubleSupplier indexSpeed) {
+            DoubleSupplier fourbarSpeed, DoubleSupplier rollerSpeed, DoubleSupplier indexSpeed) {
         return Commands.parallel(
                 flyWheelCMDs.manualController(flywheelSpeed),
                 hoodCMDs.manualController(hoodSpeed),
-                forebarCMDs.manualController(forbarSpeed),
+                fourbarCMDs.manualController(fourbarSpeed),
                 rollerCMDs.manualController(rollerSpeed),
                 indexCMDs.manualController(indexSpeed))
                 .withName("manualController");

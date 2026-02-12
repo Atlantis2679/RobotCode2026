@@ -16,6 +16,7 @@ import frc.robot.RobotMap.ModuleFL;
 import frc.robot.RobotMap.ModuleFR;
 import frc.robot.RobotMap.ModuleBL;
 import frc.robot.RobotMap.ModuleBR;
+import frc.robot.subsystems.poseestimation.PoseEstimator;
 import frc.robot.subsystems.swerve.SwerveConstants.Modules;
 import frc.robot.subsystems.swerve.io.ImuIO;
 import frc.robot.subsystems.swerve.io.ImuIONavX;
@@ -54,8 +55,6 @@ public class Swerve extends SubsystemBase implements Tunable {
 
   private final LoggedDashboardChooser<Boolean> isRedAlliance = new LoggedDashboardChooser<>("alliance");
 
-  private final PoseEstimator poseEstimator = new PoseEstimator(fieldsTable.getSubTable("poseEstimator"), kinematics);
-
   public Swerve() {
     fieldsTable.update();
 
@@ -84,8 +83,9 @@ public class Swerve extends SubsystemBase implements Tunable {
 
     gyroYawDegreesCCW.update(imuIO.angleDegreesCCW.getAsDouble());
 
-    Optional<Rotation2d> gyroAngle = isGyroConnected() ? Optional.of(Rotation2d.fromDegrees(getGyroYawDegreesCCW())) : Optional.empty();
-    poseEstimator.update(getModulePositions(), gyroAngle);
+    Optional<Rotation2d> gyroAngle = isGyroConnected() ? Optional.of(Rotation2d.fromDegrees(getGyroYawDegreesCCW()))
+        : Optional.empty();
+    PoseEstimator.getInstance().update(kinematics, getModulePositions(), gyroAngle);
 
     fieldsTable.recordOutput("Is gryo connected", isGyroConnected());
     fieldsTable.recordOutput("Yaw degrees CCW", getGyroYawDegreesCCW());
@@ -103,7 +103,7 @@ public class Swerve extends SubsystemBase implements Tunable {
     ChassisSpeeds targetChassisSpeeds = isFieldRelative ? ChassisSpeeds.fromFieldRelativeSpeeds(
         isRedAlliance() ? -vxSpeedMPS : vxSpeedMPS,
         isRedAlliance() ? -vySpeedMPS : vySpeedMPS,
-        vAngleRandiansPS, getPose().getRotation())
+        vAngleRandiansPS, PoseEstimator.getInstance().getEstimatedPose().getRotation())
         : new ChassisSpeeds(vxSpeedMPS, vySpeedMPS, vAngleRandiansPS);
 
     driveChassisSpeeds(targetChassisSpeeds, useVoltage);
@@ -145,8 +145,9 @@ public class Swerve extends SubsystemBase implements Tunable {
 
   public void resetYaw(double newAngleDegreesCCW) {
     gyroYawDegreesCCW.resetAngle(newAngleDegreesCCW);
-    Pose2d newPose = new Pose2d(getPose().getTranslation(), Rotation2d.fromDegrees(getGyroYawDegreesCCW()));
-    poseEstimator.resetPose(newPose);
+    Pose2d newPose = new Pose2d(PoseEstimator.getInstance().getEstimatedPose().getTranslation(),
+        Rotation2d.fromDegrees(getGyroYawDegreesCCW()));
+    PoseEstimator.getInstance().resetPose(newPose);
   }
 
   public void resetModulesToAbsoulte() {
@@ -160,10 +161,6 @@ public class Swerve extends SubsystemBase implements Tunable {
 
     for (SwerveModule module : modules)
       module.setTargetState(moduleStates[module.getModuleNumber()], optimize, preventJittering, useVoltage);
-  }
-
-  public Pose2d getPose() {
-    return poseEstimator.getEstimatedPose();
   }
 
   public void costAll() {
@@ -199,7 +196,8 @@ public class Swerve extends SubsystemBase implements Tunable {
     builder.addChild("Module 2 BL", modules[2]);
     builder.addChild("Module 3 BR", modules[3]);
 
-    builder.addChild("Reset moudles to absoulte", new InstantCommand(this::resetModulesToAbsoulte).ignoringDisable(true));
+    builder.addChild("Reset moudles to absoulte",
+        new InstantCommand(this::resetModulesToAbsoulte).ignoringDisable(true));
 
     builder.addChild("Reset absolute angle", (Tunable) (resetBuilder) -> {
       DoubleHolder angleToReset = new DoubleHolder(0);
