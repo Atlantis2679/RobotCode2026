@@ -51,10 +51,4 @@ public class HoodIOSim extends HoodIO {
     protected double getMotorCurrent() {
         return motor.getCurrentDrawAmps();
     }
-
-    @Override
-    public void resetRotation(double rotations) {
-        motor.setState(rotations * Math.PI * 2, motor.getVelocityRadPerSec());
-    }
-
 }

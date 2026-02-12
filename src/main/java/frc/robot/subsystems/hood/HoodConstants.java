@@ -6,21 +6,16 @@ public final class HoodConstants {
 
     public static final double MOTOR_KV = 917;
 
-    public static final double MAX_ANGLE_DEGREES = 30;
-    public static final double MIN_ANGLE_DEGREES = 0;
+    public static final double MAX_ANGLE_DEGREES = 40;
+    public static final double MIN_ANGLE_DEGREES = 10;
 
-    public static final double ANGLE_TOLERENCE_DEGREES = 10;
+    public static final double ANGLE_OFFSET = 10;
 
-    public static final double MAX_VELOCITY_DEG_PER_SEC = MAX_VOLTAGE * MOTOR_KV;
-    public static final double MAX_ACCELERATION_DEG_PER_SEC_SQUEARD = 10000000;
+    public static final double ANGLE_TOLERENCE_DEGREES = 0.1;
 
-    public static final double KP = 0;
-    public static final double KI = 0;
-    public static final double KD = 0;
-
-    public static final double KS = 0;
-    public static final double KA = 0;
-    public static final double KV = 1.0 / MOTOR_KV;
+    public static final double KP = 0.85;
+    public static final double KI = 35;
+    public static final double KD = 0.03;
 
     public static final double GEAR_RATIO = 300/360.0;
 

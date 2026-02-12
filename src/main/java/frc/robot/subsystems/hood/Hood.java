@@ -3,9 +3,9 @@ package frc.robot.subsystems.hood;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.filter.Debouncer;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Robot;
 import frc.robot.subsystems.hood.io.HoodIO;
@@ -16,8 +16,7 @@ import team2679.atlantiskit.logfields.LogFieldsTable;
 import team2679.atlantiskit.tunables.Tunable;
 import team2679.atlantiskit.tunables.TunableBuilder;
 import team2679.atlantiskit.tunables.TunablesManager;
-import team2679.atlantiskit.tunables.extensions.TunableSimpleMotorFeedforward;
-import team2679.atlantiskit.tunables.extensions.TunableTrapezoidProfile;
+import team2679.atlantiskit.valueholders.DoubleHolder;
 
 import static frc.robot.subsystems.hood.HoodConstants.*;
 
@@ -32,12 +31,7 @@ public class Hood extends SubsystemBase implements Tunable {
 
     private final RotationalSensorHelper angleDegrees;
 
-    private final TunableTrapezoidProfile trapezoidProfile = new TunableTrapezoidProfile(
-            new TrapezoidProfile.Constraints(MAX_VELOCITY_DEG_PER_SEC, MAX_ACCELERATION_DEG_PER_SEC_SQUEARD));
-
     private final PIDController pid = new PIDController(KP, KI, KD);
-
-    private final TunableSimpleMotorFeedforward feedForward = new TunableSimpleMotorFeedforward(KS, KV, KA);
 
     private final Debouncer limitSwitchDebouncer = new Debouncer(LIMIT_SWITCH_DEBAUNCER_SEC);
 
@@ -51,7 +45,7 @@ public class Hood extends SubsystemBase implements Tunable {
 
         TunablesManager.add("Hood", (Tunable) this);
 
-        angleDegrees = new RotationalSensorHelper(io.motorRotations.getAsDouble() * GEAR_RATIO);
+        angleDegrees = new RotationalSensorHelper(io.motorRotations.getAsDouble() * GEAR_RATIO, ANGLE_OFFSET);
     }
 
     public void periodic() {
@@ -67,20 +61,11 @@ public class Hood extends SubsystemBase implements Tunable {
         }
     }
 
-    public double calculateFeedForward(double desiredAngleDegree, double desiredSpeed, boolean usePID) {
-        fieldsTable.recordOutput("desired angle", desiredAngleDegree);
-        fieldsTable.recordOutput("desired speed", desiredSpeed);
+    public double calculatePID(double desiredAngleDegree) {
+        if (isAtAngle(desiredAngleDegree)) return 0.0;
+        fieldsTable.recordOutput("Desired angle PID", desiredAngleDegree);
         desiredHoodVisualizer.update(desiredAngleDegree);
-        double speed = feedForward.calculate(Math.toRadians(desiredAngleDegree), desiredSpeed);
-        if (usePID && !isAtAngle(desiredAngleDegree)) {
-            speed += pid.calculate(getAngleDegrees(), desiredAngleDegree);
-        }
-        return speed;
-    }
-
-    public TrapezoidProfile.State calculateTrapezoidProfile(double time, TrapezoidProfile.State initialState,
-            TrapezoidProfile.State desiredState) {
-        return trapezoidProfile.calculate(time, initialState, desiredState);
+        return pid.calculate(getAngleDegrees(), desiredAngleDegree);
     }
 
     public void stop() {
@@ -126,17 +111,19 @@ public class Hood extends SubsystemBase implements Tunable {
     }
 
     public void resetAngleDegrees(double angle) {
-        io.resetRotation(angle / 360);
+        angleDegrees.resetAngle(angle);
     }
 
     @Override
     public void initTunable(TunableBuilder builder) {
         builder.addChild("Hood PID", pid);
-        builder.addChild("Hood feedforward", feedForward);
-        builder.addChild("Hood Trapezoid profile", trapezoidProfile);
         builder.addChild("Hood rotational helper", angleDegrees);
         builder.addDoubleProperty("Hood max angle", () -> maxAngle, (angle) -> maxAngle = angle);
         builder.addDoubleProperty("Hood min angle", () -> minAngle, (angle) -> minAngle = angle);
-        builder.addDoubleProperty("Reset angle degrees", this::getAngleDegrees, this::resetAngleDegrees);
+        DoubleHolder angleToReset = new DoubleHolder(ANGLE_OFFSET);
+        builder.addDoubleProperty("Angle to reset", angleToReset::get, angleToReset::set);
+        builder.addChild("Reset angle degrees", new InstantCommand(() -> {
+            resetAngleDegrees(angleToReset.get());
+        }).ignoringDisable(true));
     }
 }

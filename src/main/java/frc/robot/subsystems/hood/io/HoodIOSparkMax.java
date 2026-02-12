@@ -26,6 +26,7 @@ public class HoodIOSparkMax extends HoodIO {
         super(fieldsTable);
         config.smartCurrentLimit(CURRENT_LIMIT);
         config.idleMode(IdleMode.kBrake);
+        // config.inverted(true);
         REVLibError configError = motor.configure(config, ResetMode.kNoResetSafeParameters,
                 PersistMode.kNoPersistParameters);
         AlertsFactory.revMotor(PeriodicAlertsGroup.defaultInstance.getSubGroup("Hood"), () -> configError,
@@ -35,12 +36,12 @@ public class HoodIOSparkMax extends HoodIO {
 
     @Override
     public double getMotorRotations() {
-        return motor.getEncoder().getPosition();
+        return -motor.getEncoder().getPosition();
     }
 
     @Override
     public void setVoltage(double voltage) {
-        motor.setVoltage(voltage);
+        motor.setVoltage(-voltage);
     }
 
     @Override
@@ -56,10 +57,5 @@ public class HoodIOSparkMax extends HoodIO {
     @Override
     protected double getMotorCurrent() {
         return motor.getOutputCurrent();
-    }
-
-    @Override
-    public void resetRotation(double rotations) {
-        motor.getEncoder().setPosition(rotations);
     }
 }
