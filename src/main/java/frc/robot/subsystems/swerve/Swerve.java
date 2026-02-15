@@ -16,6 +16,7 @@ import frc.robot.RobotMap.ModuleFL;
 import frc.robot.RobotMap.ModuleFR;
 import frc.robot.RobotMap.ModuleBL;
 import frc.robot.RobotMap.ModuleBR;
+import frc.robot.subsystems.poseestimation.CollisionDetector.CollisionDetectorInfo;
 import frc.robot.subsystems.poseestimation.PoseEstimator;
 import frc.robot.subsystems.swerve.SwerveConstants.Modules;
 import frc.robot.subsystems.swerve.io.ImuIO;
@@ -59,7 +60,6 @@ public class Swerve extends SubsystemBase implements Tunable {
     fieldsTable.update();
 
     TunablesManager.add("Swerve", (Tunable) this);
-
     isRedAlliance.addDefaultOption("red", true);
     isRedAlliance.addOption("blue", false);
 
@@ -85,7 +85,11 @@ public class Swerve extends SubsystemBase implements Tunable {
 
     Optional<Rotation2d> gyroAngle = isGyroConnected() ? Optional.of(Rotation2d.fromDegrees(getGyroYawDegreesCCW()))
         : Optional.empty();
-    PoseEstimator.getInstance().update(kinematics, getModulePositions(), gyroAngle);
+    PoseEstimator.getInstance().update(kinematics, getModulePositions(), gyroAngle,
+     new CollisionDetectorInfo(imuIO.xAcceleration.getAsDouble(), 
+                              imuIO.yAcceleration.getAsDouble(), 
+                              imuIO.zAcceleration.getAsDouble(), 
+                              getCurrents()));
 
     fieldsTable.recordOutput("Is gryo connected", isGyroConnected());
     fieldsTable.recordOutput("Yaw degrees CCW", getGyroYawDegreesCCW());

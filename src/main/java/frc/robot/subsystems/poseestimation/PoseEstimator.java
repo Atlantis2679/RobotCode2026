@@ -7,6 +7,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
+import frc.robot.subsystems.poseestimation.CollisionDetector.CollisionDetectorInfo;
 import team2679.atlantiskit.logfields.LogFieldsTable;
 
 public class PoseEstimator {
@@ -16,6 +17,8 @@ public class PoseEstimator {
     private Pose2d estimatedPose = Pose2d.kZero;
 
     private LogFieldsTable fieldsTable = new LogFieldsTable("PoseEstimator");
+
+    private CollisionDetector collisionDetector = new CollisionDetector(fieldsTable);
 
     private SwerveModulePosition[] lastModulePositions = new SwerveModulePosition[] {
         new SwerveModulePosition(),
@@ -30,7 +33,8 @@ public class PoseEstimator {
         return instance;
     }
 
-    public void update(SwerveDriveKinematics kinematics, SwerveModulePosition[] modulePositions, Optional<Rotation2d> gyroAngle) {
+    public void update(SwerveDriveKinematics kinematics, SwerveModulePosition[] modulePositions, Optional<Rotation2d> gyroAngle, CollisionDetectorInfo collisionDetectorInfo) {
+        collisionDetector.check(collisionDetectorInfo);
         Twist2d twist2d = kinematics.toTwist2d(lastModulePositions, modulePositions);
         lastModulePositions = modulePositions;
         Pose2d lastOdometryPose = odomertryPose;
