@@ -14,10 +14,11 @@ public class CollisionDetector implements Tunable {
 
     private final LogFieldsTable logFieldsTable;
 
-    private double zeroAcceleration = ZERO_ACCELERATION;
+    private double zeroAcceleration = STATIC_ACCELERATION_THRESHOLD;
     private double minCollisionAcceleration = MIN_COLLISION_ACCELERATION;
     private double maxCollisionAcceleration = MAX_COLLISION_ACCELERATION;
-    private double majorJerk = MAJOR_JERK;
+    private double jerkCollisionThreshold = JERK_COLLISION_THRESHOLD;
+    private double zAccelerationThreshold = Z_ACCELERATION_THRESHOLD;
 
     public CollisionDetector(LogFieldsTable logFieldsTable) {
         this.logFieldsTable = logFieldsTable;
@@ -31,7 +32,7 @@ public class CollisionDetector implements Tunable {
     }
 
     public boolean check(CollisionDetectorInfo info) {
-        if (info.zAcceleration >= zeroAcceleration) {
+        if (info.zAcceleration >= zAccelerationThreshold) {
             update(info, false);
             return true;
         } else if (!inCollision) {
@@ -52,8 +53,8 @@ public class CollisionDetector implements Tunable {
                 update(info, toReturn);
                 return toReturn;
             } else {
-                boolean toReturn = abs(info.xAcceleration - lastXAcceleration) >= majorJerk
-                        || abs(info.yAcceleration - lastYAcceleration) >= majorJerk;
+                boolean toReturn = abs(info.xAcceleration - lastXAcceleration) >= jerkCollisionThreshold
+                        || abs(info.yAcceleration - lastYAcceleration) >= jerkCollisionThreshold;
                 update(info, toReturn);
                 return toReturn;
             }
@@ -68,12 +69,21 @@ public class CollisionDetector implements Tunable {
     }
 
     public void initTunable(TunableBuilder tunableBuilder) {
-        tunableBuilder.addDoubleProperty("Zero Acceleration", () -> zeroAcceleration, (a) -> zeroAcceleration = a);
-        tunableBuilder.addDoubleProperty("Min Collision Acceleration", () -> minCollisionAcceleration,
-                (a) -> minCollisionAcceleration = a);
-        tunableBuilder.addDoubleProperty("Max Collision Acceleration", () -> maxCollisionAcceleration,
-                (a) -> maxCollisionAcceleration = a);
-        tunableBuilder.addDoubleProperty("Major Jerk", () -> majorJerk, (j) -> majorJerk = j);
+        tunableBuilder.addDoubleProperty("Static Acceleration", 
+            () -> zeroAcceleration, 
+            (a) -> zeroAcceleration = a);
+        tunableBuilder.addDoubleProperty("Min Collision Acceleration", 
+            () -> minCollisionAcceleration,
+            (a) -> minCollisionAcceleration = a);
+        tunableBuilder.addDoubleProperty("Max Collision Acceleration",
+            () -> maxCollisionAcceleration,
+            (a) -> maxCollisionAcceleration = a);
+        tunableBuilder.addDoubleProperty("Jerk Collision Threshold", 
+            () -> jerkCollisionThreshold, 
+            (j) -> jerkCollisionThreshold = j);
+        tunableBuilder.addDoubleProperty("Z Acceleration Threshold", 
+            () -> zAccelerationThreshold, 
+            (a) -> zAccelerationThreshold = a);
     }
 
     public static record CollisionDetectorInfo(double xAcceleration, double yAcceleration,
