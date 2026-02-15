@@ -79,12 +79,4 @@ public final class SwerveConstants {
         public static final double SENSETIVE_TRANSLATION_MULTIPLIER = 0.3;
         public static final double SENSETIVE_ROTATION_MULTIPLIER = 0.3;
     }
-
-    public static final class CollisionDetectorConstants {
-        public static final double MAJOR_JERK = 0;
-        public static final double MIN_COLLISION_ACCELERATION = 0;
-        public static final double MAX_COLLISION_ACCELERATION = 0;
-        public static final double ZERO_ACCELERATION = 0;
-        public static final double Z_ACCELERATION = 0;
-    }
 }

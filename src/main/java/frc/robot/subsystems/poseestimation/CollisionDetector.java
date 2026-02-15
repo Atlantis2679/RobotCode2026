@@ -1,6 +1,6 @@
-package frc.robot.subsystems.swerve;
+package frc.robot.subsystems.poseestimation;
 
-import static frc.robot.subsystems.swerve.SwerveConstants.CollisionDetectorConstants.*;
+import static frc.robot.subsystems.poseestimation.CollisionDetectionConstants.*;
 import team2679.atlantiskit.logfields.LogFieldsTable;
 import team2679.atlantiskit.tunables.Tunable;
 import team2679.atlantiskit.tunables.TunableBuilder;
