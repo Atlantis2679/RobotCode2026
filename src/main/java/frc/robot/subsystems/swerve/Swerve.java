@@ -182,7 +182,7 @@ public class Swerve extends SubsystemBase implements Tunable {
   public double[] getCurrents() {
     double[] currents = new double[4];
     for (int i = 0; i<4; ++i){
-      currents[i] = modules[i].getCurrent();
+      currents[i] = Math.abs(modules[i].getCurrent());
     }
     return currents;
   }

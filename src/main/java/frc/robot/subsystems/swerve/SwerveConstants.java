@@ -81,9 +81,10 @@ public final class SwerveConstants {
     }
 
     public static final class CollisionDetectorConstants {
-        public static final int CURRENT_AVG_CASES = 1;
-        public static final double MAJOR_CURRENTS_DIFF = 0;
         public static final double MAJOR_JERK = 0;
-        public static final double COLLISION_ACCELERATION = 0;
+        public static final double MIN_COLLISION_ACCELERATION = 0;
+        public static final double MAX_COLLISION_ACCELERATION = 0;
+        public static final double ZERO_ACCELERATION = 0;
+        public static final double Z_ACCELERATION = 0;
     }
 }
