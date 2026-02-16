@@ -20,14 +20,13 @@ import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.Timer;
 import team2679.atlantiskit.logfields.LogFieldsTable;
 
+import static frc.robot.subsystems.poseestimation.PoseEstimatorConstants.*;
+
 public class PoseEstimator {
     private static final PoseEstimator instance = new PoseEstimator();
 
     private Pose2d odomertryPose = Pose2d.kZero;
     private Pose2d estimatedPose = Pose2d.kZero;
-
-    private static final double[] VISION_Q_STD_DEVS = new double[] {0.000009, 0.000009, 0.000004};
-    private static final double ODOMETRY_POSES_BUFFER_SIZE_SEC = 2;
 
     private TimeInterpolatableBuffer<Pose2d> odometryPosesBuffer = TimeInterpolatableBuffer.createBuffer(ODOMETRY_POSES_BUFFER_SIZE_SEC);
 
