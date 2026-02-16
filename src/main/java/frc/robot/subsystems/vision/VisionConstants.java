@@ -3,29 +3,29 @@ package frc.robot.subsystems.vision;
 import static edu.wpi.first.units.Units.Degrees;
 
 import java.io.IOException;
-import java.util.function.Consumer;
 
 import org.photonvision.simulation.SimCameraProperties;
 import org.photonvision.simulation.VisionSystemSim;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
-import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Robot;
+import frc.robot.subsystems.poseestimation.PoseEstimator;
 
 public class VisionConstants {
-  public static AprilTagFieldLayout APRTIL_TAGS_FIELD_LAYOUT;
-  static {
-    try {
-      APRTIL_TAGS_FIELD_LAYOUT = new AprilTagFieldLayout(Filesystem.getDeployDirectory() + "/2026-rebuilt-welded-edit.json");
-    } catch (IOException e) {
-      APRTIL_TAGS_FIELD_LAYOUT = null;
-    }
-  };
+  public static AprilTagFieldLayout APRTIL_TAGS_FIELD_LAYOUT = AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
+  // static {
+  //   try {
+  //     APRTIL_TAGS_FIELD_LAYOUT = new AprilTagFieldLayout(Filesystem.getDeployDirectory() + "/2026-rebuilt-welded-edit.json");
+  //   } catch (IOException e) {
+  //     APRTIL_TAGS_FIELD_LAYOUT = null;
+  //   }
+  // };
 
   public static final double TRANSLATION_STD_MULTIPLYER = 0.01;
   public static final double ROTATION_STD_MULTIPLYER = 0.03;
@@ -60,16 +60,13 @@ public class VisionConstants {
     static {
       if (Robot.isSimulation()) {
         VISION_SIM.addAprilTags(APRTIL_TAGS_FIELD_LAYOUT);
+        PoseEstimator.registerCallbackOnPoseUpdate(VISION_SIM::update);
         SmartDashboard.putData("VisionSimulation", VISION_SIM.getDebugField());
         configureSimCameraProperties();
       }
     }
 
     private static void configureSimCameraProperties() {
-      // SIM_CAMERA_PROPERTIES.setCalibration(1600, 1200, Rotation2d.fromDegrees(5));
     }
-
-    // Need to register at pose estimator
-    public static Consumer<Pose2d> callbackOnPoseEstimatorUpdate = pose -> VISION_SIM.update(pose);
   }
 }
