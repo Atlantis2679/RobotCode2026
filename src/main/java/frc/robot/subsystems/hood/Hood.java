@@ -61,11 +61,12 @@ public class Hood extends SubsystemBase implements Tunable {
         }
     }
 
-    public double calculatePID(double desiredAngleDegree) {
-        if (isAtAngle(desiredAngleDegree)) return 0.0;
-        fieldsTable.recordOutput("Desired angle PID", desiredAngleDegree);
-        desiredHoodVisualizer.update(desiredAngleDegree);
-        return pid.calculate(getAngleDegrees(), desiredAngleDegree);
+    public double calculatePID(double desiredAngleDegrees) {
+        if (desiredAngleDegrees < minAngle || desiredAngleDegrees > maxAngle) return 0.0;
+        if (isAtAngle(desiredAngleDegrees)) return 0.0;
+        fieldsTable.recordOutput("Desired angle PID", desiredAngleDegrees);
+        desiredHoodVisualizer.update(desiredAngleDegrees);
+        return pid.calculate(getAngleDegrees(), desiredAngleDegrees);
     }
 
     public void stop() {

@@ -37,19 +37,6 @@ public class HoodCommands {
         });
     }
 
-    public Command hoodDemo() {
-        DoubleHolder counter = new DoubleHolder(0);
-        DoubleHolder setpoint = new DoubleHolder(0);
-        return hood.runOnce(() -> {counter.set(0);}).andThen(() -> {
-            if (counter.get() >= 100) {
-                counter.set(0);
-            }
-            if (counter.get() == 0) setpoint.set(Math.random() * 40);
-            counter.set(counter.get() + 1);
-            hood.setVoltage(hood.calculatePID(setpoint.get()));
-        });
-    }
-
     public Command manualController(DoubleSupplier speed) {
         return hood.run(() -> {
             hood.setVoltage(speed.getAsDouble() * MAX_VOLTAGE);
