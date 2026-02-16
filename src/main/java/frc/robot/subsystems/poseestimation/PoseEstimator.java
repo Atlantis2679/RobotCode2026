@@ -23,14 +23,13 @@ import static frc.robot.subsystems.poseestimation.PoseEstimatorConstants.*;
 
 public class PoseEstimator {
     private static final PoseEstimator instance = new PoseEstimator();
+    private static final List<Consumer<Pose2d>> callbackOnPoseUpdate = new ArrayList<>();
 
     private Pose2d odomertryPose = Pose2d.kZero;
     private Pose2d estimatedPose = Pose2d.kZero;
 
     private TimeInterpolatableBuffer<Pose2d> odometryPosesBuffer = TimeInterpolatableBuffer
             .createBuffer(ODOMETRY_POSES_BUFFER_SIZE_SEC);
-
-    private static final List<Consumer<Pose2d>> callbackOnPoseUpdate = new ArrayList<>();
 
     private LogFieldsTable fieldsTable = new LogFieldsTable("PoseEstimator");
 

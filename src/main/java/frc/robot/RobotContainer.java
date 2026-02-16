@@ -24,6 +24,7 @@ import frc.robot.subsystems.poseestimation.PoseEstimator;
 import frc.robot.subsystems.roller.Roller;
 import frc.robot.subsystems.swerve.Swerve;
 import frc.robot.subsystems.swerve.SwerveCommands;
+import frc.robot.subsystems.vision.Vision;
 import frc.robot.utils.NaturalXboxController;
 import team2679.atlantiskit.tunables.TunablesManager;
 import team2679.atlantiskit.tunables.extensions.TunableCommand;
@@ -36,6 +37,7 @@ public class RobotContainer {
     private final Hood hood = new Hood();
     private final FlyWheel flyWheel = new FlyWheel();
     private final Elevator elevator = new Elevator();
+    private final Vision vision = new Vision();
 
     private final ShootingCalculator hubShootingCalculator = new ShootingCalculator(FieldContants.BLUE_HUB_POSE,
             ShootingMeasurments.ALL_MEASURMENTS_HUB);
@@ -113,6 +115,10 @@ public class RobotContainer {
 
     public void enterSwerveIntoTest() {
         swerve.costAll();
+    }
+    
+    public void periodicUpdate() {
+        vision.update();
     }
 
     public Command getAutonomousCommand() {

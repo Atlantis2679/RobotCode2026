@@ -11,6 +11,7 @@ import java.util.List;
 
 import edu.wpi.first.math.geometry.Pose3d;
 import frc.robot.FieldConstants;
+import frc.robot.subsystems.poseestimation.PoseEstimator;
 import frc.robot.subsystems.poseestimation.PoseEstimator.VisionMesurment;
 import frc.robot.subsystems.vision.VisionConstants.CameraConfig;
 import frc.robot.subsystems.vision.io.VisionAprilTagsIO;
@@ -31,7 +32,7 @@ public class Vision {
     }
   }
 
-  private static List<VisionMesurment> getAllResultsInIO(VisionAprilTagsIO io, boolean useRoation) {
+  private static List<VisionMesurment> getAllResultsInIO(VisionAprilTagsIO io) {
     int length = io.posesEstimates.get().length;
     List<VisionMesurment> visionMesurments = new ArrayList<>();
     double stdFactor = io.getCameraConfig().stdFactor();
@@ -47,16 +48,16 @@ public class Vision {
       }
       double avgDistance = distanceSum / tagsUsed;
       if (avgDistance > AVG_DISTANCE_THREASHOLD_METERS) continue;
-      double[] trustLevels = calculateTrustLevel(stdFactor, tagsUsed, avgDistance, ambiguity, useRoation);
+      double[] trustLevels = calculateTrustLevel(stdFactor, tagsUsed, avgDistance, ambiguity);
       visionMesurments.add(new VisionMesurment(pose.toPose2d(), trustLevels[0], trustLevels[1], io.cameraTimestampsSeconds.get()[i]));
     }
     return visionMesurments;
   }
 
-  public List<VisionMesurment> getAllResults(boolean useRotation) {
+  private List<VisionMesurment> getAllResults() {
     List<VisionMesurment> measurments = new ArrayList<>();
     for (VisionAprilTagsIO io : visionCameras) {
-      for (VisionMesurment measurment : getAllResultsInIO(io, useRotation)) {
+      for (VisionMesurment measurment : getAllResultsInIO(io)) {
         measurments.add(measurment);
       }
     }
@@ -64,12 +65,18 @@ public class Vision {
     return measurments;
   }
 
-  private static double[] calculateTrustLevel(double stdFactor, int tagsUsed, double avgDistanceToCam, double ambiguity, boolean useRotation) {
+  public void update() {
+    for (VisionMesurment mesurment : getAllResults()) {
+      PoseEstimator.getInstance().addVisionMeasurment(mesurment);
+    }
+  }
+
+  private static double[] calculateTrustLevel(double stdFactor, int tagsUsed, double avgDistanceToCam, double ambiguity) {
     if (ambiguity == 1 || tagsUsed == 0 || avgDistanceToCam == 0)
       return new double[] {Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY};
     double value = Math.pow(avgDistanceToCam, 1.2) / Math.pow(tagsUsed, 2) / Math.pow(1 - ambiguity, 2) * stdFactor;
     double xyStdDev = TRANSLATION_STD_MULTIPLYER * value;
-    double rotationStdDevs = useRotation ? ROTATION_STD_MULTIPLYER * value : Double.POSITIVE_INFINITY;
+    double rotationStdDevs = ROTATION_STD_MULTIPLYER * value;
     return new double[] {xyStdDev, rotationStdDevs};
   }
 }
