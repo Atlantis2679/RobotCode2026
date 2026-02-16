@@ -5,6 +5,8 @@ import java.util.function.DoubleSupplier;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.PowerDistribution;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -18,9 +20,11 @@ import frc.robot.subsystems.flywheel.FlyWheel;
 import frc.robot.subsystems.fourbar.Fourbar;
 import frc.robot.subsystems.hood.Hood;
 import frc.robot.subsystems.index.Index;
+import frc.robot.subsystems.poseestimation.PoseEstimator;
 import frc.robot.subsystems.roller.Roller;
 import frc.robot.subsystems.swerve.Swerve;
 import frc.robot.subsystems.swerve.SwerveCommands;
+import frc.robot.subsystems.vision.Vision;
 import frc.robot.utils.NaturalXboxController;
 import team2679.atlantiskit.tunables.TunablesManager;
 import team2679.atlantiskit.tunables.extensions.TunableCommand;
@@ -33,6 +37,7 @@ public class RobotContainer {
     private final Hood hood = new Hood();
     private final FlyWheel flyWheel = new FlyWheel();
     private final Elevator elevator = new Elevator();
+    private final Vision vision = new Vision();
 
     private final ShootingCalculator hubShootingCalculator = new ShootingCalculator(FieldContants.BLUE_HUB_POSE,
             ShootingMeasurments.ALL_MEASURMENTS_HUB);
@@ -76,7 +81,7 @@ public class RobotContainer {
                         driverController::getLeftY,
                         driverController::getRightY).fullTunable());
 
-        driverController.a().onTrue(new InstantCommand(() -> swerve.resetYaw(0)));
+        driverController.a().onTrue(new InstantCommand(swerve::resetYawZero));
     }
 
     public void configureOperator() {
@@ -99,10 +104,21 @@ public class RobotContainer {
     }
 
     public void configureAuto() {
+        Field2d field = new Field2d();
+
+        PoseEstimator.registerCallbackOnPoseUpdate((pose) -> {
+            field.setRobotPose(pose);
+        });
+
+        SmartDashboard.putData(field);
     }
 
     public void enterSwerveIntoTest() {
         swerve.costAll();
+    }
+    
+    public void periodicUpdate() {
+        vision.update();
     }
 
     public Command getAutonomousCommand() {
