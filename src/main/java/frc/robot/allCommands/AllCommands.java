@@ -12,7 +12,6 @@ import frc.robot.subsystems.index.Index;
 import frc.robot.subsystems.index.IndexCommands;
 import frc.robot.subsystems.roller.Roller;
 import frc.robot.subsystems.roller.RollerCommands;
-import frc.robot.subsystems.swerve.Swerve;
 import team2679.atlantiskit.tunables.extensions.TunableCommand;
 import team2679.atlantiskit.valueholders.DoubleHolder;
 
@@ -28,7 +27,6 @@ public class AllCommands {
     private Roller roller;
     private FlyWheel flyWheel;
     private Hood hood;
-    private Swerve swerve;
     private Index index;
     private Elevator elevator;
 
@@ -100,9 +98,8 @@ public class AllCommands {
             roller.stop();
             flyWheel.stop();
             hood.stop();
-            swerve.stop();
             elevator.stop();
-        }, fourbar, roller, flyWheel, hood, swerve, elevator)
+        }, fourbar, roller, flyWheel, hood, elevator)
                 .ignoringDisable(true)
                 .withName("stopAll");
     }

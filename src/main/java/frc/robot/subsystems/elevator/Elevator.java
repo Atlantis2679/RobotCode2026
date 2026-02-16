@@ -24,7 +24,7 @@ import team2679.atlantiskit.tunables.TunablesManager;
 import team2679.atlantiskit.tunables.extensions.TunableArmFeedforward;
 import team2679.atlantiskit.tunables.extensions.TunableTrapezoidProfile;
 
-public class Elevator extends SubsystemBase {
+public class Elevator extends SubsystemBase implements Tunable {
     private final LogFieldsTable fieldsTable = new LogFieldsTable(getName());
     private final ElevatorIO io = Robot.isReal() ? new ElevatorIOSparkMax(fieldsTable) : new ElevatorIOSim(fieldsTable);
 
@@ -133,6 +133,7 @@ public class Elevator extends SubsystemBase {
         io.setVoltage(0);
     }
 
+    @Override
     public void initTunable(TunableBuilder builder) {
         builder.addChild("Elevator PID", pid);
         builder.addChild("Elevator feedforward", elevatorFeedforward);
