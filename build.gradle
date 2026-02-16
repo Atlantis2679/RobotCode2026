@@ -50,7 +50,10 @@ wpi.java.debugJni = false
 // Set this to true to enable desktop support.
 def includeDesktopSupport = true
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> main
 task(replayWatch, type: JavaExec) {
     mainClass = "org.littletonrobotics.junction.ReplayWatch"
     classpath = sourceSets.main.runtimeClasspath
@@ -115,7 +118,6 @@ wpi.java.configureTestTasks(test)
 tasks.withType(JavaCompile) {
     options.compilerArgs.add '-XDstringConcat=inline'
 }
-
 
 project.compileJava.dependsOn(createVersionFile)
 gversion {

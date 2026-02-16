@@ -6,25 +6,23 @@ import edu.wpi.first.wpilibj.simulation.FlywheelSim;
 import team2679.atlantiskit.logfields.LogFieldsTable;
 import frc.robot.subsystems.flywheel.FlyWheelConstants;
 
-public class FlyWheelIOSim extends FlyWheelIO{
-
+public class FlyWheelIOSim extends FlyWheelIO {
     private final FlywheelSim flyWheelMotorSim = new FlywheelSim(
-        LinearSystemId.createFlywheelSystem(DCMotor.getNeo550(1),
-        FlyWheelConstants.Sim.FLYWHEEL_JKgMetersSquared,FlyWheelConstants.GEAR_RATIO),
-        DCMotor.getNeo550(1));
-        
+            LinearSystemId.createFlywheelSystem(DCMotor.getNeo550(1),
+                    FlyWheelConstants.Sim.JKgMetersSquared, FlyWheelConstants.GEAR_RATIO),
+            DCMotor.getNeo550(1));
 
     @Override
     protected void periodicBeforeFields() {
         flyWheelMotorSim.update(0.02);
     }
 
-    public FlyWheelIOSim(LogFieldsTable fieldsTable){
+    public FlyWheelIOSim(LogFieldsTable fieldsTable) {
         super(fieldsTable);
     }
 
     @Override
-    public double getMotorsRPM(){
+    protected double getMotorsRPM() {
         return flyWheelMotorSim.getAngularVelocityRPM();
     }
 
@@ -32,5 +30,14 @@ public class FlyWheelIOSim extends FlyWheelIO{
     public void setVoltage(double volt) {
         flyWheelMotorSim.setInputVoltage(volt);
     }
-    
+
+    @Override
+    protected double getMotor1Current() {
+        return flyWheelMotorSim.getCurrentDrawAmps();
+    }
+
+    @Override
+    protected double getMotor2Current() {
+        return flyWheelMotorSim.getCurrentDrawAmps();
+    }
 }

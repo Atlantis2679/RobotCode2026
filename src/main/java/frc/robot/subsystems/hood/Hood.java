@@ -21,37 +21,23 @@ import team2679.atlantiskit.tunables.extensions.TunableTrapezoidProfile;
 
 import static frc.robot.subsystems.hood.HoodConstants.*;
 
-public class Hood extends SubsystemBase{
-
+public class Hood extends SubsystemBase implements Tunable {
     private final LogFieldsTable fieldsTable = new LogFieldsTable(getName());
-    private final HoodIO io = Robot.isReal()?
-        new HoodIOSparkMax(fieldsTable):
-        new HoodIOSim(fieldsTable);
+    private final HoodIO io = Robot.isReal() ? new HoodIOSparkMax(fieldsTable) : new HoodIOSim(fieldsTable);
 
     private final HoodVisualizer realVisualizer = new HoodVisualizer(fieldsTable, "Real Visualizer",
-        new Color8Bit(Color.kPurple));
+            new Color8Bit(Color.kPurple));
     private final HoodVisualizer desiredHoodVisualizer = new HoodVisualizer(fieldsTable, "Desired Visualizer",
-        new Color8Bit(Color.kYellow));
+            new Color8Bit(Color.kYellow));
 
     private final RotationalSensorHelper rotationalHelpr;
 
     private final TunableTrapezoidProfile trapezoidProfile = new TunableTrapezoidProfile(
-        new TrapezoidProfile.Constraints(
-            HoodConstants.MAX_VELOCITY_DEG_PER_SEC,
-            HoodConstants.MAX_ACCELERATION_DEG_PER_SEC_SQUEARD)
-    );
+            new TrapezoidProfile.Constraints(MAX_VELOCITY_DEG_PER_SEC, MAX_ACCELERATION_DEG_PER_SEC_SQUEARD));
 
-    private final PIDController hoodPidController = new PIDController(
-        HoodConstants.KP,
-        HoodConstants.KI,
-        HoodConstants.KD
-    );
-    private final TunableArmFeedforward hoodFeedForward = new TunableArmFeedforward(
-        HoodConstants.KS,
-        HoodConstants.KG,
-        HoodConstants.KV,
-        HoodConstants.KA
-    );
+    private final PIDController pid = new PIDController(KP, KI, KD);
+
+    private final TunableArmFeedforward feedForward = new TunableArmFeedforward(KS, KG, KV, KA);
 
     private final Debouncer encoderConnectedDebouncer = new Debouncer(ENCODER_CONNECTED_DEBAUNCER_SEC);
 
@@ -61,46 +47,52 @@ public class Hood extends SubsystemBase{
     private double upperBound = UPPER_BOUND;
     private double lowerBound = LOWER_BOUND;
 
-    public Hood(){
+    public Hood() {
         fieldsTable.update();
 
         TunablesManager.add("Hood", (Tunable) this);
 
-        rotationalHelpr = new RotationalSensorHelper(io.getHoodMotorAngleDegree(), HoodConstants.ANGLE_OFFSET); 
-        rotationalHelpr.enableContinuousWrap(lowerBound, upperBound);   
+        rotationalHelpr = new RotationalSensorHelper(getAngleDegrees(), ANGLE_OFFSET);
+        rotationalHelpr.enableContinuousWrap(lowerBound, upperBound);
     }
 
-    public void periodic(){
+    public void periodic() {
         realVisualizer.update(getAngleDegrees());
-        rotationalHelpr.update(io.getHoodMotorAngleDegree());
+        rotationalHelpr.update(getAngleDegrees());
         fieldsTable.recordOutput("angle", getAngleDegrees());
         fieldsTable.recordOutput("velocity", rotationalHelpr.getVelocity());
     }
-    public double calculateFeedForward(double desiredAngleDegree, double desiredSpeed, boolean usePID){
+
+    public double calculateFeedForward(double desiredAngleDegree, double desiredSpeed, boolean usePID) {
         fieldsTable.recordOutput("desired angle", desiredAngleDegree);
         fieldsTable.recordOutput("desired speed", desiredSpeed);
         desiredHoodVisualizer.update(desiredAngleDegree);
-        double speed = hoodFeedForward.calculate(Math.toRadians(desiredAngleDegree), desiredSpeed);
+        double speed = feedForward.calculate(Math.toRadians(desiredAngleDegree), desiredSpeed);
         if (usePID && !isAtAngle(desiredAngleDegree)) {
-            speed += hoodPidController.calculate(getAngleDegrees(), desiredAngleDegree);
+            speed += pid.calculate(getAngleDegrees(), desiredAngleDegree);
         }
         return speed;
     }
+
     public TrapezoidProfile.State calculateTrapezoidProfile(double time, TrapezoidProfile.State initialState,
-    TrapezoidProfile.State desiredState){
-        return trapezoidProfile.calculate(time, initialState, desiredState);    
+            TrapezoidProfile.State desiredState) {
+        return trapezoidProfile.calculate(time, initialState, desiredState);
     }
-    public void stop(){
+
+    public void stop() {
         io.setVoltage(0);
     }
-    public double getAngleDegrees(){
-        return io.getHoodMotorAngleDegree();
+
+    public double getAngleDegrees() {
+        return io.motorAngleDegrees.getAsDouble();
     }
-    public double getVelocity(){
+
+    public double getVelocity() {
         return rotationalHelpr.getVelocity();
     }
-    public void resetPID(){
-        hoodPidController.reset();
+
+    public void resetPID() {
+        pid.reset();
     }
 
     public boolean isAtAngle(double desiredAngleDegrees) {
@@ -112,32 +104,33 @@ public class Hood extends SubsystemBase{
     }
 
     public void setHoodVoltage(double voltage) {
-        if((getAngleDegrees() > maxAngle && voltage > 0)
-            || (getAngleDegrees() < minAngle && voltage < 0)) {
+        if ((getAngleDegrees() > maxAngle && voltage > 0)
+                || (getAngleDegrees() < minAngle && voltage < 0)) {
             voltage = 0.0;
         }
-        voltage = MathUtil.clamp(voltage, -HOOD_MAX_VOLTAGE, HOOD_MAX_VOLTAGE);
+        voltage = MathUtil.clamp(voltage, -MAX_VOLTAGE, MAX_VOLTAGE);
         fieldsTable.recordOutput("voltage", voltage);
         io.setVoltage(voltage);
     }
 
+    @Override
     public void initTunable(TunableBuilder builder) {
-        builder.addChild("Pivot PID", hoodPidController);
-        builder.addChild("Pivot feedforward", hoodFeedForward);
-        builder.addChild("Pivot Trapezoid profile", trapezoidProfile);
-        builder.addChild("Pivot rotational helper", rotationalHelpr);
-        builder.addDoubleProperty("Pivot max angle", () -> maxAngle, (angle) -> maxAngle = angle);
-        builder.addDoubleProperty("Pivot min angle", () -> minAngle, (angle) -> minAngle = angle);
-        builder.addDoubleProperty("Pivot upper bound", () -> upperBound,
-            (newUpperBound) -> {
-                upperBound = newUpperBound;
-                rotationalHelpr.enableContinuousWrap(lowerBound, newUpperBound);
-            });
-        builder.addDoubleProperty("Pivot lower bound", () -> lowerBound,
-            (newLowerBound) -> {
-                lowerBound = newLowerBound;
-                rotationalHelpr.enableContinuousWrap(newLowerBound, upperBound);
-            });
+        builder.addChild("Hood PID", pid);
+        builder.addChild("Hood feedforward", feedForward);
+        builder.addChild("Hood Trapezoid profile", trapezoidProfile);
+        builder.addChild("Hood rotational helper", rotationalHelpr);
+        builder.addDoubleProperty("Hood max angle", () -> maxAngle, (angle) -> maxAngle = angle);
+        builder.addDoubleProperty("Hood min angle", () -> minAngle, (angle) -> minAngle = angle);
+        builder.addDoubleProperty("Hood upper bound", () -> upperBound,
+                (newUpperBound) -> {
+                    upperBound = newUpperBound;
+                    rotationalHelpr.enableContinuousWrap(lowerBound, newUpperBound);
+                });
+        builder.addDoubleProperty("Hood lower bound", () -> lowerBound,
+                (newLowerBound) -> {
+                    lowerBound = newLowerBound;
+                    rotationalHelpr.enableContinuousWrap(newLowerBound, upperBound);
+                });
     }
-    
+
 }

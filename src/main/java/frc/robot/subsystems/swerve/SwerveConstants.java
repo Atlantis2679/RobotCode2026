@@ -34,8 +34,8 @@ public final class SwerveConstants {
         public static final double DRIVE_GEAR_RATIO = 6.756;
         public static final double TURN_GEAR_RATIO = 12.8;
 
-        public static final double WHEEL_CIRCUMFERENCE_METERS = Units.inchesToMeters(2);
-
+        public static final double WHEEL_CIRCUMFERENCE_METERS =  2 * Math.PI * Units.inchesToMeters(2);
+ 
         public static final double[] OFFSETS = {
             -26.3671875 + 180,
             -55.72265625 + 180,
