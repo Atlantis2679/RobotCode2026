@@ -35,17 +35,19 @@ public class SwerveModuleSim extends SwerveModuleIO {
         driveMotor.update(0.2);
         turnMotor.update(0.2);
 
-        angleRotaions += (turnMotor.getAngularVelocityRPM() / 60 * 0.02);
-        angleRotaions = warpAngle(angleRotaions);
+        driveMotorRotations += driveMotor.getAngularVelocityRPM() / 60 * 0.02;
+
+        angleRotaions += turnMotor.getAngularVelocityRPM() / 60 * 0.02;
+        turnMotor.setInputVoltage(turnPIDController.calculate(getAbsoluteTurnAngleRotations()));
     }
 
-    private double warpAngle(double angle) {
+    private double wrapAngle(double angle) {
         return ((angle + 1) % 2 + 2) % 2 - 1;
     }
 
     @Override
     protected double getAbsoluteTurnAngleRotations() {
-        return angleRotaions;
+        return wrapAngle(angleRotaions);
     }
 
     @Override
@@ -65,7 +67,7 @@ public class SwerveModuleSim extends SwerveModuleIO {
 
     @Override
     public void setTurnAngleRotations(double rotations) {
-        turnMotor.setInputVoltage(rotations);
+        turnPIDController.setSetpoint(wrapAngle(rotations));
     }
 
     @Override
@@ -75,10 +77,12 @@ public class SwerveModuleSim extends SwerveModuleIO {
 
     @Override
     public void setCoast() {
+        driveMotor.setInputVoltage(0);
     }
 
     @Override
     public void resetIntegratedAngleRotations(double newAngle) {
+        angleRotaions = newAngle;
     }
 
     @Override
