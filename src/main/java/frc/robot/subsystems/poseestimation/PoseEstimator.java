@@ -17,7 +17,6 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
-import edu.wpi.first.wpilibj.Timer;
 import team2679.atlantiskit.logfields.LogFieldsTable;
 
 import static frc.robot.subsystems.poseestimation.PoseEstimatorConstants.*;
@@ -28,17 +27,18 @@ public class PoseEstimator {
     private Pose2d odomertryPose = Pose2d.kZero;
     private Pose2d estimatedPose = Pose2d.kZero;
 
-    private TimeInterpolatableBuffer<Pose2d> odometryPosesBuffer = TimeInterpolatableBuffer.createBuffer(ODOMETRY_POSES_BUFFER_SIZE_SEC);
+    private TimeInterpolatableBuffer<Pose2d> odometryPosesBuffer = TimeInterpolatableBuffer
+            .createBuffer(ODOMETRY_POSES_BUFFER_SIZE_SEC);
 
-    private final List<Consumer<Pose2d>> callbackOnPoseUpdate = new ArrayList<>();
+    private static final List<Consumer<Pose2d>> callbackOnPoseUpdate = new ArrayList<>();
 
     private LogFieldsTable fieldsTable = new LogFieldsTable("PoseEstimator");
 
     private SwerveModulePosition[] lastModulePositions = new SwerveModulePosition[] {
-        new SwerveModulePosition(),
-        new SwerveModulePosition(),
-        new SwerveModulePosition(),
-        new SwerveModulePosition(),
+            new SwerveModulePosition(),
+            new SwerveModulePosition(),
+            new SwerveModulePosition(),
+            new SwerveModulePosition(),
     };
 
     private PoseEstimator() { }
@@ -47,54 +47,59 @@ public class PoseEstimator {
         return instance;
     }
 
-    public void update(SwerveDriveKinematics kinematics, SwerveModulePosition[] modulePositions, Optional<Rotation2d> gyroAngle) {
-        Twist2d twist2d = kinematics.toTwist2d(lastModulePositions, modulePositions);
-        lastModulePositions = modulePositions;
+    public void addOdometryMeasurment(OdometryMeasurment measurment) {
+        Twist2d twist2d = measurment.kinematics.toTwist2d(lastModulePositions, measurment.modulePositions);
+        lastModulePositions = measurment.modulePositions;
         Pose2d lastOdometryPose = odomertryPose;
         odomertryPose = odomertryPose.exp(twist2d);
-        if (gyroAngle.isPresent()) {
-            odomertryPose = new Pose2d(odomertryPose.getTranslation(), gyroAngle.get());
+        if (measurment.gyroAngle.isPresent()) {
+            odomertryPose = new Pose2d(odomertryPose.getTranslation(), measurment.gyroAngle.get());
         }
         fieldsTable.recordOutput("Current Odomertry Pose", odomertryPose);
-        odometryPosesBuffer.addSample(Timer.getFPGATimestamp(), odomertryPose);
+        odometryPosesBuffer.addSample(measurment.timestamp, odomertryPose);
         Twist2d odometryTwistFromLastPose = lastOdometryPose.log(odomertryPose);
         estimatedPose = estimatedPose.exp(odometryTwistFromLastPose);
+        fieldsTable.recordOutput("Current Estimated Pose", estimatedPose);
         callAllCallbacks();
     }
 
     public void addVisionMeasurment(VisionMesurment mesurment) {
         Optional<Pose2d> sample = odometryPosesBuffer.getSample(mesurment.timestamp());
-        if (sample.isEmpty()) return;
+        if (sample.isEmpty())
+            return;
         Transform2d odometryToSampleTransform = new Transform2d(odomertryPose, sample.get());
         Pose2d estimateAtTime = estimatedPose.plus(odometryToSampleTransform);
         Transform2d visionTransform = calculateVisionTransform(mesurment, estimateAtTime);
         estimatedPose = estimateAtTime.plus(visionTransform).plus(odometryToSampleTransform.inverse());
+        fieldsTable.recordOutput("Current Estimated Pose", estimatedPose);
         callAllCallbacks();
     }
 
     private Transform2d calculateVisionTransform(VisionMesurment visionMesurment, Pose2d estimateAtTime) {
         // Solve for closed form Kalman gain for continuous Kalman filter with A = 0
         // and C = I. See wpimath/algorithms.md
-        double[] r = new double[] {visionMesurment.xyStdDev(), visionMesurment.xyStdDev(), visionMesurment.thetaStdDev()};
-        
+        double[] r = new double[] { visionMesurment.xyStdDev(), visionMesurment.xyStdDev(),
+                visionMesurment.thetaStdDev() };
+
         Matrix<N3, N3> visionK = new Matrix<N3, N3>(Nat.N3(), Nat.N3());
         for (int row = 0; row < 3; row++) {
             if (VISION_Q_STD_DEVS[row] == 0) {
                 visionK.set(row, row, 0);
             } else {
-                visionK.set(row, row, VISION_Q_STD_DEVS[row] / (VISION_Q_STD_DEVS[row] + Math.sqrt(VISION_Q_STD_DEVS[row] * r[row])));
+                visionK.set(row, row,
+                        VISION_Q_STD_DEVS[row] / (VISION_Q_STD_DEVS[row] + Math.sqrt(VISION_Q_STD_DEVS[row] * r[row])));
             }
         }
 
         Transform2d transform = new Transform2d(estimateAtTime, visionMesurment.pose());
 
         Matrix<N3, N1> kTimesTransform = visionK.times(
-            VecBuilder.fill(transform.getX(), transform.getY(), transform.getRotation().getRadians()));
-        
+                VecBuilder.fill(transform.getX(), transform.getY(), transform.getRotation().getRadians()));
+
         return new Transform2d(
-            kTimesTransform.get(0, 0),
-            kTimesTransform.get(1, 0),
-            Rotation2d.fromRadians(kTimesTransform.get(2, 0)));
+                kTimesTransform.get(0, 0),
+                kTimesTransform.get(1, 0),
+                Rotation2d.fromRadians(kTimesTransform.get(2, 0)));
     }
 
     private void callAllCallbacks() {
@@ -103,7 +108,7 @@ public class PoseEstimator {
         }
     }
 
-    public void registerCallbackOnPoseUpdate(Consumer<Pose2d> callback) {
+    public static void registerCallbackOnPoseUpdate(Consumer<Pose2d> callback) {
         callbackOnPoseUpdate.add(callback);
     }
 
@@ -113,6 +118,7 @@ public class PoseEstimator {
         odometryPosesBuffer.clear();
         fieldsTable.recordOutput("Current Odomertry Pose", odomertryPose);
         fieldsTable.recordOutput("Current Estimated Pose", estimatedPose);
+        callAllCallbacks();
     }
 
     public void resetYaw(Rotation2d newYaw) {
@@ -127,5 +133,10 @@ public class PoseEstimator {
         return odomertryPose;
     }
 
-    public record VisionMesurment(Pose2d pose, double xyStdDev, double thetaStdDev, double timestamp) {}
+    public record VisionMesurment(Pose2d pose, double xyStdDev, double thetaStdDev, double timestamp) {
+    }
+
+    public record OdometryMeasurment(SwerveDriveKinematics kinematics, SwerveModulePosition[] modulePositions,
+            Optional<Rotation2d> gyroAngle, double timestamp) {
+    }
 }
