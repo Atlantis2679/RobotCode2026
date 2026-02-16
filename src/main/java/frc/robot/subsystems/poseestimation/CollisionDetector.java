@@ -14,7 +14,6 @@ public class CollisionDetector implements Tunable {
 
     private final LogFieldsTable logFieldsTable;
 
-    private double zeroAcceleration = STATIC_ACCELERATION_THRESHOLD;
     private double minCollisionAcceleration = MIN_COLLISION_ACCELERATION;
     private double maxCollisionAcceleration = MAX_COLLISION_ACCELERATION;
     private double jerkCollisionThreshold = JERK_COLLISION_THRESHOLD;
@@ -36,7 +35,7 @@ public class CollisionDetector implements Tunable {
             update(info, false);
             return true;
         } else if (!inCollision) {
-            if (abs(info.xAcceleration) > zeroAcceleration && abs(info.yAcceleration) > zeroAcceleration) {
+            if (abs(info.xAcceleration) > STATIC_ACCELERATION_THRESHOLD && abs(info.yAcceleration) > STATIC_ACCELERATION_THRESHOLD) {
                 double currentMax1 = 0, currentMax2 = 0;
                 for (double current : info.currents) {
                     if (current > currentMax1) {
@@ -69,9 +68,6 @@ public class CollisionDetector implements Tunable {
     }
 
     public void initTunable(TunableBuilder tunableBuilder) {
-        tunableBuilder.addDoubleProperty("Static Acceleration", 
-            () -> zeroAcceleration, 
-            (a) -> zeroAcceleration = a);
         tunableBuilder.addDoubleProperty("Min Collision Acceleration", 
             () -> minCollisionAcceleration,
             (a) -> minCollisionAcceleration = a);
