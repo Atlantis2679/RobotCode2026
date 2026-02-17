@@ -35,7 +35,7 @@ public class MathUtils {
         public void update(Double val) {
             values[i] = val;
             ++i;
-            if (i>values.length) {
+            if (i>=values.length) {
                 i=0;
             }
             isEmpty = false;
