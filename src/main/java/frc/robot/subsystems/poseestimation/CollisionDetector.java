@@ -1,85 +1,62 @@
 package frc.robot.subsystems.poseestimation;
 
 import static frc.robot.subsystems.poseestimation.CollisionDetectionConstants.*;
+import frc.robot.utils.MathUtils.DynamicAvarage;
+import static frc.robot.utils.MathUtils.getHighestX;
+
 import team2679.atlantiskit.logfields.LogFieldsTable;
-import team2679.atlantiskit.tunables.Tunable;
-import team2679.atlantiskit.tunables.TunableBuilder;
 
-import static java.lang.Math.*;
+import static java.lang.Math.abs;
 
-public class CollisionDetector implements Tunable {
+public class CollisionDetector {
     private double lastXAcceleration = 0;
     private double lastYAcceleration = 0;
     private boolean inCollision = false;
 
-    private final LogFieldsTable logFieldsTable;
+    private DynamicAvarage lowCurreentAvarage = new DynamicAvarage(10);
+    private DynamicAvarage highCurreentAvarage = new DynamicAvarage(10);
 
-    private double minCollisionAcceleration = MIN_COLLISION_ACCELERATION;
-    private double maxCollisionAcceleration = MAX_COLLISION_ACCELERATION;
-    private double jerkCollisionThreshold = JERK_COLLISION_THRESHOLD;
-    private double zAccelerationThreshold = Z_ACCELERATION_THRESHOLD;
+    private final LogFieldsTable logFieldsTable;
 
     public CollisionDetector(LogFieldsTable logFieldsTable) {
         this.logFieldsTable = logFieldsTable;
     }
 
-    private void update(CollisionDetectorInfo info, boolean inCollision) {
-        this.lastXAcceleration = info.xAcceleration();
-        this.lastYAcceleration = info.yAcceleration();
+    private boolean updateWrapper(CollisionDetectorInfo info, boolean inCollision) {
+        lastXAcceleration = info.xAcceleration();
+        lastYAcceleration = info.yAcceleration();
         this.inCollision = inCollision;
         logFieldsTable.recordOutput("In Collision?", inCollision);
+        return inCollision;
+    }
+
+    private void updateAVGs(double[] vals) {
+        highCurreentAvarage.update(vals[0]);
+        lowCurreentAvarage.update(vals[1]);
+    }
+
+    private void updateAVGs() {
+        highCurreentAvarage.reset();
+        lowCurreentAvarage.reset();
     }
 
     public boolean check(CollisionDetectorInfo info) {
-        if (info.zAcceleration >= zAccelerationThreshold) {
-            update(info, false);
+        if (info.zAcceleration >= Z_ACCELERATION_THRESHOLD) {
+            updateWrapper(info, false);
+            updateAVGs();
             return true;
-        } else if (!inCollision) {
-            if (abs(info.xAcceleration) > STATIC_ACCELERATION_THRESHOLD && abs(info.yAcceleration) > STATIC_ACCELERATION_THRESHOLD) {
-                double currentMax1 = 0, currentMax2 = 0;
-                for (double current : info.currents) {
-                    if (current > currentMax1) {
-                        if (current > currentMax2) {
-                            currentMax1 = currentMax2;
-                            currentMax2 = current;
-                        } else {
-                            currentMax1 = current;
-                        }
-                    }
-                }
-                boolean toReturn = minCollisionAcceleration < abs(currentMax1)
-                        && abs(currentMax2) < maxCollisionAcceleration;
-                update(info, toReturn);
-                return toReturn;
-            } else {
-                boolean toReturn = abs(info.xAcceleration - lastXAcceleration) >= jerkCollisionThreshold
-                        || abs(info.yAcceleration - lastYAcceleration) >= jerkCollisionThreshold;
-                update(info, toReturn);
-                return toReturn;
-            }
+        } if (inCollision || (info.xAcceleration<=STATIC_ACCELERATION_THRESHOLD
+                &&info.yAcceleration<=STATIC_ACCELERATION_THRESHOLD)) {
+            double[] currents = getHighestX(2, info.currents);
+            updateAVGs(currents);
+            return updateWrapper(info, highCurreentAvarage.get()>=HIGH_CURRENT_COLLISION_THRESHOLD
+                &&lowCurreentAvarage.get()>=LOW_CURRENT_COLLISION_THRESHOLD);
         } else {
-            boolean toReturn = minCollisionAcceleration <= info.xAcceleration
-                    && info.xAcceleration <= maxCollisionAcceleration
-                    && minCollisionAcceleration <= info.yAcceleration
-                    && info.yAcceleration <= maxCollisionAcceleration;
-            update(info, toReturn);
-            return toReturn;
+            boolean toReturn = abs(lastXAcceleration-info.xAcceleration)>=JERK_COLLISION_THRESHOLD
+                ||abs(lastYAcceleration-info.yAcceleration)>=JERK_COLLISION_THRESHOLD;
+            updateAVGs();
+            return updateWrapper(info, toReturn);
         }
-    }
-
-    public void initTunable(TunableBuilder tunableBuilder) {
-        tunableBuilder.addDoubleProperty("Min Collision Acceleration", 
-            () -> minCollisionAcceleration,
-            (a) -> minCollisionAcceleration = a);
-        tunableBuilder.addDoubleProperty("Max Collision Acceleration",
-            () -> maxCollisionAcceleration,
-            (a) -> maxCollisionAcceleration = a);
-        tunableBuilder.addDoubleProperty("Jerk Collision Threshold", 
-            () -> jerkCollisionThreshold, 
-            (j) -> jerkCollisionThreshold = j);
-        tunableBuilder.addDoubleProperty("Z Acceleration Threshold", 
-            () -> zAccelerationThreshold, 
-            (a) -> zAccelerationThreshold = a);
     }
 
     public static record CollisionDetectorInfo(double xAcceleration, double yAcceleration,
