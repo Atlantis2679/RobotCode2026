@@ -9,6 +9,7 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import frc.robot.subsystems.poseestimation.CollisionDetector.CollisionDetectorInfo;
 import team2679.atlantiskit.logfields.LogFieldsTable;
+import team2679.atlantiskit.tunables.TunablesManager;
 
 public class PoseEstimator {
     private static final PoseEstimator instance = new PoseEstimator();
@@ -27,7 +28,9 @@ public class PoseEstimator {
         new SwerveModulePosition(),
     };
 
-    private PoseEstimator() { }
+    private PoseEstimator() {
+        TunablesManager.add("Collision Detector", collisionDetector);
+    }
 
     public static PoseEstimator getInstance() {
         return instance;
