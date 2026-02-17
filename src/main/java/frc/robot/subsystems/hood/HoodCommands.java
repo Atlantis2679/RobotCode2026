@@ -37,6 +37,13 @@ public class HoodCommands {
         });
     }
 
+    public TunableCommand tunableHoming() {
+        return TunableCommand.wrap((tunablesTable) -> {
+            DoubleHolder voltage = tunablesTable.addNumber("voltage", -1.0);
+            return hood.run(() -> hood.setVoltage(voltage.get())).onlyWhile(() -> !hood.isCalibrated()).finallyDo(hood::stop).withName("Homing");
+        });
+    }
+
     public Command manualController(DoubleSupplier speed) {
         return hood.run(() -> {
             hood.setVoltage(speed.getAsDouble() * MAX_VOLTAGE);
