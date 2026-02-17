@@ -58,8 +58,11 @@ public class MathUtils {
         }
 
         public void reset() {
-            this.values = new Double[values.length];
-            i = 0;
+            if (!isEmpty) {
+                this.values = new Double[values.length];
+                i = 0;
+                isEmpty = true;
+            }
         }
     }
 
