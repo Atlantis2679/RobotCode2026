@@ -55,4 +55,13 @@ public class MathUtils {
             return sum/len;
         }
     }
+
+    public static double[] highestX(int x, double[] vals) {
+        java.util.Arrays.sort(vals);
+        double[] res = new double[x];
+        for (int i = 0; i < x; i++) {
+            res[i] = vals[vals.length-1-i];
+        }
+        return res;
+    }
 }
