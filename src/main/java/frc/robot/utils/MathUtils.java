@@ -56,7 +56,7 @@ public class MathUtils {
         }
     }
 
-    public static double[] highestX(int x, double[] vals) {
+    public static double[] getHighestX(int x, double[] vals) {
         java.util.Arrays.sort(vals);
         double[] res = new double[x];
         for (int i = 0; i < x; i++) {
