@@ -24,8 +24,9 @@ public class MathUtils {
     }
 
     public static class DynamicAvarage {
-        Double[] values;
-        int i = 0;
+        private Double[] values;
+        private int i = 0;
+        private boolean isEmpty = true;
         
         public DynamicAvarage(int len) {
             values = new Double[len];
@@ -37,6 +38,7 @@ public class MathUtils {
             if (i>values.length) {
                 i=0;
             }
+            isEmpty = false;
         }
 
         public Double get() {
@@ -53,6 +55,11 @@ public class MathUtils {
                 return 0.0;
             }
             return sum/len;
+        }
+
+        public void reset() {
+            this.values = new Double[values.length];
+            i = 0;
         }
     }
 
