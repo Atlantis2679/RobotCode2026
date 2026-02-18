@@ -78,8 +78,9 @@ public final class SwerveConstants {
         public static final double DRIVER_ANGULAR_ACCELERATION_LIMIT_RPS = 4.5;
         public static final double SENSETIVE_TRANSLATION_MULTIPLIER = 0.3;
         public static final double SENSETIVE_ROTATION_MULTIPLIER = 0.3;
-        public static final double ROTATION_KP = 1.8 * 12;
-        public static final double ROTATION_KI = 0;
-        public static final double ROTATION_KD = 0;
+        public static final double ROTATION_KP = 0.01;
+        public static final double ROTATION_KI = 0.02;
+        public static final double ROTATION_KD = 0.005;
+        public static final double AUTO_ROTATION_TOLERANCE_DEG = 0.5;
     }
 }

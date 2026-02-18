@@ -6,6 +6,7 @@ import java.util.function.DoubleSupplier;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import frc.robot.subsystems.poseestimation.PoseEstimator;
 import team2679.atlantiskit.tunables.SendableType;
 import team2679.atlantiskit.tunables.TunableBuilder;
 import team2679.atlantiskit.tunables.TunablesTable;
@@ -58,7 +59,7 @@ public class SwerveDriverController extends TunableCommand {
 
     tunablesTable.addChild("velocity chooser", velocityMultiplierChooser);
 
-    autoRotationPID.enableContinuousInput(-Math.PI, Math.PI);
+    autoRotationPID.enableContinuousInput(0, 360);
     tunablesTable.addChild("Auto Rotation PID Controller", autoRotationPID);
   }
 
@@ -77,10 +78,13 @@ public class SwerveDriverController extends TunableCommand {
     if (!autoRotationMode.getAsBoolean()) {
       precentageRotation = rotationsSupplier.getAsDouble() * velocityMultiplier;
     } else {
-      double currentYawAngle = PoseEstimator.getInstance().getEstimatedPose().getRotation().getDegrees();
+      double currentYawAngle = PoseEstimator.getInstance().getOdometryPose().getRotation().getDegrees();
       System.out.println("Current: " + currentYawAngle + " yaw: " + yawAutoRotationSupplier.getAsDouble());
       precentageRotation = autoRotationPID.calculate(currentYawAngle, yawAutoRotationSupplier.getAsDouble())
         * velocityMultiplier;
+      if (Math.abs(currentYawAngle - yawAutoRotationSupplier.getAsDouble()) < AUTO_ROTATION_TOLERANCE_DEG) {
+        precentageRotation = 0.0;
+      }
     }
 
     if (isSensetiveMode.getAsBoolean()) {
