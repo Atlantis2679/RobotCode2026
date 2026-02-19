@@ -40,4 +40,9 @@ public class FlyWheelIOSim extends FlyWheelIO {
     protected double getMotor2Current() {
         return flyWheelMotorSim.getCurrentDrawAmps();
     }
+
+    @Override
+    protected double getMotor2RPM() {
+        return 0;
+    }
 }

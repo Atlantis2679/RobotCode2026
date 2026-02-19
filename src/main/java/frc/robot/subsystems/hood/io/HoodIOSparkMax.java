@@ -36,12 +36,12 @@ public class HoodIOSparkMax extends HoodIO {
 
     @Override
     public double getMotorRotations() {
-        return -motor.getEncoder().getPosition();
+        return motor.getEncoder().getPosition();
     }
 
     @Override
     public void setVoltage(double voltage) {
-        motor.setVoltage(-voltage);
+        motor.setVoltage(voltage);
     }
 
     @Override

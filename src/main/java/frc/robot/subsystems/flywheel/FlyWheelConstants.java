@@ -20,12 +20,12 @@ public class FlyWheelConstants {
     // public static final double KV = 2/1000;
 
     public static final double KP = 0.0;
-    public static final double KI = 0.02;
+    public static final double KI = 0.0;
     public static final double KD = 0.0;
 
     public static final double KS = 0.21;
     public static final double KA = 0;
-    public static final double KV = 0.002;
+    public static final double KV = 0.00186;
 
     public static final double GEAR_RATIO = 1;
 

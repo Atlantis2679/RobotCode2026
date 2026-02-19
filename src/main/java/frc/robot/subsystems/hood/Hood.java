@@ -35,8 +35,8 @@ public class Hood extends SubsystemBase implements Tunable {
 
     private final Debouncer limitSwitchDebouncer = new Debouncer(LIMIT_SWITCH_DEBAUNCER_SEC);
 
-    private double maxAngle = MAX_ANGLE_DEGREES;
-    private double minAngle = MIN_ANGLE_DEGREES;
+    public double maxAngle = MAX_ANGLE_DEGREES;
+    public double minAngle = MIN_ANGLE_DEGREES;
 
     private boolean calibrated = false;
 

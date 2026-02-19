@@ -2,7 +2,7 @@ package frc.robot.subsystems.hood;
 
 public final class HoodConstants {
     public static final int MAX_VOLTAGE = 12;
-    public static final int CURRENT_LIMIT = 5;
+    public static final int CURRENT_LIMIT = 10 ;
 
     public static final double MOTOR_KV = 917;
 

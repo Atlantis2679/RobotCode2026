@@ -66,4 +66,9 @@ public class FlyWheelIOFalcon extends FlyWheelIO {
     protected double getMotor2Current() {
         return motor2.getSupplyCurrent().getValueAsDouble();
     }
+
+    @Override
+    protected double getMotor2RPM() {
+        return motor2.getVelocity().getValueAsDouble() * 60 * FlyWheelConstants.GEAR_RATIO;
+    }
 }
