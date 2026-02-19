@@ -4,7 +4,6 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import team2679.atlantiskit.logfields.LogFieldsTable;
 
-import static frc.robot.subsystems.hood.HoodConstants.ANGLE_TOLERENCE_DEGREES;
 import static frc.robot.subsystems.hood.HoodConstants.MAX_ANGLE_DEGREES;
 import static frc.robot.subsystems.hood.HoodConstants.MIN_ANGLE_DEGREES;
 import static frc.robot.subsystems.hood.HoodConstants.Sim.*;
@@ -43,12 +42,16 @@ public class HoodIOSim extends HoodIO {
     }
 
     @Override
-    protected boolean limitSwitch() {
-        return Math.abs(Math.toDegrees(motor.getAngleRads())) <= ANGLE_TOLERENCE_DEGREES;
+    protected double getMotorCurrent() {
+        return motor.getCurrentDrawAmps();
     }
 
     @Override
-    protected double getMotorCurrent() {
-        return motor.getCurrentDrawAmps();
+    protected double getAbsolueAngleDegrees() {
+        return 0.0;
+    }
+
+    @Override
+    public void setCurrentLimit(double currentLimit) {
     }
 }

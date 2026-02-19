@@ -39,16 +39,10 @@ public class HoodCommands {
         });
     }
 
-    public Command hoodDemo() {
-        DoubleHolder counter = new DoubleHolder(0);
-        DoubleHolder setpoint = new DoubleHolder(0);
-        return hood.runOnce(() -> {counter.set(0);}).andThen(() -> {
-            if (counter.get() >= 100) {
-                counter.set(0);
-            }
-            if (counter.get() == 0) setpoint.set(Math.random() * 40);
-            counter.set(counter.get() + 1);
-            hood.setVoltage(hood.calculatePID(setpoint.get()));
+    public TunableCommand tunableHoming() {
+        return TunableCommand.wrap((tunablesTable) -> {
+            DoubleHolder voltage = tunablesTable.addNumber("voltage", -1.0);
+            return hood.run(() -> hood.setVoltage(voltage.get())).onlyWhile(() -> !hood.isCalibrated()).finallyDo(hood::stop).withName("Homing");
         });
     }
 

@@ -5,7 +5,6 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Robot;
 import frc.robot.subsystems.hood.io.HoodIO;
@@ -16,7 +15,6 @@ import team2679.atlantiskit.logfields.LogFieldsTable;
 import team2679.atlantiskit.tunables.Tunable;
 import team2679.atlantiskit.tunables.TunableBuilder;
 import team2679.atlantiskit.tunables.TunablesManager;
-import team2679.atlantiskit.valueholders.DoubleHolder;
 
 import static frc.robot.subsystems.hood.HoodConstants.*;
 
@@ -33,39 +31,47 @@ public class Hood extends SubsystemBase implements Tunable {
 
     private final PIDController pid = new PIDController(KP, KI, KD);
 
-    private final Debouncer limitSwitchDebouncer = new Debouncer(LIMIT_SWITCH_DEBAUNCER_SEC);
-
-    public double maxAngle = MAX_ANGLE_DEGREES;
-    public double minAngle = MIN_ANGLE_DEGREES;
+    private double maxAngle = MAX_ANGLE_DEGREES;
+    private double minAngle = MIN_ANGLE_DEGREES;
 
     private boolean calibrated = false;
+
+    private double desiredVoltage = 0;
+
+    private final Debouncer isStuckDebouncer = new Debouncer(STUCK_DEBOUNCE_SEC);
 
     public Hood() {
         fieldsTable.update();
 
         TunablesManager.add("Hood", (Tunable) this);
 
-        angleDegrees = new RotationalSensorHelper(io.motorRotations.getAsDouble() * GEAR_RATIO, ANGLE_OFFSET);
+        io.setCurrentLimit(HOMING_CURRENT_LIMIT);
+
+        angleDegrees = new RotationalSensorHelper(io.motorRotations.getAsDouble() * GEAR_RATIO);
     }
 
     public void periodic() {
         angleDegrees.update(io.motorRotations.getAsDouble() * GEAR_RATIO);
         realVisualizer.update(getAngleDegrees());
+        fieldsTable.recordOutput("voltage", desiredVoltage);
         fieldsTable.recordOutput("angle", getAngleDegrees());
         fieldsTable.recordOutput("velocity", getVelocity());
-        fieldsTable.recordOutput("limitSwitchValue", getLimitSwitchValue());
         fieldsTable.recordOutput("current command", getCurrentCommand() != null ? getCurrentCommand().getName() : "None");
-        if (getLimitSwitchValue()) {
-            resetAngleDegrees(0);
+        fieldsTable.recordOutput("isStuck", isStuck());
+        if (isStuck() && !calibrated) {
+            angleDegrees.setOffset(io.absoluteAngleDegrees.getAsDouble());
+            angleDegrees.resetAngle(MIN_ANGLE_DEGREES);
+            io.setCurrentLimit(CURRENT_LIMIT);
             calibrated = true;
         }
     }
 
-    public double calculatePID(double desiredAngleDegree) {
-        if (isAtAngle(desiredAngleDegree)) return 0.0;
-        fieldsTable.recordOutput("Desired angle PID", desiredAngleDegree);
-        desiredHoodVisualizer.update(desiredAngleDegree);
-        return pid.calculate(getAngleDegrees(), desiredAngleDegree);
+    public double calculatePID(double desiredAngleDegrees) {
+        if (desiredAngleDegrees < minAngle || desiredAngleDegrees > maxAngle) return 0.0;
+        if (isAtAngle(desiredAngleDegrees)) return 0.0;
+        fieldsTable.recordOutput("Desired angle PID", desiredAngleDegrees);
+        desiredHoodVisualizer.update(desiredAngleDegrees);
+        return pid.calculate(getAngleDegrees(), desiredAngleDegrees);
     }
 
     public void stop() {
@@ -96,17 +102,17 @@ public class Hood extends SubsystemBase implements Tunable {
         return calibrated;
     }
 
-    public boolean getLimitSwitchValue() {
-        return limitSwitchDebouncer.calculate(io.limitSwitch.getAsBoolean());
+    private boolean isStuck() {
+        return isStuckDebouncer.calculate(Math.abs(desiredVoltage) > 0 && Math.abs(getVelocity()) < STUCK_VELOCITY_THRESHOLD_DEG_PER_SEC);
     }
 
     public void setVoltage(double voltage) {
         if ((getAngleDegrees() > maxAngle && voltage > 0)
-                || (getAngleDegrees() < minAngle && voltage < 0)) {
+                || (getAngleDegrees() < minAngle && voltage < 0) && calibrated) {
             voltage = 0.0;
         }
         voltage = MathUtil.clamp(voltage, -MAX_VOLTAGE, MAX_VOLTAGE);
-        fieldsTable.recordOutput("voltage", voltage);
+        desiredVoltage = voltage;
         io.setVoltage(voltage);
     }
 
@@ -120,10 +126,5 @@ public class Hood extends SubsystemBase implements Tunable {
         builder.addChild("Hood rotational helper", angleDegrees);
         builder.addDoubleProperty("Hood max angle", () -> maxAngle, (angle) -> maxAngle = angle);
         builder.addDoubleProperty("Hood min angle", () -> minAngle, (angle) -> minAngle = angle);
-        DoubleHolder angleToReset = new DoubleHolder(ANGLE_OFFSET);
-        builder.addDoubleProperty("Angle to reset", angleToReset::get, angleToReset::set);
-        builder.addChild("Reset angle degrees", new InstantCommand(() -> {
-            resetAngleDegrees(angleToReset.get());
-        }).ignoringDisable(true));
     }
 }
