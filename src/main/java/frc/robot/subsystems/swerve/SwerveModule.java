@@ -6,10 +6,12 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import frc.robot.Constants;
 import frc.robot.Robot;
 import frc.robot.subsystems.swerve.io.SwerveModuleIO;
 import frc.robot.subsystems.swerve.io.SwerveModuleIOFalcon;
 import frc.robot.subsystems.swerve.io.SwerveModuleSim;
+import frc.robot.subsystems.swerve.io.SwerveMoudleIONeoFalcon;
 import team2679.atlantiskit.helpers.RotationalSensorHelper;
 import team2679.atlantiskit.logfields.LogFieldsTable;
 import team2679.atlantiskit.tunables.Tunable;
@@ -29,14 +31,20 @@ public class SwerveModule implements Tunable {
     public SwerveModule(LogFieldsTable swerveFieldsTable, int moudleNum, int driveMotorID, int turnMotorID,
             int canCoderID) {
         fieldsTable = swerveFieldsTable.getSubTable("Module " + moudleNum + " " + getModuleName(moudleNum));
-        io = Robot.isReal() ? new SwerveModuleIOFalcon(fieldsTable, moudleNum, driveMotorID, turnMotorID, canCoderID)
-                : new SwerveModuleSim(fieldsTable);
+        if (Robot.isReal()) {
+            io = Constants.IS_NEO_SWERVE
+                    ? new SwerveMoudleIONeoFalcon(fieldsTable, moudleNum, driveMotorID, turnMotorID, canCoderID)
+                    : new SwerveModuleIOFalcon(fieldsTable, moudleNum, driveMotorID, turnMotorID, canCoderID);
+        } else {
+            io = new SwerveModuleSim(fieldsTable);
+        }
 
         fieldsTable.update();
 
         this.moduleNum = moudleNum;
 
-        absoluteAngleDegreesCWW = new RotationalSensorHelper(io.absoluteTurnAngleRotations.getAsDouble() * 360, OFFSETS[moudleNum]);
+        absoluteAngleDegreesCWW = new RotationalSensorHelper(io.absoluteTurnAngleRotations.getAsDouble() * 360,
+                OFFSETS[moudleNum]);
         absoluteAngleDegreesCWW.enableContinuousWrap(0, 360);
 
         resetIntegratedAngleToAbsolute();
@@ -69,7 +77,8 @@ public class SwerveModule implements Tunable {
 
         fieldsTable.recordOutput("Module target state", targetState);
         if (useVoltage) {
-            fieldsTable.recordOutput("Drive motor target voltage", (targetState.speedMetersPerSecond / MAX_SPEED_MPS) * MAX_VOLTAGE);
+            fieldsTable.recordOutput("Drive motor target voltage",
+                    (targetState.speedMetersPerSecond / MAX_SPEED_MPS) * MAX_VOLTAGE);
             io.setDriveVoltage((targetState.speedMetersPerSecond / MAX_SPEED_MPS) * MAX_VOLTAGE);
         } else {
             fieldsTable.recordOutput("Drive motor target speed", targetState.speedMetersPerSecond / MAX_SPEED_MPS);
