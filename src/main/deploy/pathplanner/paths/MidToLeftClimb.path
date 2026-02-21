@@ -3,45 +3,29 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 2.970060240963854,
-        "y": 7.378879518072289
+        "x": 3.5,
+        "y": 4.0
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.4236746987951787,
-        "y": 8.548144578313254
+        "x": 2.5,
+        "y": 4.0
       },
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "MidLeftShoot"
     },
     {
       "anchor": {
-        "x": 2.762433734944656,
-        "y": 6.559301204818536
+        "x": 1.0,
+        "y": 4.0
       },
       "prevControl": {
-        "x": 4.883754078504299,
-        "y": 8.680621548378175
-      },
-      "nextControl": {
-        "x": 2.585657039648019,
-        "y": 6.382524509521899
-      },
-      "isLocked": false,
-      "linkedName": null
-    },
-    {
-      "anchor": {
-        "x": 1.538530120480846,
-        "y": 4.187987951802794
-      },
-      "prevControl": {
-        "x": 1.4974303736570265,
-        "y": 4.434586432761249
+        "x": 2.0,
+        "y": 4.0
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "LeftClimb"
     }
   ],
   "rotationTargets": [],
@@ -61,10 +45,10 @@
     "rotation": 0.0
   },
   "reversed": false,
-  "folder": "Left",
+  "folder": "Mid",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -63.91574914345888
+    "rotation": 0.0
   },
   "useDefaultConstraints": true
 }
