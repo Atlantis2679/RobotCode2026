@@ -1,8 +1,14 @@
 package frc.robot;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
+import com.pathplanner.lib.commands.PathPlannerAuto;
+import com.pathplanner.lib.path.PathPlannerPath;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -32,14 +38,13 @@ public class RobotContainer {
 
     private final SwerveCommands swerveCommands = new SwerveCommands(swerve);
     private final AllCommands allCommands = new AllCommands(slapdown, roller, flyWheel, hood, swerve, index);
-    
+
     private SendableChooser<Command> autoChooser = new SendableChooser<Command>();
 
     private final NaturalXboxController driverController = new NaturalXboxController(
             RobotMap.Controllers.DRIVER_PORT);
     private final NaturalXboxController operatorController = new NaturalXboxController(
-        RobotMap.Controllers.OPERATOR_PORT
-    );
+            RobotMap.Controllers.OPERATOR_PORT);
 
     public RobotContainer() {
         new Trigger(DriverStation::isDisabled).whileTrue(swerveCommands.stop());
@@ -73,8 +78,8 @@ public class RobotContainer {
 
     public void configureOperator() {
         operatorController.a()
-            .onTrue(allCommands.startIntake())
-            .onFalse(allCommands.stopIntake());
+                .onTrue(allCommands.startIntake())
+                .onFalse(allCommands.stopIntake());
         operatorController.leftTrigger().whileTrue(allCommands.tunableShootPrep());
         operatorController.rightTrigger().whileTrue(allCommands.shoot());
 
@@ -82,13 +87,38 @@ public class RobotContainer {
 
     }
 
-    public void configureAuto(){
+    public void configureAuto() {
         NamedCommands.registerCommand("stopAll", allCommands.stopAll());
         NamedCommands.registerCommand("startIntake", allCommands.startIntake());
         NamedCommands.registerCommand("stopIntake", allCommands.stopIntake());
         NamedCommands.registerCommand("shoot", allCommands.shoot());
 
-        autoChooser = AutoBuilder.buildAutoChooser("Auto Chooser");
+        autoChooser = AutoBuilder.buildAutoChooser();
+        SmartDashboard.putData("Auto Chooser", autoChooser);
+
+        Field2d field = new Field2d();
+        SmartDashboard.putData(field);
+
+        
+
+        autoChooser.onChange((command) -> {
+            if (command.getName() != "None") {
+                try {
+                    List<PathPlannerPath> paths = PathPlannerAuto.getPathGroupFromAutoFile(command.getName());
+                    List<Pose2d> poses = new ArrayList<>();
+                    for (PathPlannerPath path : paths) {
+                        List<Pose2d> pathPoses = path.getPathPoses();
+                        for (Pose2d pose : pathPoses)
+                            poses.add(pose);
+                    }
+                    field.getObject("Auto Trajectory").setPoses(poses);
+                } catch (Exception e) {
+                    System.out.println("Auto Trajectory Loading Failed!");
+                }
+            } else {
+                field.getObject("Auto Trajectory").setPose(swerve.getPose());
+            }
+        });
     }
 
     public void enterSwerveIntoTest() {
