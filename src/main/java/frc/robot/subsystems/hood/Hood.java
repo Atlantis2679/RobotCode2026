@@ -21,7 +21,7 @@ import team2679.atlantiskit.tunables.extensions.TunableTrapezoidProfile;
 
 import static frc.robot.subsystems.hood.HoodConstants.*;
 
-public class Hood extends SubsystemBase{
+public class Hood extends SubsystemBase implements Tunable{
 
     private final LogFieldsTable fieldsTable = new LogFieldsTable(getName());
     private final HoodIO io = Robot.isReal() ? new HoodIOSparkMax(fieldsTable) : new HoodIOSim(fieldsTable);

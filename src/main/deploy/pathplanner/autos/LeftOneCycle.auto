@@ -7,7 +7,7 @@
         {
           "type": "named",
           "data": {
-            "name": "Shoot"
+            "name": "shoot"
           }
         },
         {
@@ -17,7 +17,7 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "Intake"
+                  "name": "startIntake"
                 }
               },
               {
@@ -30,6 +30,12 @@
           }
         },
         {
+          "type": "named",
+          "data": {
+            "name": "stopIntake"
+          }
+        },
+        {
           "type": "path",
           "data": {
             "pathName": "LeftToShoot"
@@ -38,7 +44,7 @@
         {
           "type": "named",
           "data": {
-            "name": "Shoot"
+            "name": "shoot"
           }
         }
       ]

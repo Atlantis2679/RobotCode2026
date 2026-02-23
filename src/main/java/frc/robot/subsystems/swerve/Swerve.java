@@ -3,10 +3,12 @@ package frc.robot.subsystems.swerve;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -17,6 +19,7 @@ import frc.robot.RobotMap.ModuleFR;
 import frc.robot.RobotMap.ModuleBL;
 import frc.robot.RobotMap.ModuleBR;
 import frc.robot.subsystems.swerve.SwerveConstants.Modules;
+import frc.robot.subsystems.swerve.SwerveConstants.PathPlanner;
 import frc.robot.subsystems.swerve.io.GyroIO;
 import frc.robot.subsystems.swerve.io.GyroIONavX;
 import frc.robot.subsystems.swerve.io.GyroIOSim;
@@ -33,6 +36,12 @@ import static frc.robot.subsystems.swerve.SwerveConstants.*;
 import java.util.Optional;
 
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
+
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.config.ModuleConfig;
+import com.pathplanner.lib.config.PIDConstants;
+import com.pathplanner.lib.config.RobotConfig;
+import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 
 public class Swerve extends SubsystemBase implements Tunable {
   private LogFieldsTable fieldsTable = new LogFieldsTable(getName());
@@ -56,6 +65,19 @@ public class Swerve extends SubsystemBase implements Tunable {
 
   private final PoseEstimator poseEstimator = new PoseEstimator(fieldsTable.getSubTable("poseEstimator"), kinematics);
 
+  public final Translation2d FL_LOCATION = new Translation2d(
+      TRACK_LENGTH_METERS / 2,
+      TRACK_WIDTH_METERS / 2);
+  public final Translation2d FR_LOCATION = new Translation2d(
+      TRACK_LENGTH_METERS / 2,
+      -TRACK_WIDTH_METERS / 2);
+  public final Translation2d BL_LOCATION = new Translation2d(
+      -TRACK_LENGTH_METERS / 2,
+      TRACK_WIDTH_METERS / 2);
+  public final Translation2d BR_LOCATION = new Translation2d(
+      -TRACK_LENGTH_METERS / 2,
+      -TRACK_WIDTH_METERS / 2);
+
   public Swerve() {
     fieldsTable.update();
 
@@ -74,6 +96,36 @@ public class Swerve extends SubsystemBase implements Tunable {
     PeriodicAlertsGroup.defaultInstance.addErrorAlert(() -> "Gyro Disconnected!", () -> !isGyroConnected());
 
     resetYaw(isRedAlliance() ? 0 : 180);
+
+    ModuleConfig moduleConfig = new ModuleConfig(
+        PathPlanner.WHEEL_RADIUS_METERS,
+        PathPlanner.MAX_MODULE_VELOCITY_MPS,
+        PathPlanner.FRICTION_WITH_CARPET,
+        DCMotor.getFalcon500(1).withReduction(PathPlanner.GEAR_RATIO_DRIVE),
+        130,
+        1);
+
+    RobotConfig robotConfig = new RobotConfig(PathPlanner.ROBOT_MASS_KG, PathPlanner.MOMENT_OF_INERTIA,
+        moduleConfig, FL_LOCATION, FR_LOCATION, BL_LOCATION, BR_LOCATION);
+    robotConfig.hasValidConfig();
+
+    AutoBuilder.configure(
+        this::getPose,
+        this::resetPose,
+        this::getRobotRelativeChassisSpeeds,
+        (speeds, feedforward) -> driveChassisSpeeds(speeds, true),
+        new PPHolonomicDriveController(
+            new PIDConstants(
+                PathPlanner.TRANSLATION_KP,
+                PathPlanner.TRANSLATION_KI,
+                PathPlanner.TRANSLATION_KD),
+            new PIDConstants(
+                PathPlanner.ROTATION_KP,
+                PathPlanner.ROTATION_KI,
+                PathPlanner.ROTATION_KD)),
+        robotConfig,
+        this::isRedAlliance,
+        this);
   }
 
   @Override
@@ -84,7 +136,8 @@ public class Swerve extends SubsystemBase implements Tunable {
 
     gyroYawDegreesCCW.update(gyroIO.angleDegreesCCW.getAsDouble());
 
-    Optional<Rotation2d> gyroAngle = isGyroConnected() ? Optional.of(Rotation2d.fromDegrees(getGyroYawDegreesCCW())) : Optional.empty();
+    Optional<Rotation2d> gyroAngle = isGyroConnected() ? Optional.of(Rotation2d.fromDegrees(getGyroYawDegreesCCW()))
+        : Optional.empty();
     poseEstimator.update(getModulePositions(), gyroAngle);
 
     fieldsTable.recordOutput("Is gryo connected", isGyroConnected());
@@ -166,6 +219,18 @@ public class Swerve extends SubsystemBase implements Tunable {
     return poseEstimator.getEstimatedPose();
   }
 
+  public void resetPose(Pose2d pose2d) {
+    poseEstimator.resetPose(pose2d);
+  }
+
+  public ChassisSpeeds getRobotRelativeChassisSpeeds() {
+    return kinematics.toChassisSpeeds(
+        modules[0].getModuleState(),
+        modules[1].getModuleState(),
+        modules[2].getModuleState(),
+        modules[3].getModuleState());
+  }
+
   public void costAll() {
     for (SwerveModule module : modules) {
       module.setCoast();
@@ -181,7 +246,8 @@ public class Swerve extends SubsystemBase implements Tunable {
     builder.addChild("Module 2 BL", modules[2]);
     builder.addChild("Module 3 BR", modules[3]);
 
-    builder.addChild("Reset moudles to absoulte", new InstantCommand(this::resetModulesToAbsoulte).ignoringDisable(true));
+    builder.addChild("Reset moudles to absoulte",
+        new InstantCommand(this::resetModulesToAbsoulte).ignoringDisable(true));
 
     builder.addChild("Reset absolute angle", (Tunable) (resetBuilder) -> {
       DoubleHolder angleToReset = new DoubleHolder(0);

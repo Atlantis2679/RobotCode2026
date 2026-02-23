@@ -117,6 +117,11 @@ public class SwerveModuleIOFalcon extends SwerveModuleIO {
     }
 
     @Override
+    protected double getDriveSpeedRPS() {
+        return driveMotor.getVelocity().getValueAsDouble();
+    }
+
+    @Override
     public void setCoast() {
         driveMotor.setControl(new CoastOut());
         turnMotor.setControl(new CoastOut());

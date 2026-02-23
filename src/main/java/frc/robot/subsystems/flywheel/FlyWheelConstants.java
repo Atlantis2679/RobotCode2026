@@ -26,6 +26,6 @@ public class FlyWheelConstants {
         public static final double SIM_KV = 0;
         public static final double SIM_KG = 0;
 
-        public static final double FLYWHEEL_JKgMetersSquared = 0;
+        public static final double FLYWHEEL_JKgMetersSquared = 0.1;
     }
 }

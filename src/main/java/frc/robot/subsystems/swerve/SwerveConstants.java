@@ -79,4 +79,24 @@ public final class SwerveConstants {
         public static final double SENSETIVE_TRANSLATION_MULTIPLIER = 0.3;
         public static final double SENSETIVE_ROTATION_MULTIPLIER = 0.3;
     }
+    public static class PathPlanner {
+        public final static double FRICTION_WITH_CARPET = 1;
+        // to not put any limits with robot config
+        public final static double ROBOT_MASS_KG = 1;
+        public final static double MOMENT_OF_INERTIA = 0.5;
+
+        public final static double TRANSLATION_KP = 7;
+        public final static double TRANSLATION_KI = 0;
+        public final static double TRANSLATION_KD = 0.1;
+
+        public final static double ROTATION_KP = 11.3;
+        public final static double ROTATION_KI = 0;
+        public final static double ROTATION_KD = 0.1;
+
+        public final static double GEAR_RATIO_DRIVE = 0;
+        public final static double WHEEL_RADIUS_METERS = Units.inchesToMeters(2);
+
+        public final static double MAX_VOLTAGE = 0;
+        public final static double MAX_MODULE_VELOCITY_MPS = 0;
+    }
 }

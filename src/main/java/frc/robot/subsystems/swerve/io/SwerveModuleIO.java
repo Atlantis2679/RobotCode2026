@@ -12,6 +12,8 @@ public abstract class SwerveModuleIO extends IOBase {
             this::getIntegratedTurnAngleRotations);
     public final DoubleSupplier driveDistanceRotations = fields.addDouble("driveDistanceRotations",
             this::getDriveDistanceRotations);
+    public final DoubleSupplier driveSpeedRPS = fields.addDouble("driveSpeedRPS",
+            this::getDriveSpeedRPS);
     
     public final DoubleSupplier turnKP = fields.addDouble("turnKP", this::getTurnKP);
     public final DoubleSupplier turnKI = fields.addDouble("turnKI", this::getTurnKI);
@@ -22,6 +24,7 @@ public abstract class SwerveModuleIO extends IOBase {
     }
 
     protected abstract double getDriveDistanceRotations();
+    protected abstract double getDriveSpeedRPS();
 
     protected abstract double getAbsoluteTurnAngleRotations();
     protected abstract double getIntegratedTurnAngleRotations();

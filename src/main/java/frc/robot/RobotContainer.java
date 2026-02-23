@@ -8,7 +8,6 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.allCommands.AllCommands;
@@ -44,7 +43,10 @@ public class RobotContainer {
 
     public RobotContainer() {
         new Trigger(DriverStation::isDisabled).whileTrue(swerveCommands.stop());
+
         configureDrive();
+        configureOperator();
+        configureAuto();
     }
 
     private void configureDrive() {
@@ -82,19 +84,11 @@ public class RobotContainer {
 
     public void configureAuto(){
         NamedCommands.registerCommand("stopAll", allCommands.stopAll());
-
         NamedCommands.registerCommand("startIntake", allCommands.startIntake());
         NamedCommands.registerCommand("stopIntake", allCommands.stopIntake());
-
         NamedCommands.registerCommand("shoot", allCommands.shoot());
 
-        autoChooser = AutoBuilder.buildAutoChooser();
-
-        SmartDashboard.putData("Auto Chooser", autoChooser);
-        Field2d field = new Field2d();
-
-        SmartDashboard.putData(field);
-
+        autoChooser = AutoBuilder.buildAutoChooser("Auto Chooser");
     }
 
     public void enterSwerveIntoTest() {

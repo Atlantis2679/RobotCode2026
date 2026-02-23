@@ -30,4 +30,9 @@ public class ElevatorIOSparkMax extends ElevatorIO {
     public void setElevatorVoltage(double voltage) {
         elevatorMotor.setVoltage(voltage);
     }
+
+    @Override
+    protected double getElevatorHeight() {
+        return 0;
+    }
 }

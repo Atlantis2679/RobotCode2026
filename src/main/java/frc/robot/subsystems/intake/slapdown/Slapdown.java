@@ -33,7 +33,7 @@ public class Slapdown extends SubsystemBase implements Tunable {
     private double maxAngle = MAX_ANGLE;
 
     public Slapdown(){
-        sensorHelper = new RotationalSensorHelper(getAngleDegrees(), ANGLE_OFFSET);
+        sensorHelper = new RotationalSensorHelper(io.getAngleDegrees.getAsDouble(), ANGLE_OFFSET);
         sensorHelper.enableContinuousWrap(MIN_ANGLE, MAX_ANGLE);
     }
 

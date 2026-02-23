@@ -14,6 +14,7 @@ public class SwerveModuleSim extends SwerveModuleIO {
     private final FlywheelSim turnMotor;
     private double angleRotaions = 0;
     private double driveMotorRotations = 0;
+    private double driveSpeedRPS = 0;
 
     private PIDController turnPIDController = new PIDController(SIM_TURN_MOTOR_KP, SIM_TURN_MOTOR_KI,
             SIM_TURN_MOTOR_KD);
@@ -71,6 +72,11 @@ public class SwerveModuleSim extends SwerveModuleIO {
     @Override
     protected double getDriveDistanceRotations() {
         return driveMotorRotations;
+    }
+
+    @Override
+    protected double getDriveSpeedRPS() {
+        return driveSpeedRPS;
     }
 
     @Override

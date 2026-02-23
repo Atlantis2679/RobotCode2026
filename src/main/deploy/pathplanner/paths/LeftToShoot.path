@@ -20,7 +20,7 @@
         "y": 7.3
       },
       "prevControl": {
-        "x": 5.500000000000001,
+        "x": 8.5,
         "y": 7.3
       },
       "nextControl": null,
@@ -48,7 +48,7 @@
   "folder": "Left",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 90.0
+    "rotation": -90.0
   },
   "useDefaultConstraints": true
 }
