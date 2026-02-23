@@ -67,6 +67,8 @@ public class RobotContainer {
                 driverController::getLeftY,
                 driverController::getLeftX,
                 driverController::getRightX,
+                () -> 0.0,
+                driverController.y(),
                 driverController.leftBumper().negate()::getAsBoolean,
                 driverController.rightBumper()::getAsBoolean);
 
@@ -119,6 +121,7 @@ public class RobotContainer {
     
     public void periodicUpdate() {
         vision.update();
+        hubShootingCalculator.update(PoseEstimator.getInstance().getEstimatedPose(), swerve.isRedAlliance());
     }
 
     public Command getAutonomousCommand() {

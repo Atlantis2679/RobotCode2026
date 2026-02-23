@@ -66,7 +66,9 @@ public class Swerve extends SubsystemBase implements Tunable {
     isRedAlliance.addOption("blue", false);
 
     isRedAlliance.getSendableChooser().onChange((str) -> {
-      resetYaw(str == "red" ? 0 : 180);
+      double newAngleDegreesCCW = str == "red" ? 0 : 180;
+      resetYaw(newAngleDegreesCCW);
+      PoseEstimator.getInstance().resetYaw(Rotation2d.fromDegrees(newAngleDegreesCCW));
     });
 
     gyroYawDegreesCCW = new RotationalSensorHelper(gyroIO.angleDegreesCCW.getAsDouble());

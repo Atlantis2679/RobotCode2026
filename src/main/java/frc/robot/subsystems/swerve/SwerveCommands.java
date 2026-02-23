@@ -21,9 +21,11 @@ public class SwerveCommands {
   }
 
   public TunableCommand driverController(DoubleSupplier forwardSupplier, DoubleSupplier sidewaysSupplier,
-      DoubleSupplier rotationSupplier, BooleanSupplier isFieldRelativeSupplier, BooleanSupplier isSensetiveMode) {
+      DoubleSupplier rotationSupplier, DoubleSupplier yawAutoRotationSupplier,
+      BooleanSupplier autoRotationMode, BooleanSupplier isFieldRelativeSupplier, BooleanSupplier isSensetiveMode) {
 
     return new SwerveDriverController(swerve, forwardSupplier, sidewaysSupplier, rotationSupplier,
+        yawAutoRotationSupplier, autoRotationMode,
         isFieldRelativeSupplier, isSensetiveMode);
   }
 
