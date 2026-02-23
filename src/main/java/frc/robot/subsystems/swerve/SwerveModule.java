@@ -129,6 +129,10 @@ public class SwerveModule implements Tunable {
         return new PIDController(io.turnKP.getAsDouble(), io.turnKI.getAsDouble(), io.turnKD.getAsDouble());
     }
 
+    public double getCurrent() {
+        return io.current.getAsDouble();
+    }
+
     @Override
     public void initTunable(TunableBuilder builder) {
         builder.addDoubleProperty("Integrated Angle Degrees CCW", this::getIntegratedDegreesCCW, null);

@@ -114,4 +114,9 @@ public class SwerveModuleSim extends SwerveModuleIO {
     public void setTurnKD(double kD) {
         turnPIDController.setD(kD);
     }
+
+    @Override
+    protected double getCurrent() {
+        return driveMotor.getCurrentDrawAmps();
+    }
 }

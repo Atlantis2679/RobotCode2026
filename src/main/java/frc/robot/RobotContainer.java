@@ -3,6 +3,7 @@ package frc.robot;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
@@ -39,13 +40,13 @@ public class RobotContainer {
     private final Elevator elevator = new Elevator();
     private final Vision vision = new Vision();
 
-    private final ShootingCalculator hubShootingCalculator = new ShootingCalculator(FieldContants.BLUE_HUB_POSE,
+    private final ShootingCalculator hubShootingCalculator = new ShootingCalculator(new Pose3d(),
             ShootingMeasurments.ALL_MEASURMENTS_HUB);
     private final ShootingCalculator deliveryShootingCalculator = new ShootingCalculator(
-            FieldContants.BLUE_DELIVERY_POSE, ShootingMeasurments.ALL_MEASURMENTS_DELIVRY);
+            new Pose3d(), ShootingMeasurments.ALL_MEASURMENTS_DELIVRY);
 
     private final SwerveCommands swerveCommands = new SwerveCommands(swerve);
-    private final AllCommands allCommands = new AllCommands(fourbar, roller, flyWheel, hood, index, elevator);
+    // private final AllCommands allCommands = new AllCommands(fourbar, roller, flyWheel, hood, index, elevator);
 
     private final PowerDistribution pdh = new PowerDistribution();
 
@@ -56,9 +57,10 @@ public class RobotContainer {
 
     public RobotContainer() {
         pdh.setSwitchableChannel(true);
-        new Trigger(DriverStation::isDisabled).whileTrue(swerveCommands.stop().alongWith(allCommands.stopAll()));
+        new Trigger(DriverStation::isDisabled).whileTrue(swerveCommands.stop()//.alongWith(allCommands.stopAll()));
+        );
         configureDrive();
-        configureOperator();
+        //configureOperator();  
         configureAuto();
     }
 
@@ -86,24 +88,24 @@ public class RobotContainer {
         driverController.a().onTrue(new InstantCommand(swerve::resetYawZero));
     }
 
-    public void configureOperator() {
-        operatorController.a().whileTrue(allCommands.intake());
+//     public void configureOperator() {
+//         operatorController.a().whileTrue(allCommands.intake());
 
-        BooleanSupplier isShootingHub = operatorController.b();
+//         BooleanSupplier isShootingHub = operatorController.b();
 
-        DoubleSupplier hoodAngleSupplier = () -> (isShootingHub.getAsBoolean() ? hubShootingCalculator
-                : deliveryShootingCalculator).getHoodAngleDegrees();
-        DoubleSupplier flywheelSpeedSupplier = () -> (isShootingHub.getAsBoolean() ? hubShootingCalculator
-                : deliveryShootingCalculator).getFlyWheelRPM();
+//         DoubleSupplier hoodAngleSupplier = () -> (isShootingHub.getAsBoolean() ? hubShootingCalculator
+//                 : deliveryShootingCalculator).getHoodAngleDegrees();
+//         DoubleSupplier flywheelSpeedSupplier = () -> (isShootingHub.getAsBoolean() ? hubShootingCalculator
+//                 : deliveryShootingCalculator).getFlyWheelRPM();
 
-        hood.setDefaultCommand(allCommands.hoodCMDs.moveToAngle(hoodAngleSupplier));
-        fourbar.setDefaultCommand(allCommands.fourbarCMDs.getToAngleDegrees(AllCommandsConstants.FOURBAR_MID_ANGLE_DEG));
+//         hood.setDefaultCommand(allCommands.hoodCMDs.moveToAngle(hoodAngleSupplier));
+//         forebar.setDefaultCommand(allCommands.forebarCMDs.getToAngleDegrees(AllCommandsConstants.FORBAR_MID_ANGLE_DEG));
 
-        operatorController.leftTrigger().whileTrue(allCommands.getReadyToShoot(flywheelSpeedSupplier, hoodAngleSupplier));
-        operatorController.rightTrigger().whileTrue(allCommands.shoot(flywheelSpeedSupplier, hoodAngleSupplier));
+//         operatorController.leftTrigger().whileTrue(allCommands.getReadyToShoot(flywheelSpeedSupplier, hoodAngleSupplier));
+//         operatorController.rightTrigger().whileTrue(allCommands.shoot(flywheelSpeedSupplier, hoodAngleSupplier));
 
-        TunablesManager.add("Tunable Shoot Command", allCommands.tunableShoot().fullTunable());
-    }
+//         TunablesManager.add("Tunable Shoot Command", allCommands.tunableShoot().fullTunable());
+//     }
 
     public void configureAuto() {
         Field2d field = new Field2d();

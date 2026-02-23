@@ -3,6 +3,7 @@ package frc.robot.subsystems.vision;
 import static frc.robot.subsystems.vision.VisionConstants.AMBIGUITY_THREASHOLD;
 import static frc.robot.subsystems.vision.VisionConstants.AVG_DISTANCE_THREASHOLD_METERS;
 import static frc.robot.subsystems.vision.VisionConstants.CAMERAS;
+import static frc.robot.subsystems.vision.VisionConstants.NO_ODOMETRY_STD_MULTIPLAYER;
 import static frc.robot.subsystems.vision.VisionConstants.ROTATION_STD_MULTIPLYER;
 import static frc.robot.subsystems.vision.VisionConstants.TRANSLATION_STD_MULTIPLYER;
 
@@ -10,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.wpilibj.DriverStation;
 import frc.robot.FieldConstants;
 import frc.robot.subsystems.poseestimation.PoseEstimator;
 import frc.robot.subsystems.poseestimation.PoseEstimator.VisionMesurment;
@@ -77,6 +79,10 @@ public class Vision {
     double value = Math.pow(avgDistanceToCam, 1.2) / Math.pow(tagsUsed, 2) / Math.pow(1 - ambiguity, 2) * stdFactor;
     double xyStdDev = TRANSLATION_STD_MULTIPLYER * value;
     double rotationStdDevs = ROTATION_STD_MULTIPLYER * value;
+    if (PoseEstimator.getInstance().inCollision() || DriverStation.isDisabled()) {
+      xyStdDev *= NO_ODOMETRY_STD_MULTIPLAYER;
+      rotationStdDevs *= NO_ODOMETRY_STD_MULTIPLAYER;
+    }
     return new double[] {xyStdDev, rotationStdDevs};
   }
 }

@@ -4,10 +4,10 @@ import com.studica.frc.AHRS;
 
 import team2679.atlantiskit.logfields.LogFieldsTable;
 
-public class GyroIONavX extends GyroIO {
+public class ImuIONavX extends ImuIO {
   private final AHRS navX = new AHRS(AHRS.NavXComType.kMXP_SPI);
 
-  public GyroIONavX(LogFieldsTable fieldsTable) {
+  public ImuIONavX(LogFieldsTable fieldsTable) {
     super(fieldsTable);
   }
 
@@ -20,4 +20,22 @@ public class GyroIONavX extends GyroIO {
   protected boolean getIsConnected() {
     return navX.isConnected();
   }
+
+
+  
+  @Override
+  protected double getXAcceleration() {
+    return navX.getWorldLinearAccelX();
+  }
+
+  @Override
+  protected double getYAcceleration() {
+    return navX.getWorldLinearAccelY();
+  }
+
+  @Override
+  protected double getZAcceleration() {
+    return navX.getWorldLinearAccelZ();
+  }
+
 }

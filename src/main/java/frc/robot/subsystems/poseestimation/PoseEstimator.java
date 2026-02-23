@@ -8,6 +8,7 @@ import java.util.function.Consumer;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.Nat;
 import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
@@ -15,9 +16,11 @@ import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.interpolation.TimeInterpolatableBuffer;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
+import frc.robot.subsystems.poseestimation.CollisionDetector.CollisionDetectorInfo;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import team2679.atlantiskit.logfields.LogFieldsTable;
+import team2679.atlantiskit.tunables.TunablesManager;
 
 import static frc.robot.subsystems.poseestimation.PoseEstimatorConstants.*;
 
@@ -28,10 +31,14 @@ public class PoseEstimator {
     private Pose2d odomertryPose = Pose2d.kZero;
     private Pose2d estimatedPose = Pose2d.kZero;
 
-    private TimeInterpolatableBuffer<Pose2d> odometryPosesBuffer = TimeInterpolatableBuffer
+    private final TimeInterpolatableBuffer<Pose2d> odometryPosesBuffer = TimeInterpolatableBuffer
             .createBuffer(ODOMETRY_POSES_BUFFER_SIZE_SEC);
 
-    private LogFieldsTable fieldsTable = new LogFieldsTable("PoseEstimator");
+    private final LogFieldsTable fieldsTable = new LogFieldsTable("PoseEstimator");
+
+    private final CollisionDetector collisionDetector = new CollisionDetector();
+
+    private final Debouncer inCollisionDebouncer = new Debouncer(IN_COLLISION_DEBOUNCE_SEC);
 
     private SwerveModulePosition[] lastModulePositions = new SwerveModulePosition[] {
             new SwerveModulePosition(),
@@ -40,13 +47,22 @@ public class PoseEstimator {
             new SwerveModulePosition(),
     };
 
-    private PoseEstimator() { }
+    private PoseEstimator() {
+        TunablesManager.add("Collision Detector", collisionDetector);
+    }
 
     public static PoseEstimator getInstance() {
         return instance;
     }
 
+    public void updateCollision(CollisionDetectorInfo collisionInfo) {
+        collisionDetector.update(collisionInfo);
+        fieldsTable.recordOutput("In Collision?", inCollision());
+    }
+
     public void addOdometryMeasurment(OdometryMeasurment measurment) {
+        if (collisionDetector.inCollision())
+            return;
         Twist2d twist2d = measurment.kinematics.toTwist2d(lastModulePositions, measurment.modulePositions);
         lastModulePositions = measurment.modulePositions;
         Pose2d lastOdometryPose = odomertryPose;
@@ -99,6 +115,10 @@ public class PoseEstimator {
                 kTimesTransform.get(0, 0),
                 kTimesTransform.get(1, 0),
                 Rotation2d.fromRadians(kTimesTransform.get(2, 0)));
+    }
+
+    public boolean inCollision() {
+        return inCollisionDebouncer.calculate(collisionDetector.inCollision());
     }
 
     private void callAllCallbacks() {
