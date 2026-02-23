@@ -90,13 +90,7 @@ public class Swerve extends SubsystemBase implements Tunable {
     Optional<Rotation2d> gyroAngle = isGyroConnected() ? Optional.of(Rotation2d.fromDegrees(getGyroYawDegreesCCW()))
         : Optional.empty();
     PoseEstimator.getInstance().updateCollision(
-        new CollisionDetectorInfo(imuIO.xAcceleration.getAsDouble(), imuIO.yAcceleration.getAsDouble(),
-            imuIO.zAcceleration.getAsDouble(), new double[] {
-                modules[0].getCurrent(),
-                modules[1].getCurrent(),
-                modules[2].getCurrent(),
-                modules[3].getCurrent(),
-            }));
+        new CollisionDetectorInfo(getXAcceleration(), getYAcceleration(), getZAcceleration(), getModulesCurrents()));
     PoseEstimator.getInstance().addOdometryMeasurment(
         new OdometryMeasurment(kinematics, getModulePositions(), gyroAngle, Timer.getFPGATimestamp()));
 
@@ -198,7 +192,7 @@ public class Swerve extends SubsystemBase implements Tunable {
     return imuIO.zAcceleration.getAsDouble();
   }
 
-  public double[] getCurrents() {
+  public double[] getModulesCurrents() {
     double[] currents = new double[4];
     for (int i = 0; i < 4; ++i) {
       currents[i] = Math.abs(modules[i].getCurrent());
