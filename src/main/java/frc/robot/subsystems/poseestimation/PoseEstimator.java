@@ -36,7 +36,7 @@ public class PoseEstimator {
 
     private final LogFieldsTable fieldsTable = new LogFieldsTable("PoseEstimator");
 
-    private final CollisionDetector collisionDetector = new CollisionDetector(fieldsTable.getSubTable("Collision Detector"));
+    private final CollisionDetector collisionDetector = new CollisionDetector();
 
     private final Debouncer inCollisionDebouncer = new Debouncer(IN_COLLISION_DEBOUNCE_SEC);
 
@@ -57,6 +57,7 @@ public class PoseEstimator {
 
     public void updateCollision(CollisionDetectorInfo collisionInfo) {
         collisionDetector.update(collisionInfo);
+        fieldsTable.recordOutput("In Collision?", inCollision());
     }
 
     public void addOdometryMeasurment(OdometryMeasurment measurment) {
