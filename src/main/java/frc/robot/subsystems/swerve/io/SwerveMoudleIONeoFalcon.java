@@ -121,9 +121,9 @@ public class SwerveMoudleIONeoFalcon extends SwerveModuleIO {
     @Override
     public void setCoast() {
         driveMotor.setControl(new CoastOut());
-        turnMotorConfig.idleMode(IdleMode.kCoast);
-        turnMotorStatus = turnMotor.configure(turnMotorConfig, ResetMode.kNoResetSafeParameters,
-                PersistMode.kNoPersistParameters);
+        // turnMotorConfig.idleMode(IdleMode.kCoast);
+        // turnMotorStatus = turnMotor.configure(turnMotorConfig, ResetMode.kNoResetSafeParameters,
+        //         PersistMode.kNoPersistParameters);
     }
 
     @Override

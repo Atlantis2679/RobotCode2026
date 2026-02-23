@@ -1,27 +1,28 @@
 package frc.robot;
 
 public final class RobotMap {
+  
   public static final class ModuleFL {
     public final static int DRIVE_MOTOR_ID = 20;
-    public final static int TURN_MOTOR_ID = 21;
+    public final static int TURN_MOTOR_ID = 16;
     public final static int CAN_CODER_ID = 50;
   }
 
   public static final class ModuleFR {
     public final static int DRIVE_MOTOR_ID = 22;
-    public final static int TURN_MOTOR_ID = 23;
+    public final static int TURN_MOTOR_ID = 10;
     public final static int CAN_CODER_ID = 51;
   }
 
   public static final class ModuleBL {
     public final static int DRIVE_MOTOR_ID = 26;
-    public final static int TURN_MOTOR_ID = 27;
+    public final static int TURN_MOTOR_ID = 14;
     public final static int CAN_CODER_ID = 53;
   }
 
   public static final class ModuleBR {
     public final static int DRIVE_MOTOR_ID = 24;
-    public final static int TURN_MOTOR_ID = 25;
+    public final static int TURN_MOTOR_ID = 11;
     public final static int CAN_CODER_ID = 52;
   }
 

@@ -31,21 +31,21 @@ import team2679.atlantiskit.tunables.extensions.TunableCommand;
 
 public class RobotContainer {
     private final Swerve swerve = new Swerve();
-    private final Fourbar fourbar = new Fourbar();
-    private final Roller roller = new Roller();
-    private final Index index = new Index();
-    private final Hood hood = new Hood();
-    private final FlyWheel flyWheel = new FlyWheel();
-    private final Elevator elevator = new Elevator();
-    private final Vision vision = new Vision();
+    // private final Fourbar fourbar = new Fourbar();
+    // private final Roller roller = new Roller();
+    // private final Index index = new Index();
+    // private final Hood hood = new Hood();
+    // private final FlyWheel flyWheel = new FlyWheel();
+    // private final Elevator elevator = new Elevator();
+    // private final Vision vision = new Vision();
 
-    private final ShootingCalculator hubShootingCalculator = new ShootingCalculator(FieldContants.BLUE_HUB_POSE,
-            ShootingMeasurments.ALL_MEASURMENTS_HUB);
-    private final ShootingCalculator deliveryShootingCalculator = new ShootingCalculator(
-            FieldContants.BLUE_DELIVERY_POSE, ShootingMeasurments.ALL_MEASURMENTS_DELIVRY);
+    // private final ShootingCalculator hubShootingCalculator = new ShootingCalculator(FieldContants.BLUE_HUB_POSE,
+    //         ShootingMeasurments.ALL_MEASURMENTS_HUB);
+    // private final ShootingCalculator deliveryShootingCalculator = new ShootingCalculator(
+    //         FieldContants.BLUE_DELIVERY_POSE, ShootingMeasurments.ALL_MEASURMENTS_DELIVRY);
 
     private final SwerveCommands swerveCommands = new SwerveCommands(swerve);
-    private final AllCommands allCommands = new AllCommands(fourbar, roller, flyWheel, hood, index, elevator);
+    // private final AllCommands allCommands = new AllCommands(fourbar, roller, flyWheel, hood, index, elevator);
 
     private final PowerDistribution pdh = new PowerDistribution();
 
@@ -56,7 +56,7 @@ public class RobotContainer {
 
     public RobotContainer() {
         pdh.setSwitchableChannel(true);
-        new Trigger(DriverStation::isDisabled).whileTrue(swerveCommands.stop().alongWith(allCommands.stopAll()));
+        new Trigger(DriverStation::isDisabled).whileTrue(swerveCommands.stop());
         configureDrive();
         configureOperator();
         configureAuto();
@@ -85,22 +85,22 @@ public class RobotContainer {
     }
 
     public void configureOperator() {
-        operatorController.a().whileTrue(allCommands.intake());
+        // operatorController.a().whileTrue(allCommands.intake());
 
-        BooleanSupplier isShootingHub = operatorController.b();
+        // BooleanSupplier isShootingHub = operatorController.b();
 
-        DoubleSupplier hoodAngleSupplier = () -> (isShootingHub.getAsBoolean() ? hubShootingCalculator
-                : deliveryShootingCalculator).getHoodAngleDegrees();
-        DoubleSupplier flywheelSpeedSupplier = () -> (isShootingHub.getAsBoolean() ? hubShootingCalculator
-                : deliveryShootingCalculator).getFlyWheelRPM();
+        // DoubleSupplier hoodAngleSupplier = () -> (isShootingHub.getAsBoolean() ? hubShootingCalculator
+        //         : deliveryShootingCalculator).getHoodAngleDegrees();
+        // DoubleSupplier flywheelSpeedSupplier = () -> (isShootingHub.getAsBoolean() ? hubShootingCalculator
+        //         : deliveryShootingCalculator).getFlyWheelRPM();
 
-        hood.setDefaultCommand(allCommands.hoodCMDs.moveToAngle(hoodAngleSupplier));
-        fourbar.setDefaultCommand(allCommands.fourbarCMDs.getToAngleDegrees(AllCommandsConstants.FOURBAR_MID_ANGLE_DEG));
+        // hood.setDefaultCommand(allCommands.hoodCMDs.moveToAngle(hoodAngleSupplier));
+        // fourbar.setDefaultCommand(allCommands.fourbarCMDs.getToAngleDegrees(AllCommandsConstants.FOURBAR_MID_ANGLE_DEG));
 
-        operatorController.leftTrigger().whileTrue(allCommands.getReadyToShoot(flywheelSpeedSupplier, hoodAngleSupplier));
-        operatorController.rightTrigger().whileTrue(allCommands.shoot(flywheelSpeedSupplier, hoodAngleSupplier));
+        // operatorController.leftTrigger().whileTrue(allCommands.getReadyToShoot(flywheelSpeedSupplier, hoodAngleSupplier));
+        // operatorController.rightTrigger().whileTrue(allCommands.shoot(flywheelSpeedSupplier, hoodAngleSupplier));
 
-        TunablesManager.add("Tunable Shoot Command", allCommands.tunableShoot().fullTunable());
+        // TunablesManager.add("Tunable Shoot Command", allCommands.tunableShoot().fullTunable());
     }
 
     public void configureAuto() {
@@ -118,7 +118,7 @@ public class RobotContainer {
     }
     
     public void periodicUpdate() {
-        vision.update();
+        // vision.update();
     }
 
     public Command getAutonomousCommand() {
