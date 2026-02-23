@@ -30,10 +30,9 @@ public class CollisionDetector implements Tunable {
         logFieldsTable.recordOutput("In Collision?", inCollision);
     }
 
-    public boolean check(CollisionDetectorInfo info) {
+    public void update(CollisionDetectorInfo info) {
         if (info.zAcceleration >= zAccelerationThreshold) {
             update(info, false);
-            return true;
         } else if (!inCollision) {
             if (abs(info.xAcceleration) > STATIC_ACCELERATION_THRESHOLD && abs(info.yAcceleration) > STATIC_ACCELERATION_THRESHOLD) {
                 double currentMax1 = 0, currentMax2 = 0;
@@ -47,24 +46,25 @@ public class CollisionDetector implements Tunable {
                         }
                     }
                 }
-                boolean toReturn = minCollisionAcceleration < abs(currentMax1)
+                boolean inCollision = minCollisionAcceleration < abs(currentMax1)
                         && abs(currentMax2) < maxCollisionAcceleration;
-                update(info, toReturn);
-                return toReturn;
+                update(info, inCollision);
             } else {
-                boolean toReturn = abs(info.xAcceleration - lastXAcceleration) >= jerkCollisionThreshold
+                boolean inCollision = abs(info.xAcceleration - lastXAcceleration) >= jerkCollisionThreshold
                         || abs(info.yAcceleration - lastYAcceleration) >= jerkCollisionThreshold;
-                update(info, toReturn);
-                return toReturn;
+                update(info, inCollision);
             }
         } else {
-            boolean toReturn = minCollisionAcceleration <= info.xAcceleration
+            boolean inCollision = minCollisionAcceleration <= info.xAcceleration
                     && info.xAcceleration <= maxCollisionAcceleration
                     && minCollisionAcceleration <= info.yAcceleration
                     && info.yAcceleration <= maxCollisionAcceleration;
-            update(info, toReturn);
-            return toReturn;
+            update(info, inCollision);
         }
+    }
+
+    public boolean inCollision() {
+        return inCollision;
     }
 
     public void initTunable(TunableBuilder tunableBuilder) {

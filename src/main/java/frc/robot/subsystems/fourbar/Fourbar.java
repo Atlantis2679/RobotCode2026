@@ -38,7 +38,7 @@ public class Fourbar extends SubsystemBase implements Tunable {
     private double upperBound = UPPER_BOUND;
 
     public Fourbar() {
-        sensorHelper = new RotationalSensorHelper(getAngleDegrees(), ANGLE_OFFSET);
+        sensorHelper = new RotationalSensorHelper(io.angleDegrees.getAsDouble(), ANGLE_OFFSET);
         sensorHelper.enableContinuousWrap(lowerBound, upperBound);
     }
 
