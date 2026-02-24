@@ -206,11 +206,5 @@ public class Swerve extends SubsystemBase implements Tunable {
         }
       }).ignoringDisable(true));
     });
-
-    builder.addChild("Reset Yaw", (Tunable) (resetBuilder) -> {
-      DoubleHolder angleToReset = new DoubleHolder(0);
-      resetBuilder.addDoubleProperty("Angle to reset", angleToReset::get, angleToReset::set);
-      resetBuilder.addChild("reset!", new InstantCommand(() -> resetGyroYaw(angleToReset.get())).ignoringDisable(true));
-    });
   }
 }

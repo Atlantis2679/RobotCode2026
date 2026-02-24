@@ -15,6 +15,7 @@ import com.pathplanner.lib.util.FlippingUtil;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
@@ -38,8 +39,11 @@ import frc.robot.subsystems.swerve.SwerveCommands;
 import frc.robot.subsystems.swerve.SwerveConstants.PathPlanner;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.utils.NaturalXboxController;
+import team2679.atlantiskit.tunables.Tunable;
+import team2679.atlantiskit.tunables.TunableBuilder;
 import team2679.atlantiskit.tunables.TunablesManager;
 import team2679.atlantiskit.tunables.extensions.TunableCommand;
+import team2679.atlantiskit.valueholders.DoubleHolder;
 
 public class RobotContainer {
     private final Swerve swerve = new Swerve();
@@ -88,6 +92,17 @@ public class RobotContainer {
         isRedAlliance.onChange((isRedAlliance) -> {
             swerve.resetGyroYawZero();
             PoseEstimator.getInstance().resetYawZero();
+        });
+        TunablesManager.add("Reset Yaw", new Tunable() {
+            @Override
+            public void initTunable(TunableBuilder builder) {
+                DoubleHolder angleToReset = new DoubleHolder(0);
+                builder.addDoubleProperty("angleToResetDegrees", angleToReset::get, angleToReset::set);
+                builder.addChild("Reset!", new InstantCommand(() -> {
+                    swerve.resetGyroYaw(angleToReset.get());
+                    PoseEstimator.getInstance().resetYaw(Rotation2d.fromDegrees(angleToReset.get()));
+                }));
+            }
         });
         new Trigger(DriverStation::isDisabled).whileTrue(swerveCommands.stop().alongWith(allCommands.stopAll()));
         configureDrive();
