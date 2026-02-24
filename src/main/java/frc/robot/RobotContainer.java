@@ -7,6 +7,7 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.path.PathPlannerPath;
+import com.pathplanner.lib.util.FlippingUtil;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -99,17 +100,16 @@ public class RobotContainer {
         Field2d field = new Field2d();
         SmartDashboard.putData(field);
 
-        
-
         autoChooser.onChange((command) -> {
-            if (command.getName() != "None") {
+        if (!command.getName().equals("None")){
                 try {
                     List<PathPlannerPath> paths = PathPlannerAuto.getPathGroupFromAutoFile(command.getName());
                     List<Pose2d> poses = new ArrayList<>();
+
                     for (PathPlannerPath path : paths) {
-                        List<Pose2d> pathPoses = path.getPathPoses();
-                        for (Pose2d pose : pathPoses)
-                            poses.add(pose);
+                        for (Pose2d pose : path.getPathPoses()) {
+                            poses.add(FlippingUtil.flipFieldPose(pose));
+                        }
                     }
                     field.getObject("Auto Trajectory").setPoses(poses);
                 } catch (Exception e) {
