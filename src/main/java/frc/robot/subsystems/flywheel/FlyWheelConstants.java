@@ -11,14 +11,6 @@ public class FlyWheelConstants {
 
     public static final double SPEED_TOLERANCE_RPM = 100;
 
-    // public static final double KP = 0.0025;
-    // public static final double KI = 100;
-    // public static final double KD = 0.00005;
-
-    // public static final double KS = 0.2;
-    // public static final double KA = 0;
-    // public static final double KV = 2/1000;
-
     public static final double KP = 0.0;
     public static final double KI = 0.0;
     public static final double KD = 0.0;
