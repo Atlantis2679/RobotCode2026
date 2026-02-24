@@ -12,7 +12,6 @@ import frc.robot.subsystems.index.Index;
 import frc.robot.subsystems.index.IndexCommands;
 import frc.robot.subsystems.roller.Roller;
 import frc.robot.subsystems.roller.RollerCommands;
-import frc.robot.subsystems.swerve.Swerve;
 import team2679.atlantiskit.tunables.extensions.TunableCommand;
 import team2679.atlantiskit.valueholders.DoubleHolder;
 
@@ -28,16 +27,15 @@ public class AllCommands {
     private Roller roller;
     private FlyWheel flyWheel;
     private Hood hood;
-    private Swerve swerve;
     private Index index;
     private Elevator elevator;
 
-    public FourbarCommands fourbarCMDs;
-    public RollerCommands rollerCMDs;
-    public FlyWheelCommands flyWheelCMDs;
-    public HoodCommands hoodCMDs;
-    public IndexCommands indexCMDs;
-    public ElevatorCommands elevatorCMDs;
+    private FourbarCommands fourbarCMDs;
+    private RollerCommands rollerCMDs;
+    private FlyWheelCommands flyWheelCMDs;
+    private HoodCommands hoodCMDs;
+    private IndexCommands indexCMDs;
+    private ElevatorCommands elevatorCMDs;
 
     public AllCommands(Fourbar fourbar, Roller roller, FlyWheel flyWheel, Hood hood, Index index,
             Elevator elevator) {
@@ -62,6 +60,10 @@ public class AllCommands {
                 rollerCMDs.spin(ROLLER_SPEED_RPM)).withName("intake");
     }
 
+    public Command stopIntake() {
+        return fourbar.run(fourbar::stop).alongWith(roller.run(roller::stop));
+    }
+
     public Command getReadyToShoot(DoubleSupplier speedRPM, DoubleSupplier angle) {
         return Commands.parallel(
                 hoodCMDs.moveToAngle(angle),
@@ -81,7 +83,7 @@ public class AllCommands {
         return TunableCommand.wrap((tunablesTable) -> {
             DoubleHolder speedHolder = tunablesTable.addNumber("speedRPM", 0.0);
             DoubleHolder hoodAngleHolder = tunablesTable.addNumber("angle", 0.0);
-            return shoot(speedHolder::get, hoodAngleHolder::get)
+            return getReadyToShoot(speedHolder::get, hoodAngleHolder::get)
                     .withName("tunableShoot");
         });
     }
@@ -94,15 +96,23 @@ public class AllCommands {
         return elevatorCMDs.moveToHeight(ELEVATOR_UNCLIMB_HEIGHT_METERS).withName("unclimb");
     }
 
+    public Command hoodDefaultMove(DoubleSupplier angle) {
+        return hoodCMDs.tunableHoming().andThen(hoodCMDs.moveToAngle(angle))
+            .withName("hoodDefaultMove");
+    }
+
+    public Command fourbarMoveToRest() {
+        return fourbarCMDs.moveToAngle(() -> FOURBAR_MID_ANGLE_DEG).withName("fourbarMoveToRest");
+    }
+
     public Command stopAll() {
         return Commands.run(() -> {
             fourbar.stop();
             roller.stop();
             flyWheel.stop();
             hood.stop();
-            swerve.stop();
             elevator.stop();
-        }, fourbar, roller, flyWheel, hood, swerve, elevator)
+        }, fourbar, roller, flyWheel, hood, elevator)
                 .ignoringDisable(true)
                 .withName("stopAll");
     }

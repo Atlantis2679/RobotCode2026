@@ -1,6 +1,13 @@
 package frc.robot.subsystems.swerve;
 
+import com.pathplanner.lib.config.ModuleConfig;
+import com.pathplanner.lib.config.PIDConstants;
+import com.pathplanner.lib.config.RobotConfig;
+import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+import com.pathplanner.lib.controllers.PathFollowingController;
+
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
 
 public final class SwerveConstants {
@@ -26,7 +33,8 @@ public final class SwerveConstants {
 
         public static final double MAX_VOLTAGE = 12;
         public static final double MAX_SPEED_MPS = 5;
-        // Also used as a refrence for percantage speed calculation - so lowering this MAY cause the modules to faster
+        // Also used as a refrence for percantage speed calculation - so lowering this
+        // MAY cause the modules to faster
         // - always calibrate before changing!
 
         public static final double PREVENT_JITTERING_MULTIPLAYER = 0.01;
@@ -34,13 +42,14 @@ public final class SwerveConstants {
         public static final double DRIVE_GEAR_RATIO = 6.756;
         public static final double TURN_GEAR_RATIO = 12.8;
 
-        public static final double WHEEL_CIRCUMFERENCE_METERS = Units.inchesToMeters(2);
+        public static final double WHEEL_RADIUS_METERS = Units.inchesToMeters(2);
+        public static final double WHEEL_CIRCUMFERENCE_METERS = 2 * Math.PI * WHEEL_RADIUS_METERS;
 
         public static final double[] OFFSETS = {
-            -26.3671875 + 180,
-            -55.72265625 + 180,
-            82.177734375 + 180,
-            39.7265625 + 180,
+                -26.3671875 + 180,
+                -55.72265625 + 180,
+                82.177734375 + 180,
+                39.7265625 + 180,
         };
 
         public static final double DRIVE_STATOR_CURRENT_LIMIT = 90;
@@ -55,7 +64,7 @@ public final class SwerveConstants {
         public static final double DRIVE_MOTOR_MOMENT_OF_INERTIA = 0.025;
         public static final double TURN_MOTOR_MOMENT_OF_INERTIA = 0.004;
 
-        public static final double SIM_TURN_MOTOR_KP = 0;
+        public static final double SIM_TURN_MOTOR_KP = 1.8 * 12;
         public static final double SIM_TURN_MOTOR_KI = 0;
         public static final double SIM_TURN_MOTOR_KD = 0;
     }
@@ -72,11 +81,35 @@ public final class SwerveConstants {
 
     public static final double GYRO_CONNECTED_DEBUNCER_SECONDS = 0.1;
 
+    public static final class PathPlanner {
+        public static final double FRICTION_WITH_CARPET = 1;
+        public static final double ROBOT_MASS_KG = 1;
+        public static final double MOMENT_OF_INERTIA = 0.5;
+
+        public static final ModuleConfig MODULES_CONFIG = new ModuleConfig(Modules.WHEEL_RADIUS_METERS,
+                Modules.MAX_SPEED_MPS,
+                PathPlanner.MOMENT_OF_INERTIA, DCMotor.getFalcon500(1), Modules.DRIVE_SUPPLY_CURRENT_LIMIT, 1);
+
+        public static final RobotConfig ROBOT_CONFIG = new RobotConfig(PathPlanner.ROBOT_MASS_KG,
+                PathPlanner.MOMENT_OF_INERTIA,
+                MODULES_CONFIG, MODULES_LOCATIONS);
+
+        public static final PIDConstants TRANSLATION_PID = new PIDConstants(0, 0, 0);
+        public static final PIDConstants ROTATION_PID = new PIDConstants(0, 0, 0);
+
+        public static final PathFollowingController FOLLOWING_CONTROLLER = new PPHolonomicDriveController(
+                TRANSLATION_PID, ROTATION_PID);
+    }
+
     public static final class DriverController {
         public static final double DRIVER_MAX_ANGULAR_VELOCITY_RPS = 8;
         public static final double DRIVER_ACCELERATION_LIMIT_MPS = Math.toRadians(720);
         public static final double DRIVER_ANGULAR_ACCELERATION_LIMIT_RPS = 4.5;
         public static final double SENSETIVE_TRANSLATION_MULTIPLIER = 0.3;
         public static final double SENSETIVE_ROTATION_MULTIPLIER = 0.3;
+        public static final double ROTATION_KP = 0.01;
+        public static final double ROTATION_KI = 0.02;
+        public static final double ROTATION_KD = 0.005;
+        public static final double AUTO_ROTATION_TOLERANCE_DEG = 0.5;
     }
 }

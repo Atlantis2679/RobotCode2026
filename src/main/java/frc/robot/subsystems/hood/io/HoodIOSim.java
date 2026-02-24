@@ -3,14 +3,14 @@ package frc.robot.subsystems.hood.io;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import team2679.atlantiskit.logfields.LogFieldsTable;
-import frc.robot.subsystems.hood.*;
 
+import static frc.robot.subsystems.hood.HoodConstants.GEAR_RATIO;
 import static frc.robot.subsystems.hood.HoodConstants.MAX_ANGLE_DEGREES;
 import static frc.robot.subsystems.hood.HoodConstants.MIN_ANGLE_DEGREES;
 import static frc.robot.subsystems.hood.HoodConstants.Sim.*;
 
 public class HoodIOSim extends HoodIO {
-    private final SingleJointedArmSim hoodMotor = new SingleJointedArmSim(
+    private final SingleJointedArmSim motor = new SingleJointedArmSim(
             DCMotor.getNeo550(1),
             JOINT_GEAR_RATIO,
             JKG_METERS_SQUEARED,
@@ -18,28 +18,41 @@ public class HoodIOSim extends HoodIO {
             Math.toRadians(MIN_ANGLE_DEGREES),
             Math.toRadians(MAX_ANGLE_DEGREES),
             true,
-            HoodConstants.ANGLE_OFFSET);
+            0);
 
     public HoodIOSim(LogFieldsTable fieldsTable) {
         super(fieldsTable);
     }
 
     public void periodicBeforeFields() {
-        hoodMotor.update(0.02);
+        motor.update(0.02);
     }
 
     @Override
-    public double getHoodMotorAngleDegree() {
-        return Math.toDegrees(hoodMotor.getAngleRads());
+    public double getMotorRotations() {
+        return motor.getAngleRads() / (Math.PI * 2);
     }
 
     @Override
     public void setVoltage(double volt) {
-        hoodMotor.setInputVoltage(volt);
+        motor.setInputVoltage(volt);
     }
 
     @Override
-    protected boolean getIsEncoderConnected() {
-        return true;
+    public void setCoast() {
+    }
+
+    @Override
+    protected double getMotorCurrent() {
+        return motor.getCurrentDrawAmps();
+    }
+
+    @Override
+    protected double getAbsolueAngleDegrees() {
+        return getMotorRotations() * 360 * GEAR_RATIO;
+    }
+
+    @Override
+    public void setCurrentLimit(double currentLimit) {
     }
 }
