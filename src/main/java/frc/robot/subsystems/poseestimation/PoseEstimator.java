@@ -16,6 +16,7 @@ import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.interpolation.TimeInterpolatableBuffer;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
+import frc.robot.RobotContainer;
 import frc.robot.subsystems.poseestimation.CollisionDetector.CollisionDetectorInfo;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
@@ -142,6 +143,10 @@ public class PoseEstimator {
 
     public void resetYaw(Rotation2d newYaw) {
         resetPose(new Pose2d(estimatedPose.getTranslation(), newYaw));
+    }
+
+    public void resetYawZero() {
+        resetYaw(Rotation2d.fromDegrees(RobotContainer.isRedAlliance() ? 0 : 180));
     }
 
     public Pose2d getEstimatedPose() {

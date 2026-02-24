@@ -76,6 +76,11 @@ public class SwerveModuleSim extends SwerveModuleIO {
     }
 
     @Override
+    protected double getDriveSpeedRPS() {
+        return driveMotor.getAngularVelocityRPM() / 60;
+    }
+
+    @Override
     public void setCoast() {
         driveMotor.setInputVoltage(0);
     }
