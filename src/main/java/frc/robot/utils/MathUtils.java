@@ -24,8 +24,9 @@ public class MathUtils {
     }
 
     public static class DynamicAvarage {
-        Double[] values;
-        int i = 0;
+        private Double[] values;
+        private int i = 0;
+        private boolean isEmpty = true;
         
         public DynamicAvarage(int len) {
             values = new Double[len];
@@ -34,9 +35,10 @@ public class MathUtils {
         public void update(Double val) {
             values[i] = val;
             ++i;
-            if (i>values.length) {
+            if (i>=values.length) {
                 i=0;
             }
+            isEmpty = false;
         }
 
         public Double get() {
@@ -54,5 +56,22 @@ public class MathUtils {
             }
             return sum/len;
         }
+
+        public void reset() {
+            if (!isEmpty) {
+                this.values = new Double[values.length];
+                i = 0;
+                isEmpty = true;
+            }
+        }
+    }
+
+    public static double[] getHighestX(int x, double[] vals) {
+        java.util.Arrays.sort(vals);
+        double[] res = new double[x];
+        for (int i = 0; i < x; i++) {
+            res[i] = vals[vals.length-1-i];
+        }
+        return res;
     }
 }

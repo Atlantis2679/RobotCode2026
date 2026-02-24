@@ -21,7 +21,6 @@ import frc.robot.subsystems.poseestimation.CollisionDetector.CollisionDetectorIn
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import team2679.atlantiskit.logfields.LogFieldsTable;
-import team2679.atlantiskit.tunables.TunablesManager;
 
 import static frc.robot.subsystems.poseestimation.PoseEstimatorConstants.*;
 
@@ -48,9 +47,7 @@ public class PoseEstimator {
             new SwerveModulePosition(),
     };
 
-    private PoseEstimator() {
-        TunablesManager.add("Collision Detector", collisionDetector);
-    }
+    private PoseEstimator() {}
 
     public static PoseEstimator getInstance() {
         return instance;
