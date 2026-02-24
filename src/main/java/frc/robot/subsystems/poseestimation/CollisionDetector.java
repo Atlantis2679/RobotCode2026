@@ -23,6 +23,8 @@ public class CollisionDetector {
     }
 
     private boolean updateWrapper(CollisionDetectorInfo info, boolean inCollision) {
+        logFieldsTable.recordOutput("X Jerk", abs(lastXAcceleration-info.xAcceleration));
+        logFieldsTable.recordOutput("Y Jerk", abs(lastYAcceleration-info.yAcceleration));
         lastXAcceleration = info.xAcceleration();
         lastYAcceleration = info.yAcceleration();
         this.inCollision = inCollision;
