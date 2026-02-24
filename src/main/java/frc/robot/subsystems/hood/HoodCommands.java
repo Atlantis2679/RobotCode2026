@@ -2,9 +2,11 @@ package frc.robot.subsystems.hood;
 
 import java.util.function.DoubleSupplier;
 
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
-import team2679.atlantiskit.valueholders.ValueHolder;
+import team2679.atlantiskit.tunables.TunablesManager;
+import team2679.atlantiskit.tunables.extensions.TunableCommand;
+import team2679.atlantiskit.valueholders.DoubleHolder;
 
 import static frc.robot.subsystems.hood.HoodConstants.*;
 
@@ -13,24 +15,15 @@ public class HoodCommands {
 
     public HoodCommands(Hood hood) {
         this.hood = hood;
+        TunablesManager.add("TunableSetVoltages/HoodSetVoltage", tunableSetVoltage().fullTunable());
+        TunablesManager.add("Tunable hood cosine follower", hoodCosineWaveFollower().fullTunable());
     }
 
     public Command moveToAngle(DoubleSupplier angle) {
-        ValueHolder<TrapezoidProfile.State> referenceState = new ValueHolder<TrapezoidProfile.State>(null);
         return hood.runOnce(() -> {
             hood.resetPID();
-            referenceState.set(new TrapezoidProfile.State(hood.getAngleDegrees(), hood.getVelocity()));
         }).andThen(hood.run(() -> {
-            referenceState.set(hood.calculateTrapezoidProfile(
-                    0.02,
-                    referenceState.get(),
-                    new TrapezoidProfile.State(angle.getAsDouble(), 0)));
-
-            double volt = hood.calculateFeedForward(
-                    referenceState.get().position,
-                    referenceState.get().velocity, true);
-
-            hood.setHoodVoltage(volt);
+            hood.setVoltage(hood.calculatePID(angle.getAsDouble()));
         })).withName("Hood move to angle");
     }
 
@@ -38,11 +31,41 @@ public class HoodCommands {
         return moveToAngle(() -> angle);
     }
 
+    private TunableCommand tunableSetVoltage() {
+        return TunableCommand.wrap((tunablesTable) -> {
+            DoubleHolder voltage = tunablesTable.addNumber("voltage", 0.0);
+            return hood.run(() -> hood.setVoltage(voltage.get())).finallyDo(hood::stop)
+                    .withName("Tunable hood set voltage");
+        });
+    }
+
+    public TunableCommand tunableHoming() {
+        return TunableCommand.wrap((tunablesTable) -> {
+            DoubleHolder voltage = tunablesTable.addNumber("voltage", -HOMING_VOLTAGE);
+            return hood.run(() -> hood.setVoltage(voltage.get())).onlyWhile(() -> !hood.isCalibrated()).finallyDo(hood::stop).withName("Homing");
+        });
+    }
+
+    public TunableCommand hoodCosineWaveFollower() {
+        return TunableCommand.wrap((tunablesTable) -> {
+            DoubleHolder changeRate = tunablesTable.addNumber("Change Rate", 1.0);
+            return hood.run(() -> {
+                double angle = cosineWaveFollower(hood.minAngle, hood.maxAngle, Timer.getFPGATimestamp() * changeRate.get());
+                double voltage = hood.calculatePID(angle);
+                hood.setVoltage(voltage);
+            });
+        });
+    }
+
     public Command manualController(DoubleSupplier speed) {
         return hood.run(() -> {
-            double demandSpeed = speed.getAsDouble();
-            double feedForward = hood.calculateFeedForward(hood.getAngleDegrees(), 0, false);
-            hood.setHoodVoltage(feedForward + demandSpeed * MAX_VOLTAGE);
+            hood.setVoltage(speed.getAsDouble() * MAX_VOLTAGE);
         }).finallyDo(hood::stop).withName("Hood manual controller");
+    }
+
+    public static double cosineWaveFollower(double a, double b, double x) {
+        double average = (a + b) / 2;
+        double delta = (a - b) / 2; 
+        return average + delta * Math.cos(x);
     }
 }

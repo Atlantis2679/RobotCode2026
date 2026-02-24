@@ -1,8 +1,6 @@
 package frc.robot.subsystems.fourbar;
 
 import static frc.robot.subsystems.fourbar.FourbarConstants.*;
-import static frc.robot.subsystems.hood.HoodConstants.LOWER_BOUND;
-import static frc.robot.subsystems.hood.HoodConstants.UPPER_BOUND;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
@@ -22,7 +20,7 @@ import team2679.atlantiskit.tunables.extensions.TunableArmFeedforward;
 import team2679.atlantiskit.tunables.extensions.TunableTrapezoidProfile;
 
 public class Fourbar extends SubsystemBase implements Tunable {
-    private Debouncer encoderConnectedDebouncer = new Debouncer(DEBOUNCER_DELAY);
+    private Debouncer encoderConnectedDebouncer = new Debouncer(DEBOUNCER_SEC);
     private TunableArmFeedforward feedforward = new TunableArmFeedforward(KS, KG, KV);
     private TunableTrapezoidProfile trapezoidProfile = new TunableTrapezoidProfile(
             new Constraints(MAX_VELOCITY, MAX_ACCELERATION));

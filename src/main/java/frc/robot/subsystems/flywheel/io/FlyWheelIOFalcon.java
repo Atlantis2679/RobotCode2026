@@ -1,17 +1,22 @@
 package frc.robot.subsystems.flywheel.io;
 
+import static frc.robot.subsystems.flywheel.FlyWheelConstants.STATOR_CURRENT_LIMIT;
+import static frc.robot.subsystems.flywheel.FlyWheelConstants.SUPPLY_CURRENT_LIMIT;
+import static frc.robot.subsystems.flywheel.FlyWheelConstants.SUPPLY_CURRENT_LOWER_LIMIT;
+import static frc.robot.subsystems.flywheel.FlyWheelConstants.SUPPLY_CURRENT_LOWER_TIME;
+
 import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.MotorAlignmentValue;
 
 import frc.robot.RobotMap.CANBUS;
 import frc.robot.subsystems.flywheel.FlyWheelConstants;
 import frc.robot.utils.AlertsFactory;
 import team2679.atlantiskit.logfields.LogFieldsTable;
 import team2679.atlantiskit.periodicalerts.PeriodicAlertsGroup;
-
-import static frc.robot.subsystems.flywheel.FlyWheelConstants.*;
 
 public class FlyWheelIOFalcon extends FlyWheelIO {
     private final TalonFX motor1 = new TalonFX(CANBUS.FLYWHEEL_MOTOR1_ID);
@@ -34,6 +39,8 @@ public class FlyWheelIOFalcon extends FlyWheelIO {
         motor1Status = motor1.getConfigurator().apply(motorConfig);
         motor2Status = motor2.getConfigurator().apply(motorConfig);
 
+        motor2.setControl(new Follower(motor1.getDeviceID(), MotorAlignmentValue.Aligned));
+
         AlertsFactory.phoenixMotor(alertsGroup, () -> motor1Status, "Motor 1");
         AlertsFactory.phoenixMotor(alertsGroup, () -> motor2Status, "Motor 2");
     }
@@ -42,7 +49,6 @@ public class FlyWheelIOFalcon extends FlyWheelIO {
     public void setVoltage(double volt) {
         VoltageOut voltageOut = new VoltageOut(volt);
         motor1Status = motor1.setControl(voltageOut);
-        motor2Status = motor2.setControl(voltageOut);
     }
 
     @Override
@@ -59,5 +65,10 @@ public class FlyWheelIOFalcon extends FlyWheelIO {
     @Override
     protected double getMotor2Current() {
         return motor2.getSupplyCurrent().getValueAsDouble();
+    }
+
+    @Override
+    protected double getMotor2RPM() {
+        return motor2.getVelocity().getValueAsDouble() * 60 * FlyWheelConstants.GEAR_RATIO;
     }
 }
