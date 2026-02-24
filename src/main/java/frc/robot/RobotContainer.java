@@ -13,7 +13,6 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.allCommands.AllCommands;
-import frc.robot.allCommands.AllCommandsConstants;
 import frc.robot.shooting.ShootingCalculator;
 import frc.robot.shooting.ShootingMeasurments;
 import frc.robot.subsystems.elevator.Elevator;
@@ -46,7 +45,7 @@ public class RobotContainer {
             new Pose3d(), ShootingMeasurments.ALL_MEASURMENTS_DELIVRY);
 
     private final SwerveCommands swerveCommands = new SwerveCommands(swerve);
-    // private final AllCommands allCommands = new AllCommands(fourbar, roller, flyWheel, hood, index, elevator);
+    private final AllCommands allCommands = new AllCommands(fourbar, roller, flyWheel, hood, index, elevator);
 
     private final PowerDistribution pdh = new PowerDistribution();
 
@@ -88,24 +87,24 @@ public class RobotContainer {
         driverController.a().onTrue(new InstantCommand(swerve::resetYawZero));
     }
 
-//     public void configureOperator() {
-//         operatorController.a().whileTrue(allCommands.intake());
+    public void configureOperator() {
+        operatorController.a().whileTrue(allCommands.intake());
 
-//         BooleanSupplier isShootingHub = operatorController.b();
+        BooleanSupplier isShootingHub = operatorController.b();
 
-//         DoubleSupplier hoodAngleSupplier = () -> (isShootingHub.getAsBoolean() ? hubShootingCalculator
-//                 : deliveryShootingCalculator).getHoodAngleDegrees();
-//         DoubleSupplier flywheelSpeedSupplier = () -> (isShootingHub.getAsBoolean() ? hubShootingCalculator
-//                 : deliveryShootingCalculator).getFlyWheelRPM();
+        DoubleSupplier hoodAngleSupplier = () -> (isShootingHub.getAsBoolean() ? hubShootingCalculator
+                : deliveryShootingCalculator).getHoodAngleDegrees();
+        DoubleSupplier flywheelSpeedSupplier = () -> (isShootingHub.getAsBoolean() ? hubShootingCalculator
+                : deliveryShootingCalculator).getFlyWheelRPM();
 
-//         hood.setDefaultCommand(allCommands.hoodCMDs.moveToAngle(hoodAngleSupplier));
-//         forebar.setDefaultCommand(allCommands.forebarCMDs.getToAngleDegrees(AllCommandsConstants.FORBAR_MID_ANGLE_DEG));
+        hood.setDefaultCommand(allCommands.hoodDefaultMove(hoodAngleSupplier));
+        fourbar.setDefaultCommand(allCommands.fourbarMoveToRest());
 
-//         operatorController.leftTrigger().whileTrue(allCommands.getReadyToShoot(flywheelSpeedSupplier, hoodAngleSupplier));
-//         operatorController.rightTrigger().whileTrue(allCommands.shoot(flywheelSpeedSupplier, hoodAngleSupplier));
+        operatorController.leftTrigger().whileTrue(allCommands.getReadyToShoot(flywheelSpeedSupplier, hoodAngleSupplier));
+        operatorController.rightTrigger().whileTrue(allCommands.shoot(flywheelSpeedSupplier, hoodAngleSupplier));
 
-//         TunablesManager.add("Tunable Shoot Command", allCommands.tunableShoot().fullTunable());
-//     }
+        TunablesManager.add("Tunable Shoot Command", allCommands.tunableShoot().fullTunable());
+    }
 
     public void configureAuto() {
         Field2d field = new Field2d();

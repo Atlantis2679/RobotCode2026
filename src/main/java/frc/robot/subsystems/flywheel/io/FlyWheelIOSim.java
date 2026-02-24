@@ -9,7 +9,7 @@ import frc.robot.subsystems.flywheel.FlyWheelConstants;
 public class FlyWheelIOSim extends FlyWheelIO {
     private final FlywheelSim flyWheelMotorSim = new FlywheelSim(
             LinearSystemId.createFlywheelSystem(DCMotor.getNeo550(1),
-                    FlyWheelConstants.Sim.JKgMetersSquared, FlyWheelConstants.GEAR_RATIO),
+                    FlyWheelConstants.Sim.FLYWHEEL_JKgMetersSquared, FlyWheelConstants.GEAR_RATIO),
             DCMotor.getNeo550(1));
 
     @Override
@@ -30,7 +30,7 @@ public class FlyWheelIOSim extends FlyWheelIO {
     public void setVoltage(double volt) {
         flyWheelMotorSim.setInputVoltage(volt);
     }
-
+    
     @Override
     protected double getMotor1Current() {
         return flyWheelMotorSim.getCurrentDrawAmps();
@@ -39,5 +39,10 @@ public class FlyWheelIOSim extends FlyWheelIO {
     @Override
     protected double getMotor2Current() {
         return flyWheelMotorSim.getCurrentDrawAmps();
+    }
+
+    @Override
+    protected double getMotor2RPM() {
+        return 0;
     }
 }

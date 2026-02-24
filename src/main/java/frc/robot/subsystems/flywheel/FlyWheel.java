@@ -7,18 +7,17 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Robot;
 import frc.robot.subsystems.flywheel.io.*;
 import static frc.robot.subsystems.flywheel.FlyWheelConstants.*;
-
 import team2679.atlantiskit.logfields.LogFieldsTable;
 import team2679.atlantiskit.tunables.Tunable;
 import team2679.atlantiskit.tunables.TunableBuilder;
+import team2679.atlantiskit.tunables.TunablesManager;
 import team2679.atlantiskit.tunables.extensions.TunableSimpleMotorFeedforward;
 
 public class FlyWheel extends SubsystemBase implements Tunable {
-    
     private final LogFieldsTable fieldsTable = new LogFieldsTable(getName());
 
     private final FlyWheelIO io = Robot.isReal() 
-        ? new FlyWheelIOSparkMax(fieldsTable) 
+        ? new FlyWheelIOFalcon(fieldsTable) 
         : new FlyWheelIOSim(fieldsTable);
 
     private PIDController pid = new PIDController(KP, KI, KD);
@@ -29,12 +28,14 @@ public class FlyWheel extends SubsystemBase implements Tunable {
 
     public FlyWheel() {
         fieldsTable.update();
+        TunablesManager.add(getName(), (Tunable) this);
     }
 
     @Override
     public void periodic(){
         fieldsTable.recordOutput("current command", getCurrentCommand() != null ? getCurrentCommand().getName() : "None");
-        SmartDashboard.putNumber("Flywheel Motors RPM", getMotorsRPM());
+        fieldsTable.recordOutput("currents diff", Math.abs(io.motor1Current.getAsDouble() - io.motor2Current.getAsDouble()));
+        SmartDashboard.putNumber("Motors RPM", getMotorsRPM());
     }
 
     public double getMotorsRPM(){
@@ -42,10 +43,13 @@ public class FlyWheel extends SubsystemBase implements Tunable {
     }
 
     public void setVoltage(double volt){
+        fieldsTable.recordOutput("Desired voltage", volt);
         io.setVoltage(MathUtil.clamp(volt, -MAX_VOLTAGE, MAX_VOLTAGE));
     }
 
     public double calculateFeedForward(double desiredSpeed, boolean usePID) {
+        fieldsTable.recordOutput("Desired RPM", desiredSpeed);
+        isAtSpeed(desiredSpeed);
         double speed = feedforward.calculate(desiredSpeed);
         if (usePID) {
             speed += pid.calculate(getMotorsRPM(), desiredSpeed);
@@ -55,7 +59,7 @@ public class FlyWheel extends SubsystemBase implements Tunable {
 
     public boolean isAtSpeed(double targetSpeedRpm){
         boolean isAtSpeed = Math.abs(targetSpeedRpm - getMotorsRPM()) < FlyWheelConstants.SPEED_TOLERANCE_RPM;
-        SmartDashboard.putBoolean("Flywheel at speed", isAtSpeed);
+        SmartDashboard.putBoolean("Flywheel at speed:", isAtSpeed);
         fieldsTable.recordOutput("Flywheel at speed", isAtSpeed);
         return isAtSpeed;
     }
@@ -70,7 +74,7 @@ public class FlyWheel extends SubsystemBase implements Tunable {
 
     @Override
     public void initTunable(TunableBuilder builder) {
-        builder.addChild("Flywheel PID", pid);
+        builder.addChild("Flywheel PID Controller", pid);
         builder.addChild("Flywheel FeedForward", feedforward);
     }
 }

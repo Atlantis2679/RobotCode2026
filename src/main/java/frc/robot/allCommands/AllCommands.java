@@ -30,12 +30,12 @@ public class AllCommands {
     private Index index;
     private Elevator elevator;
 
-    public FourbarCommands fourbarCMDs;
-    public RollerCommands rollerCMDs;
-    public FlyWheelCommands flyWheelCMDs;
-    public HoodCommands hoodCMDs;
-    public IndexCommands indexCMDs;
-    public ElevatorCommands elevatorCMDs;
+    private FourbarCommands fourbarCMDs;
+    private RollerCommands rollerCMDs;
+    private FlyWheelCommands flyWheelCMDs;
+    private HoodCommands hoodCMDs;
+    private IndexCommands indexCMDs;
+    private ElevatorCommands elevatorCMDs;
 
     public AllCommands(Fourbar fourbar, Roller roller, FlyWheel flyWheel, Hood hood, Index index,
             Elevator elevator) {
@@ -79,7 +79,7 @@ public class AllCommands {
         return TunableCommand.wrap((tunablesTable) -> {
             DoubleHolder speedHolder = tunablesTable.addNumber("speedRPM", 0.0);
             DoubleHolder hoodAngleHolder = tunablesTable.addNumber("angle", 0.0);
-            return shoot(speedHolder::get, hoodAngleHolder::get)
+            return getReadyToShoot(speedHolder::get, hoodAngleHolder::get)
                     .withName("tunableShoot");
         });
     }
@@ -90,6 +90,15 @@ public class AllCommands {
 
     public Command unclimb() {
         return elevatorCMDs.moveToHeight(ELEVATOR_UNCLIMB_HEIGHT_METERS).withName("unclimb");
+    }
+
+    public Command hoodDefaultMove(DoubleSupplier angle) {
+        return hoodCMDs.tunableHoming().andThen(hoodCMDs.moveToAngle(angle))
+            .withName("hoodDefaultMove");
+    }
+
+    public Command fourbarMoveToRest() {
+        return fourbarCMDs.moveToAngle(() -> FOURBAR_MID_ANGLE_DEG).withName("fourbarMoveToRest");
     }
 
     public Command stopAll() {
