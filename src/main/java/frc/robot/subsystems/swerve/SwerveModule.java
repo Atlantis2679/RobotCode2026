@@ -101,6 +101,19 @@ public class SwerveModule implements Tunable {
                 Rotation2d.fromDegrees(getIntegratedDegreesCCW()));
     }
 
+    public SwerveModuleState getModuleState() {
+        return new SwerveModuleState(getVelocityMPS(), getRotation2d());
+    }
+    
+    public double getVelocityMPS() {
+        return io.driveSpeedRPS.getAsDouble() * WHEEL_CIRCUMFERENCE_METERS;
+    }
+
+    public Rotation2d getRotation2d() {
+        return Rotation2d.fromDegrees(getAbsoluteDegreesCCW());
+    }
+
+
     public double getIntegratedDegreesCCW() {
         return io.intergatedTurnAngleRotations.getAsDouble() * 360;
     }

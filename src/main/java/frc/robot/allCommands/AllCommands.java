@@ -60,6 +60,10 @@ public class AllCommands {
                 rollerCMDs.spin(ROLLER_SPEED_RPM)).withName("intake");
     }
 
+    public Command stopIntake() {
+        return fourbar.run(fourbar::stop).alongWith(roller.run(roller::stop));
+    }
+
     public Command getReadyToShoot(DoubleSupplier speedRPM, DoubleSupplier angle) {
         return Commands.parallel(
                 hoodCMDs.moveToAngle(angle),
