@@ -36,7 +36,7 @@ public class PoseEstimator {
 
     private final LogFieldsTable fieldsTable = new LogFieldsTable("PoseEstimator");
 
-    private final CollisionDetector collisionDetector = new CollisionDetector();
+    private final CollisionDetector collisionDetector = new CollisionDetector(fieldsTable);
 
     private final Debouncer inCollisionDebouncer = new Debouncer(IN_COLLISION_DEBOUNCE_SEC);
 
