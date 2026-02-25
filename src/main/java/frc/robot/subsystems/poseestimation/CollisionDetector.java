@@ -16,10 +16,10 @@ public class CollisionDetector {
     private DynamicAvarage lowCurreentAvarage = new DynamicAvarage(10);
     private DynamicAvarage highCurreentAvarage = new DynamicAvarage(10);
 
-    private final LogFieldsTable logFieldsTable;
+    private final LogFieldsTable fieldsTable;
 
-    public CollisionDetector(LogFieldsTable logFieldsTable) {
-        this.logFieldsTable = logFieldsTable;
+    public CollisionDetector(LogFieldsTable fieldsTable) {
+        this.fieldsTable = fieldsTable;
     }
 
     private void updateAVGs(double[] vals) {
@@ -47,11 +47,11 @@ public class CollisionDetector {
                 ||abs(lastYAcceleration-info.yAcceleration)>=JERK_COLLISION_THRESHOLD;
             resetAVGs();
         }
-        logFieldsTable.recordOutput("X Jerk", abs(lastXAcceleration-info.xAcceleration));
-        logFieldsTable.recordOutput("Y Jerk", abs(lastYAcceleration-info.yAcceleration));
+        fieldsTable.recordOutput("X Jerk", abs(lastXAcceleration-info.xAcceleration));
+        fieldsTable.recordOutput("Y Jerk", abs(lastYAcceleration-info.yAcceleration));
         lastXAcceleration = info.xAcceleration();
         lastYAcceleration = info.yAcceleration();
-        logFieldsTable.recordOutput("In Collision?", inCollision);
+        fieldsTable.recordOutput("In Collision?", inCollision);
     }
 
     public boolean inCollision() {
