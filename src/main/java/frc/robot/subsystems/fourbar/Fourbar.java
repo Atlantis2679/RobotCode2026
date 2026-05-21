@@ -1,22 +1,15 @@
 package frc.robot.subsystems.fourbar;
 
-import static edu.wpi.first.units.Units.Degrees;
-import static edu.wpi.first.units.Units.DegreesPerSecond;
-import static edu.wpi.first.units.Units.Volts;
 import static frc.robot.subsystems.fourbar.FourbarConstants.*;
-import static frc.robot.subsystems.hood.HoodConstants.MAX_ANGLE_DEGREES;
-import static frc.robot.subsystems.hood.HoodConstants.MIN_ANGLE_DEGREES;
+import static frc.robot.subsystems.fourbar.FourbarConstants.MAX_ANGLE_DEGREES;
+import static frc.robot.subsystems.fourbar.FourbarConstants.MIN_ANGLE_DEGREES;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
-import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.AngularVelocity;
-import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Robot;
 import frc.robot.subsystems.fourbar.io.FourbarIO;
 import frc.robot.subsystems.fourbar.io.FourbarIOSim;
@@ -42,15 +35,6 @@ public class Fourbar extends SubsystemBase implements Tunable {
     private final Debouncer isStuckDebouncer = new Debouncer(STUCK_DEBOUNCE_SEC, DebounceType.kRising);
 
     private double desiredVoltage = 0;
-
-    public final SysIdRoutine sysIdRoutine = new SysIdRoutine(
-            new SysIdRoutine.Config(),
-            new SysIdRoutine.Mechanism((volt) -> this.setVoltage(volt.in(Volts), false), log -> {
-                log.motor("fourbar-motor")
-                        .voltage(Voltage.ofBaseUnits(desiredVoltage, Volts))
-                        .angularPosition(Angle.ofBaseUnits(getAngleDegrees(), Degrees))
-                        .angularVelocity(AngularVelocity.ofBaseUnits(getVelocity(), DegreesPerSecond));
-            }, this));
 
     public Fourbar() {
         TunablesManager.add(getName(), (Tunable) this);

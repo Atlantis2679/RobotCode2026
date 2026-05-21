@@ -1,6 +1,10 @@
 package frc.robot.subsystems.fourbar;
 
+import static edu.wpi.first.units.Units.Volts;
+
 import java.util.function.DoubleSupplier;
+
+import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.Timer;
@@ -16,12 +20,21 @@ import team2679.atlantiskit.valueholders.ValueHolder;
 public class FourbarCommands {
     private Fourbar fourbar;
 
+    private SysIdRoutine sysIdRoutine;
+
     public FourbarCommands(Fourbar fourbar) {
         this.fourbar = fourbar;
         TunablesManager.add("TunableSetVoltages/FourbarSetVoltage", tunableSetVoltage().fullTunable());
-        TunablesManager.add(fourbar.getName() + "/TunableMoveToAngle", tunableMoveToAngle().fullTunable());
-        TunablesManager.add(fourbar.getName() + "/TunableBounce", tunableBounce().fullTunable());
-        TunablesManager.add(fourbar.getName() + "/SysId", sysId());
+        TunablesManager.add("fourbar" + "/TunableMoveToAngle", tunableMoveToAngle().fullTunable());
+        TunablesManager.add("fourbar" + "/TunableBounce", tunableBounce().fullTunable());
+        this.sysIdRoutine = new SysIdRoutine(
+            new SysIdRoutine.Config(null, null, null,
+                (state) -> Logger.recordOutput("Fourbar SysID State", state.toString())), 
+            new SysIdRoutine.Mechanism(
+                (volts) -> fourbar.setVoltage(volts.in(Volts), false), 
+            null, fourbar));
+        TunablesManager.add("fourbar" + "/SysId", sysId());
+        
     }
 
     public Command moveToAngle(DoubleSupplier angle) {
@@ -74,10 +87,10 @@ public class FourbarCommands {
 
     public Command sysId() {
         return Commands.sequence(
-                fourbar.sysIdRoutine.quasistatic(SysIdRoutine.Direction.kForward),
-                fourbar.sysIdRoutine.quasistatic(SysIdRoutine.Direction.kReverse),
-                fourbar.sysIdRoutine.dynamic(SysIdRoutine.Direction.kForward),
-                fourbar.sysIdRoutine.dynamic(SysIdRoutine.Direction.kReverse)).withName("sysId");
+                this.sysIdRoutine.quasistatic(SysIdRoutine.Direction.kForward),
+                this.sysIdRoutine.quasistatic(SysIdRoutine.Direction.kReverse),
+                this.sysIdRoutine.dynamic(SysIdRoutine.Direction.kForward),
+                this.sysIdRoutine.dynamic(SysIdRoutine.Direction.kReverse)).withName("sysId");
     }
 
     public Command manualController(DoubleSupplier speed) {
