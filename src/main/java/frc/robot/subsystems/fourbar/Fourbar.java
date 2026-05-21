@@ -54,6 +54,7 @@ public class Fourbar extends SubsystemBase implements Tunable {
 
     public Fourbar() {
         TunablesManager.add(getName(), (Tunable) this);
+        pid.enableContinuousInput(0, 360);
     }
 
     public void resetPID() {
