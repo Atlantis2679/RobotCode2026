@@ -54,7 +54,6 @@ public class RobotContainer {
     private final Index index = new Index();
     private final Hood hood = new Hood();
     private final FlyWheel flyWheel = new FlyWheel();
-    // private final Elevator elevator = new Elevator();
     // private final Vision vision = new Vision();
 
     private final ShootingCalculator hubShootingCalculator = new ShootingCalculator(new Pose3d(0.0, 0.0, FieldConstants.HUB_OPENING_HEIGHT_METERS, new Rotation3d()),
@@ -66,7 +65,7 @@ public class RobotContainer {
     private final AllCommands allCommands = new AllCommands(fourbar, roller, flyWheel, hood, index);
 
     private final PowerDistribution pdh = new PowerDistribution();
-private final NaturalXboxController driverController = new NaturalXboxController( RobotMap.Controllers.DRIVER_PORT); private final NaturalXboxController operatorController = new NaturalXboxController(
+    private final NaturalXboxController driverController = new NaturalXboxController( RobotMap.Controllers.DRIVER_PORT); private final NaturalXboxController operatorController = new NaturalXboxController(
             RobotMap.Controllers.OPERATOR_PORT);
 
     private BooleanSupplier isShootingHub;

@@ -29,14 +29,12 @@ public class AllCommands {
     private FlyWheel flyWheel;
     private Hood hood;
     private Index index;
-    // private Elevator elevator;
 
     private FourbarCommands fourbarCMDs;
     private RollerCommands rollerCMDs;
     private FlyWheelCommands flyWheelCMDs;
     private HoodCommands hoodCMDs;
     private IndexCommands indexCMDs;
-    // private ElevatorCommands elevatorCMDs;
 
     public AllCommands(Fourbar fourbar, Roller roller, FlyWheel flyWheel, Hood hood, Index index) {
         this.fourbar = fourbar;
@@ -44,14 +42,12 @@ public class AllCommands {
         this.flyWheel = flyWheel;
         this.hood = hood;
         this.index = index;
-        // this.elevator = elevator;
 
         fourbarCMDs = new FourbarCommands(this.fourbar);
         rollerCMDs = new RollerCommands(this.roller);
         flyWheelCMDs = new FlyWheelCommands(this.flyWheel);
         hoodCMDs = new HoodCommands(this.hood);
         indexCMDs = new IndexCommands(this.index);
-        // elevatorCMDs = new ElevatorCommands(this.elevator);
     }
 
     public Command intake() {
@@ -73,9 +69,6 @@ public class AllCommands {
     public Command shoot(DoubleSupplier speedRPM, DoubleSupplier angle) {
         return Commands.parallel(
                 getReadyToShoot(speedRPM, angle),
-                // Commands.waitUntil(
-                //         () -> flyWheel.isAtSpeed(speedRPM.getAsDouble()) && hood.isAtAngle(angle.getAsDouble()))
-                //         .andThen(
                             indexCMDs.spinBoth(INDEXER_VOLTAGE, SPINDEX_VOLTAGE))//)
                 .withName("shoot");
     }
@@ -117,14 +110,6 @@ public class AllCommands {
         return hoodCMDs.moveToAngle(angle);
     }
 
-    // public Command climb() {
-    //     return elevatorCMDs.moveToHeight(ELEVATOR_CLIMB_HEIGHT_METERS).withName("climb");
-    // }
-
-    // public Command unclimb() {
-    //     return elevatorCMDs.moveToHeight(ELEVATOR_UNCLIMB_HEIGHT_METERS).withName("unclimb");
-    // }
-
     public Command fourbarMoveToRest() {
         return fourbarCMDs.moveToAngle(() -> FOURBAR_MID_ANGLE).withName("fourbarMoveToRest");
     }
@@ -135,7 +120,6 @@ public class AllCommands {
             roller.stop();
             flyWheel.stop();
             hood.stop();
-            // elevator.stop();
         }, fourbar, roller, flyWheel, hood)
                 .ignoringDisable(true)
                 .withName("stopAll");

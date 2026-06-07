@@ -29,8 +29,8 @@ public final class HoodConstants {
         public static final double SIM_KV = 0;
         public static final double SIM_KG = 0;
 
-        public static final double JOINT_GEAR_RATIO = 1; //0 throws compile error, changed to one
-        public static final double JKG_METERS_SQUEARED = 1; //0 throws compile error, changed to one
-        public static final double ARM_LENGTH_M = 1.0; //0 throws compile error, changed to one
+        public static final double JOINT_GEAR_RATIO = 1;
+        public static final double JKG_METERS_SQUEARED = 1;
+        public static final double ARM_LENGTH_M = 1.0;
     }
 }
