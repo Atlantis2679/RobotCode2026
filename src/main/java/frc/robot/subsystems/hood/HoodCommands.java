@@ -4,6 +4,7 @@ import java.util.function.DoubleSupplier;
 
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.utils.MathUtils;
 import team2679.atlantiskit.tunables.TunablesManager;
 import team2679.atlantiskit.tunables.extensions.TunableCommand;
 import team2679.atlantiskit.valueholders.DoubleHolder;
@@ -16,13 +17,14 @@ public class HoodCommands {
     public HoodCommands(Hood hood) {
         this.hood = hood;
         TunablesManager.add("TunableSetVoltages/HoodSetVoltage", tunableSetVoltage().fullTunable());
-        TunablesManager.add("Tunable hood cosine follower", hoodCosineWaveFollower().fullTunable());
+        TunablesManager.add("Hood/Cosine Follower", cosineWaveFollower().fullTunable());
+        TunablesManager.add("Hood/tunableHoming", tunableHoming().fullTunable());
     }
 
     public Command moveToAngle(DoubleSupplier angle) {
         return hood.runOnce(() -> {
             hood.resetPID();
-        }).andThen(hood.run(() -> {
+        }).andThen(homing()).andThen(hood.run(() -> {
             hood.setVoltage(hood.calculatePID(angle.getAsDouble()));
         })).withName("Hood move to angle");
     }
@@ -39,18 +41,25 @@ public class HoodCommands {
         });
     }
 
+    public Command homing() {
+        return hood.run(() -> hood.setVoltage(HOMING_VOLTAGE)).onlyWhile(() -> !hood.isCalibrated())
+                .finallyDo(hood::stop).withName("Homing");
+    }
+
     public TunableCommand tunableHoming() {
         return TunableCommand.wrap((tunablesTable) -> {
-            DoubleHolder voltage = tunablesTable.addNumber("voltage", -HOMING_VOLTAGE);
-            return hood.run(() -> hood.setVoltage(voltage.get())).onlyWhile(() -> !hood.isCalibrated()).finallyDo(hood::stop).withName("Homing");
+            DoubleHolder voltage = tunablesTable.addNumber("voltage", HOMING_VOLTAGE);
+            return hood.run(() -> hood.setVoltage(voltage.get())).onlyWhile(() -> !hood.isCalibrated())
+                    .finallyDo(hood::stop).withName("Tunable Homing");
         });
     }
 
-    public TunableCommand hoodCosineWaveFollower() {
+    public TunableCommand cosineWaveFollower() {
         return TunableCommand.wrap((tunablesTable) -> {
             DoubleHolder changeRate = tunablesTable.addNumber("Change Rate", 1.0);
             return hood.run(() -> {
-                double angle = cosineWaveFollower(hood.minAngle, hood.maxAngle, Timer.getFPGATimestamp() * changeRate.get());
+                double angle = MathUtils.cosineWave(hood.minAngle, hood.maxAngle,
+                        Timer.getFPGATimestamp() * changeRate.get());
                 double voltage = hood.calculatePID(angle);
                 hood.setVoltage(voltage);
             });
@@ -61,11 +70,5 @@ public class HoodCommands {
         return hood.run(() -> {
             hood.setVoltage(speed.getAsDouble() * MAX_VOLTAGE);
         }).finallyDo(hood::stop).withName("Hood manual controller");
-    }
-
-    public static double cosineWaveFollower(double a, double b, double x) {
-        double average = (a + b) / 2;
-        double delta = (a - b) / 2; 
-        return average + delta * Math.cos(x);
     }
 }

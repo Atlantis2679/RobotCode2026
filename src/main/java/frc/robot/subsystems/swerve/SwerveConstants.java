@@ -39,17 +39,17 @@ public final class SwerveConstants {
 
         public static final double PREVENT_JITTERING_MULTIPLAYER = 0.01;
 
-        public static final double DRIVE_GEAR_RATIO = 6.756;
-        public static final double TURN_GEAR_RATIO = 12.8;
+        public static final double DRIVE_GEAR_RATIO = 6.12;
+        public static final double TURN_GEAR_RATIO = 150.0 / 7;
 
         public static final double WHEEL_RADIUS_METERS = Units.inchesToMeters(2);
         public static final double WHEEL_CIRCUMFERENCE_METERS = 2 * Math.PI * WHEEL_RADIUS_METERS;
 
         public static final double[] OFFSETS = {
-                -26.3671875 + 180,
-                -55.72265625 + 180,
-                82.177734375 + 180,
-                39.7265625 + 180,
+                115.83984375,
+                91.7578125 + 180,
+                48.603515625,
+                150.732421875,
         };
 
         public static final double DRIVE_STATOR_CURRENT_LIMIT = 90;
@@ -69,8 +69,8 @@ public final class SwerveConstants {
         public static final double SIM_TURN_MOTOR_KD = 0;
     }
 
-    public static final double TRACK_LENGTH_METERS = 0.595;
-    public static final double TRACK_WIDTH_METERS = 0.595;
+    public static final double TRACK_LENGTH_METERS = 0.69;
+    public static final double TRACK_WIDTH_METERS = 0.69;
 
     public static final Translation2d[] MODULES_LOCATIONS = {
             new Translation2d(TRACK_LENGTH_METERS / 2, TRACK_WIDTH_METERS / 2),
@@ -107,9 +107,9 @@ public final class SwerveConstants {
         public static final double DRIVER_ANGULAR_ACCELERATION_LIMIT_RPS = 4.5;
         public static final double SENSETIVE_TRANSLATION_MULTIPLIER = 0.3;
         public static final double SENSETIVE_ROTATION_MULTIPLIER = 0.3;
-        public static final double ROTATION_KP = 0.01;
-        public static final double ROTATION_KI = 0.02;
-        public static final double ROTATION_KD = 0.005;
-        public static final double AUTO_ROTATION_TOLERANCE_DEG = 0.5;
+        public static final double ROTATION_KP = 0.005;
+        public static final double ROTATION_KI = 0.0;
+        public static final double ROTATION_KD = 0.0;
+        public static final double AUTO_ROTATION_TOLERANCE_DEG = 2;
     }
 }

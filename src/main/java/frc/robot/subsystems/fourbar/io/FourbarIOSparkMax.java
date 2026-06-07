@@ -15,11 +15,13 @@ import frc.robot.utils.AlertsFactory;
 import team2679.atlantiskit.logfields.LogFieldsTable;
 import team2679.atlantiskit.periodicalerts.PeriodicAlertsGroup;
 
+import static frc.robot.RobotMap.DIO.FOURBAR_ENCODER_ID;
+
 public class FourbarIOSparkMax extends FourbarIO {
 
     private SparkMax motor = new SparkMax(RobotMap.CANBUS.FOURBAR_ID, MotorType.kBrushless);
     private SparkMaxConfig motorConfig = new SparkMaxConfig();
-    private DutyCycleEncoder encoder = new DutyCycleEncoder(RobotMap.DIO.FOURBAR_ENCODER_ID);
+    private DutyCycleEncoder encoder = new DutyCycleEncoder(FOURBAR_ENCODER_ID);
 
     public FourbarIOSparkMax(LogFieldsTable fields) {
         super(fields);
@@ -30,16 +32,13 @@ public class FourbarIOSparkMax extends FourbarIO {
                 PersistMode.kNoPersistParameters);
         AlertsFactory.revMotor(PeriodicAlertsGroup.defaultInstance.getSubGroup("Fourbar"),
                 () -> motorConfigError, motor::getWarnings, motor::getFaults, "motor");
-
-        encoder.setDutyCycleRange(0, 1);
+        
+        motor.getEncoder().setPosition(0);
     }
 
+    @Override
     protected double getAngleDegrees() {
-        return encoder.get();
-    }
-
-    protected boolean isEncoderConnected() {
-        return encoder.isConnected();
+        return encoder.get() * 360;
     }
 
     protected double getCurrent() {

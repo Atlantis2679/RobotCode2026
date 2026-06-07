@@ -8,7 +8,7 @@ public class RollerIOSim extends RollerIO {
         super(fields);
     }
 
-    public void setSpeed(double speed) {
+    public void setVoltage(double voltage) {
     }
 
     protected double getCurrent() {

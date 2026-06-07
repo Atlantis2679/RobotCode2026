@@ -4,7 +4,6 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import team2679.atlantiskit.logfields.LogFieldsTable;
 
-import static frc.robot.subsystems.hood.HoodConstants.GEAR_RATIO;
 import static frc.robot.subsystems.hood.HoodConstants.MAX_ANGLE_DEGREES;
 import static frc.robot.subsystems.hood.HoodConstants.MIN_ANGLE_DEGREES;
 import static frc.robot.subsystems.hood.HoodConstants.Sim.*;
@@ -45,11 +44,6 @@ public class HoodIOSim extends HoodIO {
     @Override
     protected double getMotorCurrent() {
         return motor.getCurrentDrawAmps();
-    }
-
-    @Override
-    protected double getAbsolueAngleDegrees() {
-        return getMotorRotations() * 360 * GEAR_RATIO;
     }
 
     @Override

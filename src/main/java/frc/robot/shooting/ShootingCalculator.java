@@ -9,6 +9,8 @@ import edu.wpi.first.math.geometry.Pose3d;
 import frc.robot.utils.LinearInterpolation;
 import team2679.atlantiskit.logfields.LogFieldsTable;
 
+import static frc.robot.shooting.ShootingMeasurments.ROBOT_TO_MEASURMENT_TRANSFORM;
+
 public class ShootingCalculator {
     private static final double G = -9.8;
 
@@ -16,8 +18,6 @@ public class ShootingCalculator {
 
     private final LinearInterpolation hoodAngleDegreesLinearInterpolation;
     private final LinearInterpolation flyWheelRPMLinearInterpolation;
-
-    private double robotYawDegreesCCW;
 
     private double hoodAngleDegrees;
     private double flyWheelRPM;
@@ -44,24 +44,25 @@ public class ShootingCalculator {
         this.targetPose = targetPose;
     }
 
-    public void update(Pose2d robotPose, boolean isRedAlliance) {
-        double distanceFromTarget = new Pose3d(robotPose).getTranslation().getDistance(targetPose.getTranslation());
-        robotYawDegreesCCW = Math.toDegrees(Math
-                .atan((targetPose.getY() - robotPose.getY()) / (targetPose.getX() - robotPose.getX())));
-        if (isRedAlliance) {
-            robotYawDegreesCCW += 180;
-        }
+    public void update(Pose2d robotPose) {
+        double distanceFromTarget = new Pose3d(robotPose).transformBy(ROBOT_TO_MEASURMENT_TRANSFORM).getTranslation().getDistance(targetPose.getTranslation());
+        update_with_distance(distanceFromTarget);
+    }
 
+    public void update_with_distance(double distanceFromTarget) {
         hoodAngleDegrees = hoodAngleDegreesLinearInterpolation.calculate(distanceFromTarget);
         flyWheelRPM = flyWheelRPMLinearInterpolation.calculate(distanceFromTarget);
 
         flightTimeEstimateSeconds = solveKinematicsTime(targetPose.getZ(), flyWheelRPM, hoodAngleDegrees);
 
         fieldsTable.recordOutput("distanceFromTarget", distanceFromTarget);
-        fieldsTable.recordOutput("robotYawDegreesCCW", robotYawDegreesCCW);
         fieldsTable.recordOutput("hoodAngleDegrees", hoodAngleDegrees);
         fieldsTable.recordOutput("flyWheelRPM", flyWheelRPM);
         fieldsTable.recordOutput("flightTimeEstimateSeconds", flightTimeEstimateSeconds);
+    }
+
+    public void setTargetPose(Pose3d targetPose) {
+        this.targetPose = targetPose;
     }
 
     public double getHoodAngleDegrees() {
@@ -70,10 +71,6 @@ public class ShootingCalculator {
 
     public double getFlyWheelRPM() {
         return flyWheelRPM;
-    }
-
-    public double getRobotYawDegreesCCW() {
-        return robotYawDegreesCCW;
     }
 
     public double getFlightTimeEstimateSeconds() {

@@ -12,7 +12,9 @@ import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.ctre.phoenix6.signals.SensorDirectionValue;
 
 import frc.robot.utils.AlertsFactory;
 import team2679.atlantiskit.logfields.LogFieldsTable;
@@ -59,6 +61,7 @@ public class SwerveModuleIOFalcon extends SwerveModuleIO {
         turnMotorConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
         turnMotorConfig.Feedback.SensorToMechanismRatio = TURN_GEAR_RATIO;
         turnMotorConfig.ClosedLoopGeneral.ContinuousWrap = true;
+        turnMotorConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
 
         turnMotorConfig.CurrentLimits.StatorCurrentLimitEnable = true;
         turnMotorConfig.CurrentLimits.StatorCurrentLimit = TURN_STATOR_CURRENT_LIMIT;
@@ -69,6 +72,8 @@ public class SwerveModuleIOFalcon extends SwerveModuleIO {
         turnSlotConfigs.kD = TURN_MOTOR_KD;
 
         CANcoderConfiguration canCoderConfig = new CANcoderConfiguration();
+
+        canCoderConfig.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive;
 
         driveMotorStatus = driveMotor.getConfigurator().apply(driveMotorConfig);
         turnMotorStatus = turnMotor.getConfigurator().apply(turnMotorConfig);

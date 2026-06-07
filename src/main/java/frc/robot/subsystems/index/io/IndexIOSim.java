@@ -11,9 +11,14 @@ public class IndexIOSim extends IndexIO{
     public void setSpindexVolt(double volt) {}
     public void setIndexerVolt(double volt) {}
 
-    protected double getSpindexCurrent() {
+    protected double getSpindexFollowerCurrent() {
         return 0;
     }
+
+    protected double getSpindexLeaderCurrent() {
+        return 0;
+    }
+
 
     protected double getIndexerCurrent() {
         return 0;

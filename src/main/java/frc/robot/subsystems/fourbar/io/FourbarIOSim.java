@@ -7,12 +7,9 @@ public class FourbarIOSim extends FourbarIO {
         super(fieldsTable);
     }
 
+    @Override
     protected double getAngleDegrees() {
         return 0;
-    }
-
-    protected boolean isEncoderConnected() {
-        return false;
     }
 
     protected double getCurrent() {
