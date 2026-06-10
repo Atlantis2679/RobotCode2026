@@ -203,7 +203,7 @@ public class RobotContainer {
 
     private void configureWrapperAuto() {
         CommandsWrappers commandWrappers = new CommandsWrappers(allCommands, swerveCommands);
-        CommandScheduler.getInstance().schedule(commandWrappers.autoCommand());
+        new Trigger(DriverStation::isEnabled).onTrue(commandWrappers.autoCommand());
     }
 
     public void enterSwerveIntoTest() {

@@ -3,6 +3,7 @@ package frc.robot.allCommands;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.subsystems.swerve.SwerveCommands;
+import team2679.atlantiskit.valueholders.DoubleHolder;
 
 public class CommandsWrappers {
     private static final double DRIVE_SPEED = 0.05;
@@ -65,36 +66,36 @@ public class CommandsWrappers {
         return Commands.runOnce(() -> {
             switch (direction) {
                 case LEFT:
-                    xSpeed = DRIVE_SPEED;
+                    xSpeed = -DRIVE_SPEED;
                     ySpeed = 0;
                     break;
                 case RIGHT:
-                    xSpeed = -DRIVE_SPEED;
+                    xSpeed = DRIVE_SPEED;
                     ySpeed = 0;
                     break;
                 case FRONT:
                     xSpeed = 0;
-                    ySpeed = DRIVE_SPEED;
+                    ySpeed = -DRIVE_SPEED;
                     break;
                 case BACK:
                     xSpeed = 0;
-                    ySpeed = -DRIVE_SPEED;
+                    ySpeed = DRIVE_SPEED;
                     break;
                 case FRONT_LEFT:
-                    xSpeed = DRIVE_SPEED / 2;
-                    ySpeed = DRIVE_SPEED / 2;
+                    xSpeed = -DRIVE_SPEED / 2;
+                    ySpeed = -DRIVE_SPEED / 2;
                     break;
                 case BACK_LEFT:
-                    xSpeed = DRIVE_SPEED / 2;
-                    ySpeed = -DRIVE_SPEED / 2;
-                    break;
-                case FRONT_RIGHT:
                     xSpeed = -DRIVE_SPEED / 2;
                     ySpeed = DRIVE_SPEED / 2;
                     break;
-                case BACK_RIGHT:
-                    xSpeed = -DRIVE_SPEED / 2;
+                case FRONT_RIGHT:
+                    xSpeed = DRIVE_SPEED / 2;
                     ySpeed = -DRIVE_SPEED / 2;
+                    break;
+                case BACK_RIGHT:
+                    xSpeed = DRIVE_SPEED / 2;
+                    ySpeed = DRIVE_SPEED / 2;
                     break;
             }
         });
@@ -111,6 +112,16 @@ public class CommandsWrappers {
                     break;
             }
         });
+    }
+
+    public Command rotateBy(RotateDirection direction, double angle) {
+        DoubleHolder targetAngle = new DoubleHolder(0);
+        if (direction == RotateDirection.ClockWise) angle = -angle;
+        DoubleHolder targetInputAngle = new DoubleHolder(angle);
+        return Commands.sequence(
+            Commands.runOnce(() -> targetAngle.set(targetInputAngle.get() + swerveCommands.swerve.getGyroYawDegreesCCW())),
+            startRotating(direction).until(() -> swerveCommands.swerve.getGyroYawDegreesCCW() > targetAngle.get())
+        ); 
     }
 
     public Command stopShooting() {
@@ -151,8 +162,11 @@ public class CommandsWrappers {
         return Commands.sequence(
             startMoving(MoveDirection.BACK_LEFT),
             waitSeconds(1),
+            stopMoving(),
+            rotateBy(RotateDirection.CounterClockWise, 90),
             startShooting(0.1,40),
-            startPass()
+            startPass(),
+            stopAll()
         );
     }
 }
