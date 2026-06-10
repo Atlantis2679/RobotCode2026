@@ -14,7 +14,7 @@ import team2679.atlantiskit.tunables.extensions.TunableCommand;
 import team2679.atlantiskit.valueholders.BooleanHolder;
 
 public class SwerveCommands {
-  private final Swerve swerve;
+  public final Swerve swerve;
 
   public SwerveCommands(Swerve swerve) {
     this.swerve = swerve;

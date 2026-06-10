@@ -24,9 +24,11 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.allCommands.AllCommands;
+import frc.robot.allCommands.CommandsWrappers;
 import frc.robot.shooting.ShootingCalculator;
 import frc.robot.shooting.ShootingMeasurments;
 // import frc.robot.subsystems.elevator.Elevator;
@@ -104,9 +106,10 @@ public class RobotContainer {
         });
         new Trigger(DriverStation::isDisabled).whileTrue(swerveCommands.stop().alongWith(allCommands.stopAll()));
         // SignalLogger.setPath("/media/sda1/"); // Cofigure pheonixLib logging path
-        configureDrive();
-        configureOperator();
-        configureAuto();
+        // configureDrive();
+        // configureOperator();
+        // configureAuto();
+        configureWrapperAuto();
     }
 
     private void configureDrive() {
@@ -196,6 +199,11 @@ public class RobotContainer {
                 field.getObject("Auto Trajectory").setPose(PoseEstimator.getInstance().getEstimatedPose());
             }
         });
+    }
+
+    private void configureWrapperAuto() {
+        CommandsWrappers commandWrappers = new CommandsWrappers(allCommands, swerveCommands);
+        CommandScheduler.getInstance().schedule(commandWrappers.autoCommand());
     }
 
     public void enterSwerveIntoTest() {

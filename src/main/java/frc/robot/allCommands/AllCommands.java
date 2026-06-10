@@ -51,9 +51,7 @@ public class AllCommands {
     }
 
     public Command intake() {
-        return Commands.parallel(
-                fourbarCMDs.bounce(FOURBAR_INTAKE_BOUNCE_MIN_ANGLE, FOURBAR_INTAKE_BOUNCE_MAX_ANGLE),
-                rollerCMDs.spin(ROLLER_VOLTAGE)).withName("intake");
+        return rollerCMDs.spin(ROLLER_VOLTAGE).withName("intake");
     }
 
     public Command stopIntake() {
@@ -69,8 +67,14 @@ public class AllCommands {
     public Command shoot(DoubleSupplier speedRPM, DoubleSupplier angle) {
         return Commands.parallel(
                 getReadyToShoot(speedRPM, angle),
-                            indexCMDs.spinBoth(INDEXER_VOLTAGE, SPINDEX_VOLTAGE))//)
+                Commands.waitUntil(
+                        () -> flyWheel.isAtSpeed(speedRPM.getAsDouble()) && hood.isAtAngle(angle.getAsDouble()))
+                        .andThen(spinIndex()))
                 .withName("shoot");
+    }
+
+    public Command spinIndex() {
+        return indexCMDs.spinBoth(INDEXER_VOLTAGE, SPINDEX_VOLTAGE).withName("SpinIndex");
     }
 
     public TunableCommand tunableShoot() {
@@ -112,6 +116,14 @@ public class AllCommands {
 
     public Command fourbarMoveToRest() {
         return fourbarCMDs.moveToAngle(() -> FOURBAR_MID_ANGLE).withName("fourbarMoveToRest");
+    }
+
+    public Command stopFlywheel() {
+        return flyWheel.run(flyWheel::stop).withName("stopFlywheel");
+    }
+
+    public Command stopIndex() {
+        return index.run(index::stop).withName("stopIndex");
     }
 
     public Command stopAll() {
