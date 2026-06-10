@@ -25,8 +25,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.allCommands.AllCommands;
-import frc.robot.shooting.ShootingCalculator;
-import frc.robot.shooting.ShootingMeasurments;
 import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.flywheel.FlyWheel;
 import frc.robot.subsystems.fourbar.Fourbar;
@@ -54,11 +52,6 @@ public class RobotContainer {
     private final FlyWheel flyWheel = new FlyWheel();
     private final Elevator elevator = new Elevator();
     private final Vision vision = new Vision();
-
-    private final ShootingCalculator hubShootingCalculator = new ShootingCalculator(new Pose3d(),
-            ShootingMeasurments.ALL_MEASURMENTS_HUB);
-    private final ShootingCalculator deliveryShootingCalculator = new ShootingCalculator(
-            new Pose3d(), ShootingMeasurments.ALL_MEASURMENTS_DELIVRY);
 
     private final SwerveCommands swerveCommands = new SwerveCommands(swerve);
     private final AllCommands allCommands = new AllCommands(fourbar, roller, flyWheel, hood, index, elevator);
@@ -203,7 +196,6 @@ public class RobotContainer {
 
     public void periodicUpdate() {
         vision.update();
-        hubShootingCalculator.update(PoseEstimator.getInstance().getEstimatedPose(), isRedAlliance());
     }
 
     public static boolean isRedAlliance() {
