@@ -1,5 +1,9 @@
 package frc.robot.utils;
 
+import java.util.Optional;
+
+import edu.wpi.first.math.filter.Debouncer;
+
 public class MathUtils {
     public static double cosineWave(double max, double min, double time) {
         double average = (max + min) / 2;
@@ -27,6 +31,44 @@ public class MathUtils {
             sum += v;
         }
         return Math.round(sum / values.length);
+    }
+
+    public static class RangeWrapper {
+        private final double lowerBound;
+        private final double rangeLength;
+
+        public RangeWrapper(double lowerBound, double upperBound) {
+            this.lowerBound = lowerBound;
+            this.rangeLength = upperBound - lowerBound;
+        }
+
+        public double wrap(double value) {
+            return ((value - lowerBound) % rangeLength + rangeLength) % rangeLength + lowerBound;
+        }
+    }
+
+    public static class NumberGoalTester {
+        public final double target;
+        public final boolean positiveDir;
+        private final Optional<RangeWrapper> rangeWrapper;
+        private final Debouncer goalReachedDebouncer;
+
+        public NumberGoalTester(double target, boolean positiveDir, Optional<RangeWrapper> rangeWrapper, double debounceSec) {
+            if (rangeWrapper.isPresent()) {
+                target = rangeWrapper.get().wrap(target);    
+            }
+            this.target = target;
+            this.positiveDir = positiveDir;
+            this.rangeWrapper = rangeWrapper;
+            this.goalReachedDebouncer = new Debouncer(debounceSec);
+        }
+
+        public boolean goalReached(double current) {
+            if (rangeWrapper.isPresent()) {
+                current = rangeWrapper.get().wrap(current);    
+            }
+            return goalReachedDebouncer.calculate(positiveDir ? current >= target : current <= target);
+        }
     }
 
     public static class DynamicAvarage {

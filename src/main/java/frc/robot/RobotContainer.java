@@ -202,7 +202,8 @@ public class RobotContainer {
     }
 
     private void configureWrapperAuto() {
-        CommandsWrappers commandWrappers = new CommandsWrappers(allCommands, swerveCommands);
+        NaturalXboxController xboxController = new NaturalXboxController(0);
+        CommandsWrappers commandWrappers = new CommandsWrappers(allCommands, swerveCommands, xboxController.a());
         new Trigger(DriverStation::isEnabled).onTrue(commandWrappers.autoCommand());
     }
 
