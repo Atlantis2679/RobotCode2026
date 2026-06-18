@@ -13,7 +13,7 @@ public class ImuIONavX extends ImuIO {
 
   @Override
   protected double getYawDegreesCCW() {
-    return -navX.getAngle();
+    return navX.getAngle();
   }
 
   @Override

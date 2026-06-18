@@ -18,6 +18,8 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.Timer;
@@ -112,11 +114,16 @@ public class RobotContainer {
     }
 
     private void configureDrive() {
+        Pose2d target = new Pose2d(2, 2, new Rotation2d());
         TunableCommand driveCommand = swerveCommands.driverController(
                 driverController::getLeftY,
                 driverController::getLeftX,
                 driverController::getRightX,
-                () -> 180,
+                () -> {
+                    Translation2d transform = PoseEstimator.getInstance().getEstimatedPose().relativeTo(target).getTranslation();
+                    System.out.println(transform);
+                    return Math.toDegrees(Math.atan2(transform.getY(), transform.getX())) + 180                                                                                                                 ;
+                },
                 driverController.b(),
                 driverController.leftBumper().negate()::getAsBoolean,
                 driverController.rightBumper()::getAsBoolean);
