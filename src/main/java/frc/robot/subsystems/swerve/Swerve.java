@@ -82,7 +82,10 @@ public class Swerve extends SubsystemBase implements Tunable {
         new OdometryMeasurment(kinematics, getModulePositions(), gyroAngle, Timer.getFPGATimestamp()));
 
     fieldsTable.recordOutput("Is gryo connected", isGyroConnected());
+    fieldsTable.recordOutput("Robot Relative Real Chassis Speeds", getRobotRelativeChassisSpeeds());
+    fieldsTable.recordOutput("Robot Relative Real States", getModulesStates());
     fieldsTable.recordOutput("Yaw degrees CCW", getGyroYawDegreesCCW());
+    fieldsTable.recordOutput("Modules Current Positions", getModulePositions());
     fieldsTable.recordOutput("Current Command", getCurrentCommand() != null ? getCurrentCommand().getName() : "none");
   }
 
@@ -126,6 +129,15 @@ public class Swerve extends SubsystemBase implements Tunable {
 
   public ChassisSpeeds getFieldRelativeChassisSpeeds() {
     return ChassisSpeeds.fromRobotRelativeSpeeds(getRobotRelativeChassisSpeeds(), Rotation2d.fromDegrees(getGyroYawDegreesCCW()));
+  }
+  
+  public SwerveModuleState[] getModulesStates() {
+    return new SwerveModuleState[] {
+      modules[0].getModuleState(),
+      modules[1].getModuleState(),
+      modules[2].getModuleState(),
+      modules[3].getModuleState()
+    };
   }
 
   public boolean isGyroConnected() {

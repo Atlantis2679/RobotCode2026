@@ -1,7 +1,7 @@
 package frc.robot.allCommands;
 
-import frc.robot.subsystems.elevator.Elevator;
-import frc.robot.subsystems.elevator.ElevatorCommands;
+// import frc.robot.subsystems.elevator.Elevator;
+// import frc.robot.subsystems.elevator.ElevatorCommands;
 import frc.robot.subsystems.flywheel.FlyWheel;
 import frc.robot.subsystems.flywheel.FlyWheelCommands;
 import frc.robot.subsystems.fourbar.Fourbar;
@@ -28,36 +28,31 @@ public class AllCommands {
     private FlyWheel flyWheel;
     private Hood hood;
     private Index index;
-    private Elevator elevator;
 
     private FourbarCommands fourbarCMDs;
     private RollerCommands rollerCMDs;
     private FlyWheelCommands flyWheelCMDs;
     private HoodCommands hoodCMDs;
     private IndexCommands indexCMDs;
-    private ElevatorCommands elevatorCMDs;
 
-    public AllCommands(Fourbar fourbar, Roller roller, FlyWheel flyWheel, Hood hood, Index index,
-            Elevator elevator) {
+    public AllCommands(Fourbar fourbar, Roller roller, FlyWheel flyWheel, Hood hood, Index index) {
         this.fourbar = fourbar;
         this.roller = roller;
         this.flyWheel = flyWheel;
         this.hood = hood;
         this.index = index;
-        this.elevator = elevator;
 
         fourbarCMDs = new FourbarCommands(this.fourbar);
         rollerCMDs = new RollerCommands(this.roller);
         flyWheelCMDs = new FlyWheelCommands(this.flyWheel);
         hoodCMDs = new HoodCommands(this.hood);
         indexCMDs = new IndexCommands(this.index);
-        elevatorCMDs = new ElevatorCommands(this.elevator);
     }
 
     public Command intake() {
         return Commands.parallel(
-                fourbarCMDs.getToAngleDegrees(FOURBAR_OPEN_ANGLE_DEG),
-                rollerCMDs.spin(ROLLER_SPEED_RPM)).withName("intake");
+                fourbarCMDs.bounce(FOURBAR_INTAKE_BOUNCE_MIN_ANGLE, FOURBAR_INTAKE_BOUNCE_MAX_ANGLE),
+                rollerCMDs.spin(ROLLER_VOLTAGE)).withName("intake");
     }
 
     public Command stopIntake() {
@@ -73,9 +68,7 @@ public class AllCommands {
     public Command shoot(DoubleSupplier speedRPM, DoubleSupplier angle) {
         return Commands.parallel(
                 getReadyToShoot(speedRPM, angle),
-                Commands.waitUntil(
-                        () -> flyWheel.isAtSpeed(speedRPM.getAsDouble()) && hood.isAtAngle(angle.getAsDouble()))
-                        .andThen(indexCMDs.spinBoth(INDEXER_VOLTAGE, SPINDEX_VOLTAGE)))
+                            indexCMDs.spinBoth(INDEXER_VOLTAGE, SPINDEX_VOLTAGE))//)
                 .withName("shoot");
     }
 
@@ -88,21 +81,23 @@ public class AllCommands {
         });
     }
 
-    public Command climb() {
-        return elevatorCMDs.moveToHeight(ELEVATOR_CLIMB_HEIGHT_METERS).withName("climb");
+    public TunableCommand tunableShootWithPassing() {
+        return TunableCommand.wrap((tunablesTable) -> {
+            DoubleHolder speedHolder = tunablesTable.addNumber("speedRPM", 0.0);
+            DoubleHolder hoodAngleHolder = tunablesTable.addNumber("angle", 0.0);
+            DoubleHolder indexVoltage = tunablesTable.addNumber("indexVoltage", INDEXER_VOLTAGE);
+            DoubleHolder spindexVoltage = tunablesTable.addNumber("spindexVoltage", SPINDEX_VOLTAGE);
+            return getReadyToShoot(speedHolder::get, hoodAngleHolder::get).alongWith(indexCMDs.spinBoth(indexVoltage::get, spindexVoltage::get))
+                    .withName("tunableShoot");
+        });
     }
 
-    public Command unclimb() {
-        return elevatorCMDs.moveToHeight(ELEVATOR_UNCLIMB_HEIGHT_METERS).withName("unclimb");
-    }
-
-    public Command hoodDefaultMove(DoubleSupplier angle) {
-        return hoodCMDs.tunableHoming().andThen(hoodCMDs.moveToAngle(angle))
-            .withName("hoodDefaultMove");
+    public Command hoodFollow(DoubleSupplier angle) {
+        return hoodCMDs.moveToAngle(angle);
     }
 
     public Command fourbarMoveToRest() {
-        return fourbarCMDs.moveToAngle(() -> FOURBAR_MID_ANGLE_DEG).withName("fourbarMoveToRest");
+        return fourbarCMDs.moveToAngle(() -> FOURBAR_MID_ANGLE).withName("fourbarMoveToRest");
     }
 
     public Command stopAll() {
@@ -111,8 +106,7 @@ public class AllCommands {
             roller.stop();
             flyWheel.stop();
             hood.stop();
-            elevator.stop();
-        }, fourbar, roller, flyWheel, hood, elevator)
+        }, fourbar, roller, flyWheel, hood)
                 .ignoringDisable(true)
                 .withName("stopAll");
     }
@@ -127,5 +121,4 @@ public class AllCommands {
                 indexCMDs.manualController(indexSpeed))
                 .withName("manualController");
     }
-
 }

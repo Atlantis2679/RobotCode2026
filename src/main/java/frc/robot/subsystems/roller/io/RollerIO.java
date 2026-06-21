@@ -14,5 +14,5 @@ public abstract class RollerIO extends IOBase {
 
     protected abstract double getCurrent();
 
-    public abstract void setSpeed(double speed);
+    public abstract void setVoltage(double voltage);
 }

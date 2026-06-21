@@ -23,7 +23,6 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.allCommands.AllCommands;
 import frc.robot.shooting.ShotControl;
-import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.flywheel.FlyWheel;
 import frc.robot.subsystems.fourbar.Fourbar;
 import frc.robot.subsystems.hood.Hood;
@@ -34,8 +33,8 @@ import frc.robot.subsystems.swerve.Swerve;
 import frc.robot.subsystems.swerve.SwerveCommands;
 import frc.robot.subsystems.swerve.SwerveConstants;
 import frc.robot.subsystems.swerve.SwerveConstants.PathPlanner;
-import frc.robot.subsystems.vision.Vision;
 import frc.robot.utils.CommandsUtils;
+// import frc.robot.subsystems.vision.Vision;
 import frc.robot.utils.NaturalXboxController;
 import team2679.atlantiskit.tunables.Tunable;
 import team2679.atlantiskit.tunables.TunableBuilder;
@@ -50,17 +49,13 @@ public class RobotContainer {
     private final Index index = new Index();
     private final Hood hood = new Hood();
     private final FlyWheel flyWheel = new FlyWheel();
-    private final Elevator elevator = new Elevator();
-    private final Vision vision = new Vision();
+    // private final Vision vision = new Vision();
 
     private final SwerveCommands swerveCommands = new SwerveCommands(swerve);
-    private final AllCommands allCommands = new AllCommands(fourbar, roller, flyWheel, hood, index, elevator);
+    private final AllCommands allCommands = new AllCommands(fourbar, roller, flyWheel, hood, index);
 
     private final PowerDistribution pdh = new PowerDistribution();
-
-    private final NaturalXboxController driverController = new NaturalXboxController(
-            RobotMap.Controllers.DRIVER_PORT);
-    private final NaturalXboxController operatorController = new NaturalXboxController(
+    private final NaturalXboxController driverController = new NaturalXboxController( RobotMap.Controllers.DRIVER_PORT); private final NaturalXboxController operatorController = new NaturalXboxController(
             RobotMap.Controllers.OPERATOR_PORT);
 
     private static final LoggedDashboardChooser<Boolean> isRedAlliance = new LoggedDashboardChooser<>("alliance");
@@ -104,6 +99,7 @@ public class RobotContainer {
             swerve.resetGyroYawZero();
         }));
         new Trigger(DriverStation::isDisabled).whileTrue(swerveCommands.stop().alongWith(allCommands.stopAll()));
+        // SignalLogger.setPath("/media/sda1/"); // Cofigure pheonixLib logging path
         configureDrive();
         configureOperator();
         configureAuto();
@@ -145,11 +141,13 @@ public class RobotContainer {
 
         operatorController.a().whileTrue(allCommands.intake());
 
-        hood.setDefaultCommand(allCommands.hoodDefaultMove(shotControl::getAngle));
+        hood.setDefaultCommand(allCommands.hoodFollow(shotControl::getAngle));
         fourbar.setDefaultCommand(allCommands.fourbarMoveToRest());
         
         shotTrigger.whileTrue(shotCommand);
         TunablesManager.add("Tunable Shoot Command", allCommands.tunableShoot().fullTunable());
+        TunablesManager.add("Tunable Shoot With Passing", allCommands.tunableShootWithPassing().fullTunable());
+        // TunablesManager.add("Tunable Shoot Hub With Distance", allCommands.tunableShootWithDistance(hubShootingCalculator).fullTunable());
     }
 
     public void configureAuto() {
@@ -202,7 +200,7 @@ public class RobotContainer {
     }
 
     public void periodicUpdate() {
-        vision.update();
+        // vision.update();
         shotControl.update(
             PoseEstimator.getInstance().getEstimatedPose(),
             isRedAlliance(),

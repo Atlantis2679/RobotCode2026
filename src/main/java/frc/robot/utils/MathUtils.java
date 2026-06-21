@@ -1,6 +1,12 @@
 package frc.robot.utils;
 
 public class MathUtils {
+    public static double cosineWave(double max, double min, double time) {
+        double average = (max + min) / 2;
+        double delta = (max - min) / 2;
+        return average + delta * Math.cos(time);
+    }
+
     public static double avg(double[] values) {
         if (values == null || values.length == 0) {
             return 0.0;

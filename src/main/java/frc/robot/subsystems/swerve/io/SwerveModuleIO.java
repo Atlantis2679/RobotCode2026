@@ -8,7 +8,7 @@ import team2679.atlantiskit.logfields.LogFieldsTable;
 public abstract class SwerveModuleIO extends IOBase {
     public final DoubleSupplier absoluteTurnAngleRotations = fields.addDouble("absoluteTurnAngleRotations",
             this::getAbsoluteTurnAngleRotations);
-        public final DoubleSupplier intergatedTurnAngleRotations = fields.addDouble("intergatedTurnAngleRotations",
+        public final DoubleSupplier integratedTurnAngleRotations = fields.addDouble("intergatedTurnAngleRotations",
             this::getIntegratedTurnAngleRotations);
     public final DoubleSupplier driveDistanceRotations = fields.addDouble("driveDistanceRotations",
             this::getDriveDistanceRotations);

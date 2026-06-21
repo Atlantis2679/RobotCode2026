@@ -2,8 +2,6 @@ package frc.robot.subsystems.hood.io;
 
 import com.revrobotics.spark.SparkMax;
 
-import static frc.robot.subsystems.hood.HoodConstants.GEAR_RATIO;
-
 import com.revrobotics.PersistMode;
 import com.revrobotics.REVLibError;
 import com.revrobotics.ResetMode;
@@ -49,11 +47,6 @@ public class HoodIOSparkMax extends HoodIO {
     @Override
     protected double getMotorCurrent() {
         return motor.getOutputCurrent();
-    }
-
-    @Override
-    protected double getAbsolueAngleDegrees() {
-        return motor.getAbsoluteEncoder().getPosition() * 360 * GEAR_RATIO;
     }
 
     @Override

@@ -20,12 +20,12 @@ public class Roller extends SubsystemBase {
     }
 
     public void stop() {
-        io.setSpeed(0);
+        io.setVoltage(0);
     }
 
-    public void setSpeedRPM(double speed) {
-        speed = MathUtil.clamp(speed, -RollerConstants.MAX_RPM, RollerConstants.MAX_RPM);
-        io.setSpeed(speed / RollerConstants.MAX_RPM);
+    public void setVoltage(double voltage) {
+        voltage = MathUtil.clamp(voltage, -RollerConstants.MAX_VOLTAGE, RollerConstants.MAX_VOLTAGE);
+        io.setVoltage(voltage);
     }
 
     public double getCurrent() {
