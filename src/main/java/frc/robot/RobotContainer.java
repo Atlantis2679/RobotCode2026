@@ -99,6 +99,10 @@ public class RobotContainer {
                 }));
             }
         });
+        TunablesManager.add("Reset Pose", new InstantCommand(() -> {
+            PoseEstimator.getInstance().resetPose(new Pose2d());
+            swerve.resetGyroYawZero();
+        }));
         new Trigger(DriverStation::isDisabled).whileTrue(swerveCommands.stop().alongWith(allCommands.stopAll()));
         configureDrive();
         configureOperator();
@@ -137,6 +141,8 @@ public class RobotContainer {
     }
 
     public void configureOperator() {
+        TunablesManager.add("Shot Control", shotControl);
+
         operatorController.a().whileTrue(allCommands.intake());
 
         hood.setDefaultCommand(allCommands.hoodDefaultMove(shotControl::getAngle));
