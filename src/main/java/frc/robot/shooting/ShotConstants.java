@@ -17,7 +17,7 @@ public final class ShotConstants {
         0.6,
         45.0,
         0.001,
-        1500, 6000, 25, 5.0
+        1500, 5500, 25, 5.0
     );
 
     public static final ShotCalculator.Config CONFIG = new ShotCalculator.Config();
@@ -33,10 +33,17 @@ public final class ShotConstants {
 
     public static final double POSE_CONFIDENCE = 0.9;
 
-    public static final Translation2d RED_HUB = new Translation2d(4.6, 4.0);
+    // public static final Translation2d RED_HUB = new Translation2d(4.6, 4.0);
+    public static final Translation2d RED_HUB = new Translation2d(0.0, 0.0);
     public static final Translation2d BLUE_HUB = new Translation2d(4.6, 4.0);
     public static final Translation2d RED_HUB_HEADING = new Translation2d(1, 0);
     public static final Translation2d BLUE_HUB_HEADING = new Translation2d(0, 0);
 
-    public static final double SHOT_CONFIDENCE_FILTER_THRESHOLD = 0.5;
+    public static final double SHOT_CONFIDENCE_FILTER_THRESHOLD = 0.6;
+
+    public static final ShotLUT SHOT_MEASURMENTS = new ShotLUT();
+
+    static {
+        SHOT_MEASURMENTS.put(0.0, 0.0, 0.0, 0.0);
+    }
 }

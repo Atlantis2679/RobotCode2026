@@ -124,6 +124,10 @@ public class Swerve extends SubsystemBase implements Tunable {
         modules[3].getModuleState());
   }
 
+  public ChassisSpeeds getFieldRelativeChassisSpeeds() {
+    return ChassisSpeeds.fromRobotRelativeSpeeds(getRobotRelativeChassisSpeeds(), Rotation2d.fromDegrees(getGyroYawDegreesCCW()));
+  }
+
   public boolean isGyroConnected() {
     return isGyroConnectedDebouncer.calculate(imuIO.isConnected.getAsBoolean());
   }

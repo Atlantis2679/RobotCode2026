@@ -2,38 +2,64 @@ package frc.robot.shooting;
 
 import static frc.robot.shooting.ShotConstants.*;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import frc.robot.shooting.ShotCalculator.LaunchParameters;
 import frc.robot.shooting.ShotCalculator.ShotInputs;
-import frc.robot.subsystems.poseestimation.PoseEstimator;
+import team2679.atlantiskit.tunables.Tunable;
+import team2679.atlantiskit.tunables.TunableBuilder;
+import team2679.atlantiskit.valueholders.DoubleHolder;
 
-public class ShotControl {
-    private static final ShotControl instance = new ShotControl();
-
+public class ShotControl implements Tunable {
     private final ProjectileSimulator sim = new ProjectileSimulator(PARAMETERS);
+    
+    private final ShotLUT lut = sim.generateVariableAngleShotLUT(MIN_ANGLE_DEG, MAX_ANGLE_DEG, ANGLE_STEP);
 
     private final ShotCalculator shotCalculator = new ShotCalculator(CONFIG);
 
-    private final ShotLUT lut = sim.generateVariableAngleShotLUT(MIN_ANGLE_DEG, MAX_ANGLE_DEG, ANGLE_STEP);
+    private DoubleHolder shotConfidenceFilter = new DoubleHolder(SHOT_CONFIDENCE_FILTER_THRESHOLD);
 
-    private ShotControl() {
+    private LaunchParameters shotParams;
+
+    private boolean shoot = false;
+
+    public ShotControl() {
         shotCalculator.loadShotLUT(lut);
     }
 
-    public static ShotControl getInstance() {
-        return instance;
-    }
-
-    public void update(boolean isRedAlliance, ChassisSpeeds fieldSpeeds, ChassisSpeeds robotSpeeds, double robotPitchDeg, double robotRollDeg) {
+    public void update(Pose2d robotPose, boolean isRedAlliance, ChassisSpeeds fieldSpeeds, ChassisSpeeds robotSpeeds, double robotPitchDeg, double robotRollDeg) {
         Translation2d target = isRedAlliance ? RED_HUB : BLUE_HUB;
         Translation2d targetHeading = isRedAlliance ? RED_HUB_HEADING : BLUE_HUB_HEADING;
-        ShotInputs inputs = new ShotInputs(
-            PoseEstimator.getInstance().getEstimatedPose(),
-            fieldSpeeds, robotSpeeds, target, targetHeading, POSE_CONFIDENCE, robotPitchDeg, robotRollDeg);
-        LaunchParameters shot = shotCalculator.calculate(inputs);
-        if (shot.isValid() && shot.confidence() > SHOT_CONFIDENCE_FILTER_THRESHOLD) {
-            shot.driveAngularVelocityRadPerSec()
+        ShotInputs inputs = new ShotInputs(robotPose, fieldSpeeds, robotSpeeds, target,
+            targetHeading, POSE_CONFIDENCE, robotPitchDeg, robotRollDeg);
+        LaunchParameters nextShot = shotCalculator.calculate(inputs);
+        if (nextShot.isValid() && nextShot.confidence() > shotConfidenceFilter.get()) {
+            this.shotParams = nextShot;
+            shoot = true;
+        } else {
+            shoot = false;
         }
+    }
+
+    public double getRpm() {
+        return shotParams.rpm();
+    }
+
+    public double getAngle() {
+        return shotCalculator.getHoodAngle(shotParams.solvedDistanceM());
+    }
+
+    public double getDriveRotationRPS() {
+        return shotParams.driveAngularVelocityRadPerSec() / (2 * Math.PI);
+    }
+
+    public boolean shoot() {
+        return shoot;
+    }
+
+    @Override
+    public void initTunable(TunableBuilder builder) {
+        builder.addDoubleProperty("Shot Confidence Filter", shotConfidenceFilter::get, shotConfidenceFilter::set);
     }
 }

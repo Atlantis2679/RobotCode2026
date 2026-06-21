@@ -2,8 +2,6 @@ package frc.robot;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.BooleanSupplier;
-import java.util.function.DoubleSupplier;
 
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
@@ -14,7 +12,6 @@ import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.util.FlippingUtil;
 
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.PowerDistribution;
@@ -25,6 +22,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.allCommands.AllCommands;
+import frc.robot.shooting.ShotControl;
 import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.flywheel.FlyWheel;
 import frc.robot.subsystems.fourbar.Fourbar;
@@ -34,8 +32,10 @@ import frc.robot.subsystems.poseestimation.PoseEstimator;
 import frc.robot.subsystems.roller.Roller;
 import frc.robot.subsystems.swerve.Swerve;
 import frc.robot.subsystems.swerve.SwerveCommands;
+import frc.robot.subsystems.swerve.SwerveConstants;
 import frc.robot.subsystems.swerve.SwerveConstants.PathPlanner;
 import frc.robot.subsystems.vision.Vision;
+import frc.robot.utils.CommandsUtils;
 import frc.robot.utils.NaturalXboxController;
 import team2679.atlantiskit.tunables.Tunable;
 import team2679.atlantiskit.tunables.TunableBuilder;
@@ -63,9 +63,7 @@ public class RobotContainer {
     private final NaturalXboxController operatorController = new NaturalXboxController(
             RobotMap.Controllers.OPERATOR_PORT);
 
-    private BooleanSupplier isShootingHub;
-
-    public static final LoggedDashboardChooser<Boolean> isRedAlliance = new LoggedDashboardChooser<>("alliance");
+    private static final LoggedDashboardChooser<Boolean> isRedAlliance = new LoggedDashboardChooser<>("alliance");
 
     static {
         isRedAlliance.addDefaultOption("red", true);
@@ -73,10 +71,14 @@ public class RobotContainer {
         SmartDashboard.putBoolean("isRedAlliance", RobotContainer.isRedAlliance());
     }
 
-    private final DoubleSupplier hoodAngleSupplier = () -> (isShootingHub.getAsBoolean() ? hubShootingCalculator
-            : deliveryShootingCalculator).getHoodAngleDegrees();
-    private final DoubleSupplier flywheelSpeedSupplier = () -> (isShootingHub.getAsBoolean() ? hubShootingCalculator
-            : deliveryShootingCalculator).getFlyWheelRPM();
+    private final ShotControl shotControl = new ShotControl();
+
+    private final Command shotCommand = CommandsUtils.dynamicSwitchBetweenCommands(
+            shotControl::shoot,
+            allCommands.getReadyToShoot(shotControl::getRpm, shotControl::getAngle),
+            allCommands.shoot(shotControl::getRpm, shotControl::getAngle));
+
+    private final Trigger shotTrigger = operatorController.leftTrigger();
 
     private SendableChooser<Command> autoChooser = null;
 
@@ -107,9 +109,13 @@ public class RobotContainer {
         TunableCommand driveCommand = swerveCommands.driverController(
                 driverController::getLeftY,
                 driverController::getLeftX,
-                driverController::getRightX,
-                () -> 0.0,
-                driverController.y(),
+                () -> {
+                    if (shotTrigger.getAsBoolean()) {
+                        return shotControl.getDriveRotationRPS() / SwerveConstants.DriverController.DRIVER_MAX_ANGULAR_VELOCITY_RPS;
+                    } else {
+                        return driverController.getRightX();
+                    }
+                },
                 driverController.leftBumper().negate()::getAsBoolean,
                 driverController.rightBumper()::getAsBoolean);
 
@@ -133,15 +139,10 @@ public class RobotContainer {
     public void configureOperator() {
         operatorController.a().whileTrue(allCommands.intake());
 
-        isShootingHub = operatorController.b().or(DriverStation::isAutonomous);
-
-        hood.setDefaultCommand(allCommands.hoodDefaultMove(hoodAngleSupplier));
+        hood.setDefaultCommand(allCommands.hoodDefaultMove(shotControl::getAngle));
         fourbar.setDefaultCommand(allCommands.fourbarMoveToRest());
-
-        operatorController.leftTrigger()
-                .whileTrue(allCommands.getReadyToShoot(flywheelSpeedSupplier, hoodAngleSupplier));
-        operatorController.rightTrigger().whileTrue(allCommands.shoot(flywheelSpeedSupplier, hoodAngleSupplier));
-
+        
+        shotTrigger.whileTrue(shotCommand);
         TunablesManager.add("Tunable Shoot Command", allCommands.tunableShoot().fullTunable());
     }
 
@@ -164,7 +165,7 @@ public class RobotContainer {
         NamedCommands.registerCommand("stopAll", allCommands.stopAll());
         NamedCommands.registerCommand("startIntake", allCommands.intake());
         NamedCommands.registerCommand("stopIntake", allCommands.stopIntake());
-        NamedCommands.registerCommand("shoot", allCommands.shoot(flywheelSpeedSupplier, hoodAngleSupplier));
+        NamedCommands.registerCommand("shoot", shotCommand);
 
         autoChooser = AutoBuilder.buildAutoChooser();
         SmartDashboard.putData("Auto Chooser", autoChooser);
@@ -196,10 +197,18 @@ public class RobotContainer {
 
     public void periodicUpdate() {
         vision.update();
+        shotControl.update(
+            PoseEstimator.getInstance().getEstimatedPose(),
+            isRedAlliance(),
+            swerve.getFieldRelativeChassisSpeeds(),
+            swerve.getRobotRelativeChassisSpeeds(),
+            swerve.getRobotPitchDeg(),
+            swerve.getRobotRollDeg()
+        );
     }
 
     public static boolean isRedAlliance() {
-        return isRedAlliance != null && isRedAlliance.get();
+        return isRedAlliance.get() != null && isRedAlliance.get();
     }
 
     public Command getAutonomousCommand() {
