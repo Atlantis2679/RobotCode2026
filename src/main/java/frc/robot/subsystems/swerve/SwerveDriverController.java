@@ -82,7 +82,7 @@ public class SwerveDriverController extends TunableCommand {
       if (Math.abs(currentYawAngle - yawAutoRotationSupplier.getAsDouble()) < AUTO_ROTATION_TOLERANCE_DEG) {
         precentageRotation = 0.0;
       }
-      System.out.println("target: " + yawAutoRotationSupplier.getAsDouble());
+      // System.out.println("target: " + yawAutoRotationSupplier.getAsDouble());
     } else {
       precentageRotation = rotationsSupplier.getAsDouble() * velocityMultiplier;
     }
