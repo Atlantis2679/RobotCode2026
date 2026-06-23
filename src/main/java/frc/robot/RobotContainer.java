@@ -145,6 +145,13 @@ public class RobotContainer {
         fourbar.setDefaultCommand(allCommands.fourbarMoveToRest());
         
         shotTrigger.whileTrue(shotCommand);
+
+        operatorController.leftBumper().whileTrue(allCommands.manualController(
+            operatorController::getLeftTriggerAxis,
+            operatorController::getRightY,
+            operatorController::getRightX,
+            operatorController::getLeftX, 
+            operatorController::getLeftY));
         TunablesManager.add("Tunable Shoot Command", allCommands.tunableShoot().fullTunable());
         TunablesManager.add("Tunable Shoot With Passing", allCommands.tunableShootWithPassing().fullTunable());
         // TunablesManager.add("Tunable Shoot Hub With Distance", allCommands.tunableShootWithDistance(hubShootingCalculator).fullTunable());
