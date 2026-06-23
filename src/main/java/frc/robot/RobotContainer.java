@@ -109,13 +109,9 @@ public class RobotContainer {
         TunableCommand driveCommand = swerveCommands.driverController(
                 driverController::getLeftY,
                 driverController::getLeftX,
-                () -> {
-                    if (shotTrigger.getAsBoolean()) {
-                        return shotControl.getDriveRotationRPS() / SwerveConstants.DriverController.DRIVER_MAX_ANGULAR_VELOCITY_RPS;
-                    } else {
-                        return driverController.getRightX();
-                    }
-                },
+                driverController::getRightX,
+                () -> 0,
+                driverController.b(),
                 driverController.leftBumper().negate()::getAsBoolean,
                 driverController.rightBumper()::getAsBoolean);
 

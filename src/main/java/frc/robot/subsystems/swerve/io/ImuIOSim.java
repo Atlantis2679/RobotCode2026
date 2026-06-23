@@ -8,7 +8,7 @@ public class ImuIOSim extends ImuIO {
     }
 
     @Override
-    protected double getYawDegCCW() {
+    protected double getYawDegreesCCW() {
         return 0;
     }
 

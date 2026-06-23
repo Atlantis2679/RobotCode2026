@@ -21,7 +21,7 @@ public abstract class ImuIO extends IOBase {
     super(fieldsTable);
   }
 
-  protected abstract double getYawDegCCW();
+  protected abstract double getYawDegreesCCW();
   protected abstract double getPitchDeg();
   protected abstract double getRollDeg();
 

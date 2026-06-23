@@ -3,8 +3,10 @@ package frc.robot.subsystems.swerve;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import frc.robot.subsystems.poseestimation.PoseEstimator;
 import team2679.atlantiskit.tunables.SendableType;
 import team2679.atlantiskit.tunables.TunableBuilder;
 import team2679.atlantiskit.tunables.TunablesTable;
@@ -21,6 +23,8 @@ public class SwerveDriverController extends TunableCommand {
   private DoubleSupplier sidewaysSupplier;
   private DoubleSupplier forwardSupplier;
   private DoubleSupplier rotationsSupplier;
+  private DoubleSupplier yawAutoRotationSupplier;
+  private BooleanSupplier autoRotationMode;
   private BooleanSupplier isFieldRelative;
   private BooleanSupplier isSensetiveMode;
 
@@ -32,14 +36,19 @@ public class SwerveDriverController extends TunableCommand {
   private final SlewRateLimiter sidewaysSlewRateLimiter = new SlewRateLimiter(DRIVER_ACCELERATION_LIMIT_MPS);
   private final SlewRateLimiter rotationSlewRateLimiter = new SlewRateLimiter(DRIVER_ANGULAR_ACCELERATION_LIMIT_RPS);
 
+  private final PIDController autoRotationPID = new PIDController(ROTATION_KP, ROTATION_KI, ROTATION_KD);
+
   public SwerveDriverController(Swerve swerve, DoubleSupplier forwardSupplier, DoubleSupplier sidewaysSupplier,
-      DoubleSupplier rotationsSupplier, BooleanSupplier isFieldRelative, BooleanSupplier isSensetiveMode) {
+      DoubleSupplier rotationsSupplier, DoubleSupplier yawAutoRotationSupplier, BooleanSupplier autoRotationMode,
+      BooleanSupplier isFieldRelative, BooleanSupplier isSensetiveMode) {
     this.swerve = swerve;
     addRequirements(swerve);
 
     this.sidewaysSupplier = sidewaysSupplier;
     this.forwardSupplier = forwardSupplier;
     this.rotationsSupplier = rotationsSupplier;
+    this.yawAutoRotationSupplier = yawAutoRotationSupplier;
+    this.autoRotationMode = autoRotationMode;
     this.isFieldRelative = isFieldRelative;
     this.isSensetiveMode = isSensetiveMode;
 
@@ -49,6 +58,9 @@ public class SwerveDriverController extends TunableCommand {
     velocityMultiplierChooser.addOption("EGG (10%)", 0.1);
 
     tunablesTable.addChild("velocity chooser", velocityMultiplierChooser);
+
+    autoRotationPID.enableContinuousInput(0, 360);
+    tunablesTable.addChild("Rotation Auto PID Controller", autoRotationPID);
   }
 
   @Override
@@ -63,7 +75,17 @@ public class SwerveDriverController extends TunableCommand {
     double precentageSideways = sidewaysSupplier.getAsDouble() * velocityMultiplier;
     double precentageRotation;
 
-    precentageRotation = rotationsSupplier.getAsDouble() * velocityMultiplier;
+    if (autoRotationMode.getAsBoolean() && rotationsSupplier.getAsDouble() == 0) {
+      double currentYawAngle = PoseEstimator.getInstance().getOdometryPose().getRotation().getDegrees();
+      precentageRotation = autoRotationPID.calculate(currentYawAngle, yawAutoRotationSupplier.getAsDouble())
+        * AUTO_ROTATION_SPEED_MULTIPLYER;
+      if (Math.abs(currentYawAngle - yawAutoRotationSupplier.getAsDouble()) < AUTO_ROTATION_TOLERANCE_DEG) {
+        precentageRotation = 0.0;
+      }
+      // System.out.println("target: " + yawAutoRotationSupplier.getAsDouble());
+    } else {
+      precentageRotation = rotationsSupplier.getAsDouble() * velocityMultiplier;
+    }
 
     if (isSensetiveMode.getAsBoolean()) {
       precentageForward *= SENSETIVE_TRANSLATION_MULTIPLIER;
@@ -80,7 +102,9 @@ public class SwerveDriverController extends TunableCommand {
   }
 
   @Override
-  public void end(boolean interrupted) {}
+  public void end(boolean interrupted) {
+    autoRotationPID.reset();
+  }
 
   @Override
   public boolean isFinished() {

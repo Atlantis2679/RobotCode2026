@@ -46,10 +46,10 @@ public final class SwerveConstants {
         public static final double WHEEL_CIRCUMFERENCE_METERS = 2 * Math.PI * WHEEL_RADIUS_METERS;
 
         public static final double[] OFFSETS = {
-                115.83984375,
-                91.7578125 + 180,
-                48.603515625,
-                150.732421875,
+                116.806640625,
+                -92.900390625,
+                -126.826171875 + 180,
+                -30.498046875 + 180,
         };
 
         public static final double DRIVE_STATOR_CURRENT_LIMIT = 90;
@@ -107,9 +107,10 @@ public final class SwerveConstants {
         public static final double DRIVER_ANGULAR_ACCELERATION_LIMIT_RPS = 4.5;
         public static final double SENSETIVE_TRANSLATION_MULTIPLIER = 0.3;
         public static final double SENSETIVE_ROTATION_MULTIPLIER = 0.3;
-        // public static final double ROTATION_KP = 0.01;
-        // public static final double ROTATION_KI = 0.02;
-        // public static final double ROTATION_KD = 0.005;
-        // public static final double AUTO_ROTATION_TOLERANCE_DEG = 0.5;
+        public static final double ROTATION_KP = 0.04;
+        public static final double ROTATION_KI = 0.1;
+        public static final double ROTATION_KD = 0.005;
+        public static final double AUTO_ROTATION_TOLERANCE_DEG = 1;
+        public static final double AUTO_ROTATION_SPEED_MULTIPLYER = 0.1;
     }
 }
