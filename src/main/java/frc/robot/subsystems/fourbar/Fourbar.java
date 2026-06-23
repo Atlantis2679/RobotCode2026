@@ -13,7 +13,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Robot;
 import frc.robot.subsystems.fourbar.io.FourbarIO;
 import frc.robot.subsystems.fourbar.io.FourbarIOSim;
-import frc.robot.subsystems.fourbar.io.FourbarIOSparkMax;
+import frc.robot.subsystems.fourbar.io.FourbarIOTalon;
 import team2679.atlantiskit.helpers.RotationalSensorHelper;
 import team2679.atlantiskit.logfields.LogFieldsTable;
 import team2679.atlantiskit.tunables.Tunable;
@@ -29,7 +29,7 @@ public class Fourbar extends SubsystemBase implements Tunable {
             new TrapezoidProfile.Constraints(
                     MAX_VELOCITY_DEG_PER_SEC, MAX_ACCELERATION_DEG_PER_SEC));
     private final LogFieldsTable fieldsTable = new LogFieldsTable(getName());
-    private final FourbarIO io = Robot.isReal() ? new FourbarIOSparkMax(fieldsTable) : new FourbarIOSim(fieldsTable);
+    private final FourbarIO io = Robot.isReal() ? new FourbarIOTalon(fieldsTable) : new FourbarIOSim(fieldsTable);
     private final RotationalSensorHelper angleDegrees = new RotationalSensorHelper(io.angleDegrees.getAsDouble());
 
     private final Debouncer isStuckDebouncer = new Debouncer(STUCK_DEBOUNCE_SEC, DebounceType.kRising);
