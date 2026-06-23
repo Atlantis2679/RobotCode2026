@@ -31,7 +31,6 @@ import frc.robot.subsystems.poseestimation.PoseEstimator;
 import frc.robot.subsystems.roller.Roller;
 import frc.robot.subsystems.swerve.Swerve;
 import frc.robot.subsystems.swerve.SwerveCommands;
-import frc.robot.subsystems.swerve.SwerveConstants;
 import frc.robot.subsystems.swerve.SwerveConstants.PathPlanner;
 import frc.robot.utils.CommandsUtils;
 // import frc.robot.subsystems.vision.Vision;
@@ -110,7 +109,7 @@ public class RobotContainer {
                 driverController::getLeftY,
                 driverController::getLeftX,
                 driverController::getRightX,
-                () -> 0,
+                shotControl::getDriveAngleDegrees,
                 driverController.b(),
                 driverController.leftBumper().negate()::getAsBoolean,
                 driverController.rightBumper()::getAsBoolean);

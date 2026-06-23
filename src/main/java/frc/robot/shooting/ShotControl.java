@@ -61,6 +61,10 @@ public class ShotControl implements Tunable {
         return shotParams.driveAngularVelocityRadPerSec() / (2 * Math.PI);
     }
 
+    public double getDriveAngleDegrees() {
+        return shotParams.driveAngle().getDegrees();
+    }
+
     public boolean shoot() {
         return shoot;
     }

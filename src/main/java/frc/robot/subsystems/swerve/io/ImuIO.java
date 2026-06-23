@@ -7,7 +7,7 @@ import team2679.atlantiskit.logfields.IOBase;
 import team2679.atlantiskit.logfields.LogFieldsTable;
 
 public abstract class ImuIO extends IOBase {
-  public final DoubleSupplier yawAngleDeg = fields.addDouble("yawAngleDeg", this::getYawDegCCW);
+  public final DoubleSupplier yawAngleDeg = fields.addDouble("yawAngleDeg", this::getYawDegreesCCW);
   public final DoubleSupplier pitchAngleDeg = fields.addDouble("pitchAngleDeg", this::getPitchDeg);
   public final DoubleSupplier rollAngleDeg = fields.addDouble("rollAngleDeg", this::getRollDeg);
 
