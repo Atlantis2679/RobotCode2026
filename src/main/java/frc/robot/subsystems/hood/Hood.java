@@ -59,7 +59,7 @@ public class Hood extends SubsystemBase implements Tunable {
         fieldsTable.recordOutput("current command", getCurrentCommand() != null ? getCurrentCommand().getName() : "None");
         fieldsTable.recordOutput("isStuck", isStuck());
         if (isStuck() && !calibrated) {
-            angleDegrees.resetAngle(MIN_ANGLE_DEGREES);
+            angleDegrees.resetAngle(MAX_ANGLE_DEGREES);
             io.setCurrentLimit(CURRENT_LIMIT);
             calibrated = true;
         }

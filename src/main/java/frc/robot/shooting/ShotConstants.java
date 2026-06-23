@@ -16,7 +16,7 @@ public final class ShotConstants {
         1.83,
         0.6,
         45.0,
-        0.001,
+        0.005,
         1500, 5500, 25, 5.0
     );
 
@@ -24,7 +24,6 @@ public final class ShotConstants {
     static {
         CONFIG.launcherOffsetX = 0.293653;
         CONFIG.launcherOffsetY = 0.009185;
-        CONFIG.headingSpeedScalar = 1.0;
     }
 
     public static final double MAX_ANGLE_DEG = HoodConstants.MAX_ANGLE_DEGREES;
@@ -34,12 +33,12 @@ public final class ShotConstants {
     public static final double POSE_CONFIDENCE = 0.9;
 
     // public static final Translation2d RED_HUB = new Translation2d(4.6, 4.0);
-    public static final Translation2d RED_HUB = new Translation2d(0.0, 0.0);
+    public static final Translation2d RED_HUB = new Translation2d(-0.955, 0.0);
     public static final Translation2d BLUE_HUB = new Translation2d(4.6, 4.0);
-    public static final Translation2d RED_HUB_HEADING = new Translation2d(1, 0);
-    public static final Translation2d BLUE_HUB_HEADING = new Translation2d(0, 0);
+    public static final Translation2d RED_HUB_HEADING = new Translation2d(0, 0);
+    public static final Translation2d BLUE_HUB_HEADING = new Translation2d(1, 0);
 
-    public static final double SHOT_CONFIDENCE_FILTER_THRESHOLD = 0.6;
+    public static final double SHOT_CONFIDENCE_FILTER_THRESHOLD = 60;
 
     public static final ShotLUT SHOT_MEASURMENTS = new ShotLUT();
 

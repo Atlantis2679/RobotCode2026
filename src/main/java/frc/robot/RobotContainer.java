@@ -70,8 +70,8 @@ public class RobotContainer {
 
     private final Command shotCommand = CommandsUtils.dynamicSwitchBetweenCommands(
             shotControl::shoot,
-            allCommands.getReadyToShoot(shotControl::getRpm, shotControl::getAngle),
-            allCommands.shoot(shotControl::getRpm, shotControl::getAngle));
+            allCommands.shoot(shotControl::getRpm, shotControl::getAngle),
+            allCommands.getReadyToShoot(shotControl::getRpm, shotControl::getAngle));
 
     private final Trigger shotTrigger = operatorController.leftTrigger();
 

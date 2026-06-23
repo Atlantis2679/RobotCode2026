@@ -7,39 +7,46 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import frc.robot.shooting.ShotCalculator.LaunchParameters;
 import frc.robot.shooting.ShotCalculator.ShotInputs;
+import team2679.atlantiskit.logfields.LogFieldsTable;
 import team2679.atlantiskit.tunables.Tunable;
 import team2679.atlantiskit.tunables.TunableBuilder;
 import team2679.atlantiskit.valueholders.DoubleHolder;
 
 public class ShotControl implements Tunable {
-    private final ProjectileSimulator sim = new ProjectileSimulator(PARAMETERS);
+    private final ProjectileSimulator sim;
     
-    private final ShotLUT lut = sim.generateVariableAngleShotLUT(MIN_ANGLE_DEG, MAX_ANGLE_DEG, ANGLE_STEP);
+    private final ShotLUT lut;
 
-    private final ShotCalculator shotCalculator = new ShotCalculator(CONFIG);
+    private final ShotCalculator shotCalculator;
 
     private DoubleHolder shotConfidenceFilter = new DoubleHolder(SHOT_CONFIDENCE_FILTER_THRESHOLD);
 
-    private LaunchParameters shotParams;
+    private LaunchParameters shotParams = LaunchParameters.INVALID;
+
+    private final LogFieldsTable fieldsTable = new LogFieldsTable("Shot Control");
 
     private boolean shoot = false;
 
     public ShotControl() {
-        shotCalculator.loadShotLUT(lut);
+        sim = new ProjectileSimulator(PARAMETERS);
+        lut = sim.generateVariableAngleShotLUT(MIN_ANGLE_DEG, MAX_ANGLE_DEG, ANGLE_STEP);
+        shotCalculator = new ShotCalculator(CONFIG);
     }
 
     public void update(Pose2d robotPose, boolean isRedAlliance, ChassisSpeeds fieldSpeeds, ChassisSpeeds robotSpeeds, double robotPitchDeg, double robotRollDeg) {
+        shotCalculator.loadShotLUT(lut);
         Translation2d target = isRedAlliance ? RED_HUB : BLUE_HUB;
         Translation2d targetHeading = isRedAlliance ? RED_HUB_HEADING : BLUE_HUB_HEADING;
         ShotInputs inputs = new ShotInputs(robotPose, fieldSpeeds, robotSpeeds, target,
-            targetHeading, POSE_CONFIDENCE, robotPitchDeg, robotRollDeg);
+            targetHeading, POSE_CONFIDENCE);
+        fieldsTable.recordOutput("Inputs", inputs);
         LaunchParameters nextShot = shotCalculator.calculate(inputs);
-        if (nextShot.isValid() && nextShot.confidence() > shotConfidenceFilter.get()) {
+        if (nextShot.isValid()) {
             this.shotParams = nextShot;
-            shoot = true;
-        } else {
-            shoot = false;
+            shoot = nextShot.confidence() > shotConfidenceFilter.get();
         }
+        fieldsTable.recordOutput("Shot Params", shotParams);
+        fieldsTable.recordOutput("Shoot", shoot);
     }
 
     public double getRpm() {

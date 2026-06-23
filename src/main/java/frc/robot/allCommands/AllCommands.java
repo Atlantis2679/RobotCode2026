@@ -12,6 +12,7 @@ import frc.robot.subsystems.index.Index;
 import frc.robot.subsystems.index.IndexCommands;
 import frc.robot.subsystems.roller.Roller;
 import frc.robot.subsystems.roller.RollerCommands;
+import frc.robot.utils.CommandsUtils;
 import team2679.atlantiskit.tunables.extensions.TunableCommand;
 import team2679.atlantiskit.valueholders.DoubleHolder;
 
@@ -68,8 +69,11 @@ public class AllCommands {
     public Command shoot(DoubleSupplier speedRPM, DoubleSupplier angle) {
         return Commands.parallel(
                 getReadyToShoot(speedRPM, angle),
-                            indexCMDs.spinBoth(INDEXER_VOLTAGE, SPINDEX_VOLTAGE))//)
-                .withName("shoot");
+                CommandsUtils.dynamicSwitchBetweenCommands(
+                    () -> flyWheel.isAtSpeed(speedRPM.getAsDouble()) && hood.isAtAngle(angle.getAsDouble()),
+                    indexCMDs.spinBoth(INDEXER_VOLTAGE, SPINDEX_VOLTAGE),
+                    Commands.none()
+                )).withName("shoot");
     }
 
     public TunableCommand tunableShoot() {
