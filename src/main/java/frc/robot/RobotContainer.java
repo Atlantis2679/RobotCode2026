@@ -7,7 +7,6 @@ import java.util.function.DoubleSupplier;
 
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
-import com.ctre.phoenix6.SignalLogger;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
@@ -29,7 +28,6 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.allCommands.AllCommands;
 import frc.robot.shooting.ShootingCalculator;
 import frc.robot.shooting.ShootingMeasurments;
-// import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.flywheel.FlyWheel;
 import frc.robot.subsystems.fourbar.Fourbar;
 import frc.robot.subsystems.hood.Hood;
@@ -114,8 +112,8 @@ public class RobotContainer {
                 driverController::getLeftY,
                 driverController::getLeftX,
                 driverController::getRightX,
-                () -> 180,
-                driverController.y(),
+                () -> 0,
+                driverController.b(),
                 driverController.leftBumper().negate()::getAsBoolean,
                 driverController.rightBumper()::getAsBoolean);
 

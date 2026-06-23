@@ -60,7 +60,7 @@ public class SwerveDriverController extends TunableCommand {
     tunablesTable.addChild("velocity chooser", velocityMultiplierChooser);
 
     autoRotationPID.enableContinuousInput(0, 360);
-    tunablesTable.addChild("Auto Rotation PID Controller", autoRotationPID);
+    tunablesTable.addChild("Rotation Auto PID Controller", autoRotationPID);
   }
 
   @Override
@@ -75,16 +75,16 @@ public class SwerveDriverController extends TunableCommand {
     double precentageSideways = sidewaysSupplier.getAsDouble() * velocityMultiplier;
     double precentageRotation;
 
-    if (!autoRotationMode.getAsBoolean()) {
-      precentageRotation = rotationsSupplier.getAsDouble() * velocityMultiplier;
-    } else {
+    if (autoRotationMode.getAsBoolean() && rotationsSupplier.getAsDouble() == 0) {
       double currentYawAngle = PoseEstimator.getInstance().getOdometryPose().getRotation().getDegrees();
       precentageRotation = autoRotationPID.calculate(currentYawAngle, yawAutoRotationSupplier.getAsDouble())
-        * velocityMultiplier;
-      System.out.println("Current: " + currentYawAngle + " yaw: " + yawAutoRotationSupplier.getAsDouble() + " speed: " + precentageRotation);
-      if (Math.abs(currentYawAngle - yawAutoRotationSupplier.getAsDouble() - 180) < AUTO_ROTATION_TOLERANCE_DEG) {
+        * AUTO_ROTATION_SPEED_MULTIPLYER;
+      if (Math.abs(currentYawAngle - yawAutoRotationSupplier.getAsDouble()) < AUTO_ROTATION_TOLERANCE_DEG) {
         precentageRotation = 0.0;
       }
+      // System.out.println("target: " + yawAutoRotationSupplier.getAsDouble());
+    } else {
+      precentageRotation = rotationsSupplier.getAsDouble() * velocityMultiplier;
     }
 
     if (isSensetiveMode.getAsBoolean()) {
