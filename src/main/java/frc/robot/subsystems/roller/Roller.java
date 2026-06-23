@@ -8,7 +8,7 @@ import team2679.atlantiskit.logfields.LogFieldsTable;
 
 public class Roller extends SubsystemBase {
     private LogFieldsTable fieldsTable = new LogFieldsTable(getName());
-    private RollerIO io = Robot.isReal() ? new RollerIOSparkMax(fieldsTable) : new RollerIOSim(fieldsTable);
+    private RollerIO io = Robot.isReal() ? new RollerIOTalon(fieldsTable) : new RollerIOSim(fieldsTable);
 
     public Roller() {
     }
