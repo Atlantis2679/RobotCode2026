@@ -51,9 +51,11 @@ public class HoodCommands {
         return TunableCommand.wrap((tunablesTable) -> {
             DoubleHolder voltage = tunablesTable.addNumber("voltage", HOMING_VOLTAGE);
             return Commands.sequence(
+                hood.runOnce(() -> hood.setCurrentLimit(HOMING_CURRENT_LIMIT)),
                 hood.runOnce(() -> hood.calibrated = false),
                 hood.run(() -> hood.setVoltage(voltage.get()))
-                    .onlyWhile(() -> !hood.isCalibrated())
+                    .onlyWhile(() -> !hood.isCalibrated()),
+                hood.runOnce(() -> hood.setCurrentLimit(CURRENT_LIMIT))
             ).finallyDo(hood::stop).withName("Tunable Homing");
         });
     }

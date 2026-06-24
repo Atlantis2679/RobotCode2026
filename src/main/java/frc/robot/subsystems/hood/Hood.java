@@ -77,6 +77,10 @@ public class Hood extends SubsystemBase implements Tunable {
         io.setVoltage(0);
     }
 
+    protected void setCurrentLimit(double currentLimit) {
+        io.setCurrentLimit(currentLimit);
+    }
+
     public void coast() {
         io.setCoast();
     }
