@@ -137,7 +137,7 @@ public class RobotContainer {
         operatorController.a().whileTrue(allCommands.intake());
 
         hood.setDefaultCommand(allCommands.hoodFollow(shotControl::getAngle));
-        fourbar.setDefaultCommand(allCommands.fourbarMoveToRest());
+        fourbar.setDefaultCommand(fourbar.run(fourbar::stop));
         
         shotTrigger.whileTrue(shotCommand);
 

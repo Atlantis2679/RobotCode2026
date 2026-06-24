@@ -34,7 +34,7 @@ public class Hood extends SubsystemBase implements Tunable {
     public double maxAngle = MAX_ANGLE_DEGREES;
     public double minAngle = MIN_ANGLE_DEGREES;
 
-    private boolean calibrated = false;
+    protected boolean calibrated = false;
 
     private double desiredVoltage = 0;
 
@@ -75,6 +75,10 @@ public class Hood extends SubsystemBase implements Tunable {
 
     public void stop() {
         io.setVoltage(0);
+    }
+
+    protected void setCurrentLimit(double currentLimit) {
+        io.setCurrentLimit(currentLimit);
     }
 
     public void coast() {
