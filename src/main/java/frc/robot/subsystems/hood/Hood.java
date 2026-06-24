@@ -34,7 +34,7 @@ public class Hood extends SubsystemBase implements Tunable {
     public double maxAngle = MAX_ANGLE_DEGREES;
     public double minAngle = MIN_ANGLE_DEGREES;
 
-    private boolean calibrated = false;
+    protected boolean calibrated = false;
 
     private double desiredVoltage = 0;
 
