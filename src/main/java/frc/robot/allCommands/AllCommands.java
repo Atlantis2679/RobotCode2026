@@ -48,6 +48,8 @@ public class AllCommands {
         flyWheelCMDs = new FlyWheelCommands(this.flyWheel);
         hoodCMDs = new HoodCommands(this.hood);
         indexCMDs = new IndexCommands(this.index);
+
+        fourbar.setDefaultCommand(fourbar.run(() -> {fourbar.setVoltage(0, false);}));
     }
 
     public Command intake() {

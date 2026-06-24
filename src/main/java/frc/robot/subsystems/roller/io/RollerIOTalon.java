@@ -26,7 +26,7 @@ public class RollerIOTalon extends RollerIO {
     }
 
     public void setVoltage(double voltage) {
-        statusCode = motor.setControl(new VoltageOut(voltage));
+        statusCode = motor.setControl(new VoltageOut(-voltage));
     }
 
     protected double getCurrent() {

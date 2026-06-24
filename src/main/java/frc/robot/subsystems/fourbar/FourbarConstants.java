@@ -19,10 +19,10 @@ public class FourbarConstants {
     
     public static final double STUCK_VELOCITY_THRESHOLD_DEG_PER_SEC = 0.01;
 
-    public static final double ANGLE_TOLLERANCE = 0.6;
+    public static final double ANGLE_TOLLERANCE = 5;
 
-    public static final double ANGLE_OFFSET = 0;
+    public static final double ANGLE_OFFSET = 358;
 
-    public static final double MAX_ANGLE_DEGREES = 310;
-    public static final double MIN_ANGLE_DEGREES = 250;
+    public static final double MAX_ANGLE_DEGREES = 90;
+    public static final double MIN_ANGLE_DEGREES = 0;
 }
