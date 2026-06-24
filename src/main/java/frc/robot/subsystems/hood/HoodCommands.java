@@ -4,6 +4,7 @@ import java.util.function.DoubleSupplier;
 
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.utils.MathUtils;
 import team2679.atlantiskit.tunables.TunablesManager;
 import team2679.atlantiskit.tunables.extensions.TunableCommand;
@@ -49,8 +50,11 @@ public class HoodCommands {
     public TunableCommand tunableHoming() {
         return TunableCommand.wrap((tunablesTable) -> {
             DoubleHolder voltage = tunablesTable.addNumber("voltage", HOMING_VOLTAGE);
-            return hood.run(() -> hood.setVoltage(voltage.get())).onlyWhile(() -> !hood.isCalibrated())
-                    .finallyDo(hood::stop).withName("Tunable Homing");
+            return Commands.sequence(
+                hood.runOnce(() -> hood.calibrated = false),
+                hood.run(() -> hood.setVoltage(voltage.get()))
+                    .onlyWhile(() -> !hood.isCalibrated())
+            ).finallyDo(hood::stop).withName("Tunable Homing");
         });
     }
 
