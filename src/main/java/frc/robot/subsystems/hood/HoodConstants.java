@@ -21,7 +21,7 @@ public final class HoodConstants {
     public static final double STUCK_VELOCITY_THRESHOLD_DEG_PER_SEC = 0.01;
     public static final double STUCK_DEBOUNCE_SEC = 0.2; 
 
-    public static final double HOMING_VOLTAGE = -1;
+    public static final double HOMING_VOLTAGE = 1;
 
     public final class Sim {
         public static final double SIM_KS = 0;

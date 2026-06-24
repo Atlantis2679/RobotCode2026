@@ -34,6 +34,7 @@ public class FlyWheel extends SubsystemBase implements Tunable {
     public void periodic() {
         fieldsTable.recordOutput("current command", getCurrentCommand() != null ? getCurrentCommand().getName() : "None");
         fieldsTable.recordOutput("currents diff", Math.abs(io.motor1Current.getAsDouble() - io.motor2Current.getAsDouble()));
+        fieldsTable.recordOutput("Motors RPM", getMotorsRPM());
         SmartDashboard.putNumber("Motors RPM", getMotorsRPM());
     }
 

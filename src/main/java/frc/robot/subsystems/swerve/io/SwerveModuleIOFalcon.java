@@ -79,6 +79,7 @@ public class SwerveModuleIOFalcon extends SwerveModuleIO {
         turnMotorStatus = turnMotor.getConfigurator().apply(turnMotorConfig);
         canCoderStatus = canCoder.getConfigurator().apply(canCoderConfig);
         
+        driveMotor.setPosition(0);
         turnMotor.setPosition(0);
 
         String moduleAlertPrefix = "Module " + moduleNum + " " + getModuleName(moduleNum) + " ";

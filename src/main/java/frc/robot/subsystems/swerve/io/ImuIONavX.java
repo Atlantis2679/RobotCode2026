@@ -20,8 +20,6 @@ public class ImuIONavX extends ImuIO {
   protected boolean getIsConnected() {
     return navX.isConnected();
   }
-
-
   
   @Override
   protected double getXAcceleration() {
@@ -36,6 +34,16 @@ public class ImuIONavX extends ImuIO {
   @Override
   protected double getZAcceleration() {
     return navX.getWorldLinearAccelZ();
+  }
+
+  @Override
+  protected double getPitchDeg() {
+    return navX.getPitch();
+  }
+
+  @Override
+  protected double getRollDeg() {
+    return navX.getRoll();
   }
 
 }

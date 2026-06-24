@@ -34,14 +34,10 @@ public final class RobotMap {
     public static final int SPINDEX_LEADER_ID = 40;
     public static final int INDEXER_ID = 41;
     public static final int SPINDEX_FOLLOWER_ID = 42;
-
-    public static final int ELEVATOR_ID = 0;
-
     public static final int FOURBAR_ID = 30;
+    public static final int ROLLER_ID = 31;
     public static final int FLYWHEEL_MOTOR1_ID = 20;
     public static final int FLYWHEEL_MOTOR2_ID = 21;
-    public static final int ROLLER_ID = 31;
-
     public final static int HOOD_MOTOR_ID = 22;
   }
 

@@ -116,7 +116,6 @@ public class SwerveModule implements Tunable {
     public void resetIntegratedAngleToAbsolute() {
         currentAngleDegreesCCW = getAbsoluteDegreesCCW();
         io.resetIntegratedAngleRotations(currentAngleDegreesCCW / 360);
-        io.setTurnAngleRotations(currentAngleDegreesCCW / 360);
     }
 
     public void resetAngleDegreesCCW(double newAngle) {

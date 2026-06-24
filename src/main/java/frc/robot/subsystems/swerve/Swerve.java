@@ -58,7 +58,7 @@ public class Swerve extends SubsystemBase implements Tunable {
 
     TunablesManager.add("Swerve", (Tunable) this);
 
-    gyroYawDegreesCCW = new RotationalSensorHelper(imuIO.angleDegreesCCW.getAsDouble());
+    gyroYawDegreesCCW = new RotationalSensorHelper(imuIO.yawAngleDeg.getAsDouble());
     gyroYawDegreesCCW.enableContinuousWrap(0, 360);
 
     PeriodicAlertsGroup.defaultInstance.addErrorAlert(() -> "Gyro Disconnected!", () -> !isGyroConnected());
@@ -72,7 +72,7 @@ public class Swerve extends SubsystemBase implements Tunable {
       module.periodic();
     }
 
-    gyroYawDegreesCCW.update(imuIO.angleDegreesCCW.getAsDouble());
+    gyroYawDegreesCCW.update(imuIO.yawAngleDeg.getAsDouble());
 
     Optional<Rotation2d> gyroAngle = isGyroConnected() ? Optional.of(Rotation2d.fromDegrees(getGyroYawDegreesCCW()))
         : Optional.empty();
@@ -127,6 +127,10 @@ public class Swerve extends SubsystemBase implements Tunable {
         modules[3].getModuleState());
   }
 
+  public ChassisSpeeds getFieldRelativeChassisSpeeds() {
+    return ChassisSpeeds.fromRobotRelativeSpeeds(getRobotRelativeChassisSpeeds(), Rotation2d.fromDegrees(getGyroYawDegreesCCW()));
+  }
+  
   public SwerveModuleState[] getModulesStates() {
     return new SwerveModuleState[] {
       modules[0].getModuleState(),
@@ -187,6 +191,14 @@ public class Swerve extends SubsystemBase implements Tunable {
 
   public double getZAcceleration() {
     return imuIO.zAcceleration.getAsDouble();
+  }
+
+  public double getRobotPitchDeg() {
+    return imuIO.pitchAngleDeg.getAsDouble();
+  }
+
+  public double getRobotRollDeg() {
+    return imuIO.rollAngleDeg.getAsDouble();
   }
 
   public double[] getModulesCurrents() {

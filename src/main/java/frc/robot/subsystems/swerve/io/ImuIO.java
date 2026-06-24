@@ -7,7 +7,10 @@ import team2679.atlantiskit.logfields.IOBase;
 import team2679.atlantiskit.logfields.LogFieldsTable;
 
 public abstract class ImuIO extends IOBase {
-  public final DoubleSupplier angleDegreesCCW = fields.addDouble("angleDegreesCCW", this::getYawDegreesCCW);
+  public final DoubleSupplier yawAngleDeg = fields.addDouble("yawAngleDeg", this::getYawDegreesCCW);
+  public final DoubleSupplier pitchAngleDeg = fields.addDouble("pitchAngleDeg", this::getPitchDeg);
+  public final DoubleSupplier rollAngleDeg = fields.addDouble("rollAngleDeg", this::getRollDeg);
+
   public final BooleanSupplier isConnected = fields.addBoolean("isGyroConnected", this::getIsConnected);
 
   public final DoubleSupplier xAcceleration = fields.addDouble("X Acceleration", this::getXAcceleration);
@@ -19,6 +22,8 @@ public abstract class ImuIO extends IOBase {
   }
 
   protected abstract double getYawDegreesCCW();
+  protected abstract double getPitchDeg();
+  protected abstract double getRollDeg();
 
   protected abstract boolean getIsConnected();
 

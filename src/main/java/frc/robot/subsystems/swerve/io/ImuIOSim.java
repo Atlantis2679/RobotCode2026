@@ -19,16 +19,26 @@ public class ImuIOSim extends ImuIO {
 
     @Override
     protected double getXAcceleration() {
-    return 0;
+        return 0;
     }
     
     @Override
     protected double getYAcceleration() {
-    return 0;
+        return 0;
     }
     
     @Override
     protected double getZAcceleration() {
-    return 0;
+        return 0;
+    }
+
+    @Override
+    protected double getPitchDeg() {
+        return 0;
+    }
+
+    @Override
+    protected double getRollDeg() {
+        return 0;
     }
 }

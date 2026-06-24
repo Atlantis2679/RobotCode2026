@@ -2,8 +2,6 @@ package frc.robot;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.BooleanSupplier;
-import java.util.function.DoubleSupplier;
 
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
@@ -14,9 +12,7 @@ import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.util.FlippingUtil;
 
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
@@ -26,8 +22,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.allCommands.AllCommands;
-import frc.robot.shooting.ShootingCalculator;
-import frc.robot.shooting.ShootingMeasurments;
+import frc.robot.shooting.ShotControl;
 import frc.robot.subsystems.flywheel.FlyWheel;
 import frc.robot.subsystems.fourbar.Fourbar;
 import frc.robot.subsystems.hood.Hood;
@@ -37,6 +32,7 @@ import frc.robot.subsystems.roller.Roller;
 import frc.robot.subsystems.swerve.Swerve;
 import frc.robot.subsystems.swerve.SwerveCommands;
 import frc.robot.subsystems.swerve.SwerveConstants.PathPlanner;
+import frc.robot.utils.CommandsUtils;
 // import frc.robot.subsystems.vision.Vision;
 import frc.robot.utils.NaturalXboxController;
 import team2679.atlantiskit.tunables.Tunable;
@@ -54,11 +50,6 @@ public class RobotContainer {
     private final FlyWheel flyWheel = new FlyWheel();
     // private final Vision vision = new Vision();
 
-    private final ShootingCalculator hubShootingCalculator = new ShootingCalculator(new Pose3d(0.0, 0.0, FieldConstants.HUB_OPENING_HEIGHT_METERS, new Rotation3d()),
-            ShootingMeasurments.ALL_MEASURMENTS_HUB);
-    private final ShootingCalculator deliveryShootingCalculator = new ShootingCalculator(
-            new Pose3d(), ShootingMeasurments.ALL_MEASURMENTS_DELIVRY);
-
     private final SwerveCommands swerveCommands = new SwerveCommands(swerve);
     private final AllCommands allCommands = new AllCommands(fourbar, roller, flyWheel, hood, index);
 
@@ -66,9 +57,7 @@ public class RobotContainer {
     private final NaturalXboxController driverController = new NaturalXboxController( RobotMap.Controllers.DRIVER_PORT); private final NaturalXboxController operatorController = new NaturalXboxController(
             RobotMap.Controllers.OPERATOR_PORT);
 
-    private BooleanSupplier isShootingHub;
-
-    public static final LoggedDashboardChooser<Boolean> isRedAlliance = new LoggedDashboardChooser<>("alliance");
+    private static final LoggedDashboardChooser<Boolean> isRedAlliance = new LoggedDashboardChooser<>("alliance");
 
     static {
         isRedAlliance.addDefaultOption("red", true);
@@ -76,10 +65,14 @@ public class RobotContainer {
         SmartDashboard.putBoolean("isRedAlliance", RobotContainer.isRedAlliance());
     }
 
-    private final DoubleSupplier hoodAngleSupplier = () -> (isShootingHub.getAsBoolean() ? hubShootingCalculator
-            : deliveryShootingCalculator).getHoodAngleDegrees();
-    private final DoubleSupplier flywheelSpeedSupplier = () -> (isShootingHub.getAsBoolean() ? hubShootingCalculator
-            : deliveryShootingCalculator).getFlyWheelRPM();
+    private final ShotControl shotControl = new ShotControl();
+
+    private final Command shotCommand = CommandsUtils.dynamicSwitchBetweenCommands(
+            shotControl::shoot,
+            allCommands.shoot(shotControl::getRpm, shotControl::getAngle),
+            allCommands.getReadyToShoot(shotControl::getRpm, shotControl::getAngle));
+
+    private final Trigger shotTrigger = operatorController.leftTrigger();
 
     private SendableChooser<Command> autoChooser = null;
 
@@ -100,6 +93,10 @@ public class RobotContainer {
                 }));
             }
         });
+        TunablesManager.add("Reset Pose", new InstantCommand(() -> {
+            PoseEstimator.getInstance().resetPose(new Pose2d());
+            swerve.resetGyroYawZero();
+        }));
         new Trigger(DriverStation::isDisabled).whileTrue(swerveCommands.stop().alongWith(allCommands.stopAll()));
         // SignalLogger.setPath("/media/sda1/"); // Cofigure pheonixLib logging path
         configureDrive();
@@ -112,7 +109,7 @@ public class RobotContainer {
                 driverController::getLeftY,
                 driverController::getLeftX,
                 driverController::getRightX,
-                () -> 0,
+                shotControl::getDriveAngleDegrees,
                 driverController.b(),
                 driverController.leftBumper().negate()::getAsBoolean,
                 driverController.rightBumper()::getAsBoolean);
@@ -135,20 +132,24 @@ public class RobotContainer {
     }
 
     public void configureOperator() {
+        TunablesManager.add("Shot Control", shotControl);
+
         operatorController.a().whileTrue(allCommands.intake());
 
-        isShootingHub = operatorController.b().or(DriverStation::isAutonomous);
+        hood.setDefaultCommand(allCommands.hoodFollow(shotControl::getAngle));
+        fourbar.setDefaultCommand(allCommands.fourbarMoveToRest());
+        
+        shotTrigger.whileTrue(shotCommand);
 
-        hood.setDefaultCommand(allCommands.hoodFollow(hoodAngleSupplier));
-        // fourbar.setDefaultCommand(allCommands.fourbarMoveToRest());
-
-        operatorController.leftTrigger()
-                .whileTrue(allCommands.getReadyToShoot(flywheelSpeedSupplier, hoodAngleSupplier));
-        operatorController.rightTrigger().whileTrue(allCommands.shoot(flywheelSpeedSupplier, hoodAngleSupplier));
-
+        operatorController.leftBumper().whileTrue(allCommands.manualController(
+            operatorController::getLeftTriggerAxis,
+            operatorController::getRightY,
+            operatorController::getRightX,
+            operatorController::getLeftX, 
+            operatorController::getLeftY));
         TunablesManager.add("Tunable Shoot Command", allCommands.tunableShoot().fullTunable());
         TunablesManager.add("Tunable Shoot With Passing", allCommands.tunableShootWithPassing().fullTunable());
-        TunablesManager.add("Tunable Shoot Hub With Distance", allCommands.tunableShootWithDistance(hubShootingCalculator).fullTunable());
+        // TunablesManager.add("Tunable Shoot Hub With Distance", allCommands.tunableShootWithDistance(hubShootingCalculator).fullTunable());
     }
 
     public void configureAuto() {
@@ -170,7 +171,7 @@ public class RobotContainer {
         NamedCommands.registerCommand("stopAll", allCommands.stopAll());
         NamedCommands.registerCommand("startIntake", allCommands.intake());
         NamedCommands.registerCommand("stopIntake", allCommands.stopIntake());
-        NamedCommands.registerCommand("shoot", allCommands.shoot(flywheelSpeedSupplier, hoodAngleSupplier));
+        NamedCommands.registerCommand("shoot", shotCommand);
 
         autoChooser = AutoBuilder.buildAutoChooser();
         SmartDashboard.putData("Auto Chooser", autoChooser);
@@ -202,7 +203,14 @@ public class RobotContainer {
 
     public void periodicUpdate() {
         // vision.update();
-        // hubShootingCalculator.update(PoseEstimator.getInstance().getEstimatedPose(), isRedAlliance());
+        shotControl.update(
+            PoseEstimator.getInstance().getEstimatedPose(),
+            isRedAlliance(),
+            swerve.getFieldRelativeChassisSpeeds(),
+            swerve.getRobotRelativeChassisSpeeds(),
+            swerve.getRobotPitchDeg(),
+            swerve.getRobotRollDeg()
+        );
     }
 
     public static boolean isRedAlliance() {
