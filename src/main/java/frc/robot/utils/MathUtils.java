@@ -1,10 +1,40 @@
 package frc.robot.utils;
 
+import team2679.atlantiskit.tunables.Tunable;
+import team2679.atlantiskit.tunables.TunableBuilder;
+
 public class MathUtils {
-    public static double cosineWave(double max, double min, double time) {
-        double average = (max + min) / 2;
-        double delta = (max - min) / 2;
-        return average + delta * Math.cos(time);
+    public static class CosineWaveFollower implements Tunable {
+        public double min, max, speed, timestamp;
+
+        public CosineWaveFollower(double min, double max, double speed) {
+            this.min = min;
+            this.max = max;
+            this.speed = speed;
+            this.timestamp = 0;
+        }
+
+        public CosineWaveFollower(double min, double max) {
+            this(min, max, Math.PI / 180);
+        }
+
+        public double getNext() {
+            timestamp += speed;
+            return cosineWave(timestamp, min, max);
+        }
+
+        public static double cosineWave(double timestamp, double min, double max) {
+            double average = (max + min) / 2;
+            double delta = (max - min) / 2;
+            return average + delta * Math.cos(timestamp);
+        }
+
+        @Override
+        public void initTunable(TunableBuilder builder) {
+            builder.addDoubleProperty("min",  () -> this.min, (min) -> this.min = min);
+            builder.addDoubleProperty("max",  () -> this.max, (max) -> this.max = max);
+            builder.addDoubleProperty("speed", () -> this.speed, (speed) -> this.speed = speed);
+        }
     }
 
     public static double avg(double[] values) {

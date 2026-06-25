@@ -48,18 +48,18 @@ public class AllCommands {
         flyWheelCMDs = new FlyWheelCommands(this.flyWheel);
         hoodCMDs = new HoodCommands(this.hood);
         indexCMDs = new IndexCommands(this.index);
-
-        fourbar.setDefaultCommand(fourbar.run(() -> {fourbar.setVoltage(0, false);}));
     }
 
     public Command intake() {
         return Commands.parallel(
-                fourbarCMDs.bounce(FOURBAR_INTAKE_BOUNCE_MIN_ANGLE, FOURBAR_INTAKE_BOUNCE_MAX_ANGLE),
-                rollerCMDs.spin(ROLLER_VOLTAGE)).withName("intake");
+                fourbarCMDs.runWithVoltage(FOURBAR_OPEN_VOLTAGE).until(fourbar::isStuck)
+                    .andThen(fourbarCMDs.bounce(FOURBAR_BOUNCE_WAVE_FOLLOWER)),
+                rollerCMDs.spin(ROLLER_VOLTAGE)
+            ).withName("intake");
     }
 
     public Command stopIntake() {
-        return fourbar.run(fourbar::stop).alongWith(roller.run(roller::stop));
+        return fourbar.run(fourbar::stop).alongWith(roller.run(roller::stop)).withName("stop intake");
     }
 
     public Command getReadyToShoot(DoubleSupplier speedRPM, DoubleSupplier angle) {
@@ -102,8 +102,8 @@ public class AllCommands {
         return hoodCMDs.moveToAngle(angle);
     }
 
-    public Command fourbarMoveToRest() {
-        return fourbarCMDs.moveToAngle(() -> FOURBAR_MID_ANGLE).withName("fourbarMoveToRest");
+    public Command fourbarOpen() {
+        return fourbarCMDs.runWithVoltage(FOURBAR_OPEN_VOLTAGE);
     }
 
     public Command stopAll() {

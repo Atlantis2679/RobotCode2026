@@ -1,14 +1,10 @@
 package frc.robot.subsystems.fourbar;
 
 import static frc.robot.subsystems.fourbar.FourbarConstants.*;
-import static frc.robot.subsystems.fourbar.FourbarConstants.MAX_ANGLE_DEGREES;
-import static frc.robot.subsystems.fourbar.FourbarConstants.MIN_ANGLE_DEGREES;
 
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Robot;
 import frc.robot.subsystems.fourbar.io.FourbarIO;
@@ -19,15 +15,8 @@ import team2679.atlantiskit.logfields.LogFieldsTable;
 import team2679.atlantiskit.tunables.Tunable;
 import team2679.atlantiskit.tunables.TunableBuilder;
 import team2679.atlantiskit.tunables.TunablesManager;
-import team2679.atlantiskit.tunables.extensions.TunableArmFeedforward;
-import team2679.atlantiskit.tunables.extensions.TunableTrapezoidProfile;
 
 public class Fourbar extends SubsystemBase implements Tunable {
-    private final PIDController pid = new PIDController(KP, KI, KD);
-    private final TunableArmFeedforward feedforward = new TunableArmFeedforward(KS, KG, KV);
-    private final TunableTrapezoidProfile trapezoidProfile = new TunableTrapezoidProfile(
-            new TrapezoidProfile.Constraints(
-                    MAX_VELOCITY_DEG_PER_SEC, MAX_ACCELERATION_DEG_PER_SEC));
     private final LogFieldsTable fieldsTable = new LogFieldsTable(getName());
     private final FourbarIO io = Robot.isReal() ? new FourbarIOSparkMax(fieldsTable) : new FourbarIOSim(fieldsTable);
     private final RotationalSensorHelper angleDegrees = new RotationalSensorHelper(io.angleDegrees.getAsDouble());
@@ -38,13 +27,8 @@ public class Fourbar extends SubsystemBase implements Tunable {
 
     public Fourbar() {
         TunablesManager.add(getName(), (Tunable) this);
-        pid.enableContinuousInput(0, 360);
-        angleDegrees.setOffset(ANGLE_OFFSET);
     }
 
-    public void resetPID() {
-        pid.reset();
-    }
 
     @Override
     public void periodic() {
@@ -69,39 +53,15 @@ public class Fourbar extends SubsystemBase implements Tunable {
         return angleDegrees.getVelocity();
     }
 
-    public void setVoltage(double voltage, boolean softwareStop) {
-        if (softwareStop &&
-            ((getAngleDegrees() > MAX_ANGLE_DEGREES && voltage > 0) ||
-            (getAngleDegrees() < MIN_ANGLE_DEGREES && voltage < 0))) {
-            voltage = 0;
-        }
+    public void setVoltage(double voltage) {
         voltage = MathUtil.clamp(voltage, -MAX_VOLTAGE, MAX_VOLTAGE);
         desiredVoltage = voltage;
         io.setVolt(voltage);
     }
 
-    public double calculateFeedForward(double desiredAngleDegrees, double desiredSpeed, boolean usePID) {
-        fieldsTable.recordOutput("desired angle", desiredAngleDegrees);
-        fieldsTable.recordOutput("desired speed", desiredSpeed);
-        double speed = feedforward.calculate(Math.toRadians(desiredAngleDegrees), desiredSpeed);
-        if (usePID && !isAtAngle(desiredAngleDegrees)) {
-            speed += pid.calculate(getAngleDegrees(), desiredAngleDegrees);
-        }
-        return speed;
-    }
-
-    public TrapezoidProfile.State calculateTrapezoidProfile(double time, TrapezoidProfile.State initialState,
-            TrapezoidProfile.State goalState) {
-        return trapezoidProfile.calculate(time, initialState, goalState);
-    }
-
     public void stop() {
         desiredVoltage = 0;
         io.setVolt(0);
-    }
-
-    public boolean isAtAngle(double angle) {
-        return Math.abs(getAngleDegrees() - angle) < ANGLE_TOLLERANCE;
     }
 
     public boolean isStuck() {
@@ -111,9 +71,6 @@ public class Fourbar extends SubsystemBase implements Tunable {
 
     @Override
     public void initTunable(TunableBuilder builder) {
-        builder.addChild("Forbar PID", pid);
-        builder.addChild("Forbar FeedForward", feedforward);
-        builder.addChild("Forbar TrapeziodProfile", trapezoidProfile);
         builder.addChild("Forbar RotationalSensorHelper", angleDegrees);
     }
 }

@@ -2,7 +2,6 @@ package frc.robot.subsystems.hood;
 
 import java.util.function.DoubleSupplier;
 
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.utils.MathUtils;
@@ -62,10 +61,10 @@ public class HoodCommands {
 
     public TunableCommand cosineWaveFollower() {
         return TunableCommand.wrap((tunablesTable) -> {
-            DoubleHolder changeRate = tunablesTable.addNumber("Change Rate", 1.0);
+            MathUtils.CosineWaveFollower cosineWaveFollower = new MathUtils.CosineWaveFollower(hood.minAngle, hood.maxAngle);
+            tunablesTable.addChild("Cosine wave follower", cosineWaveFollower);
             return hood.run(() -> {
-                double angle = MathUtils.cosineWave(hood.minAngle, hood.maxAngle,
-                        Timer.getFPGATimestamp() * changeRate.get());
+                double angle = cosineWaveFollower.getNext();
                 double voltage = hood.calculatePID(angle);
                 hood.setVoltage(voltage);
             });

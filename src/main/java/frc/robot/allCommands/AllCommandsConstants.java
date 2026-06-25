@@ -1,12 +1,13 @@
 package frc.robot.allCommands;
 
+import frc.robot.utils.MathUtils.CosineWaveFollower;
+
 public class AllCommandsConstants {
-    public static final double FOURBAR_MID_ANGLE = 8.5;
-    public static final double FOURBAR_INTAKE_BOUNCE_MIN_ANGLE = 11;
-    public static final double FOURBAR_INTAKE_BOUNCE_MAX_ANGLE = 18.5;
+    public static final double FOURBAR_OPEN_VOLTAGE = 1;
+    public static final double FOURBAR_CLOSE_VOLTAGE = -1.5;
+    public static final CosineWaveFollower FOURBAR_BOUNCE_WAVE_FOLLOWER = new CosineWaveFollower(-2, 1, 0.1);
+    public static final double FOURBAR_INTAKE_BOUNCE_MAX_VOLTAGE = 4;
     public static final double SPINDEX_VOLTAGE = 12;
     public static final double INDEXER_VOLTAGE = 12;
     public static final double ROLLER_VOLTAGE = 7;
-    public static final double ELEVATOR_CLIMB_HEIGHT_METERS = 0;
-    public static final double ELEVATOR_UNCLIMB_HEIGHT_METERS = 0;
 }
