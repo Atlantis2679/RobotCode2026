@@ -5,6 +5,7 @@ import static frc.robot.shooting.ShotConstants.*;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.shooting.ShotCalculator.LaunchParameters;
 import frc.robot.shooting.ShotCalculator.ShotInputs;
 import team2679.atlantiskit.logfields.LogFieldsTable;
@@ -27,6 +28,9 @@ public class ShotControl implements Tunable {
 
     private boolean shoot = false;
 
+    private double rpmAdjusment = 0;
+    private double hoodAdjusment = 0;
+
     public ShotControl() {
         sim = new ProjectileSimulator(PARAMETERS);
         lut = sim.generateVariableAngleShotLUT(MIN_ANGLE_DEG, MAX_ANGLE_DEG, ANGLE_STEP);
@@ -47,6 +51,17 @@ public class ShotControl implements Tunable {
         }
         fieldsTable.recordOutput("Shot Params", shotParams);
         fieldsTable.recordOutput("Shoot", shoot);
+        SmartDashboard.putNumber("Shot RPM adjustment", rpmAdjusment);
+        SmartDashboard.putNumber("Shot Hood angle adjustment", hoodAdjusment);
+    }
+
+    public void adjustRpmOffset(double rpm) {
+        rpmAdjusment += rpm;
+        shotCalculator.adjustOffset(rpm);
+    }
+
+    public void adjustHoodOffset(double angle) {
+        hoodAdjusment += angle;
     }
 
     public double getRpm() {
@@ -54,7 +69,7 @@ public class ShotControl implements Tunable {
     }
 
     public double getAngle() {
-        return shotCalculator.getHoodAngle(shotParams.solvedDistanceM());
+        return shotCalculator.getHoodAngle(shotParams.solvedDistanceM()) + hoodAdjusment;
     }
 
     public double getDriveRotationRPS() {

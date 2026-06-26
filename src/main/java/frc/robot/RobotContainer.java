@@ -73,8 +73,6 @@ public class RobotContainer {
             allCommands.shoot(shotControl::getRpm, shotControl::getAngle),
             allCommands.getReadyToShoot(shotControl::getRpm, shotControl::getAngle));
 
-    private final Trigger shotTrigger = operatorController.leftTrigger();
-
     private SendableChooser<Command> autoChooser = null;
 
     public RobotContainer() {
@@ -111,7 +109,7 @@ public class RobotContainer {
                 driverController::getLeftX,
                 driverController::getRightX,
                 shotControl::getDriveAngleDegrees,
-                driverController.b(),
+                operatorController.leftTrigger(),
                 driverController.leftBumper().negate()::getAsBoolean,
                 driverController.rightBumper()::getAsBoolean);
 
@@ -135,19 +133,31 @@ public class RobotContainer {
     public void configureOperator() {
         TunablesManager.add("Shot Control", shotControl);
 
-        operatorController.a().whileTrue(allCommands.intake());
+        operatorController.x().whileTrue(allCommands.intake());
+        operatorController.a().whileTrue(allCommands.delivery());
 
         hood.setDefaultCommand(allCommands.hoodFollow(shotControl::getAngle));
-        fourbar.setDefaultCommand(fourbar.run(fourbar::stop));
         
-        shotTrigger.whileTrue(shotCommand);
+        operatorController.rightTrigger().whileTrue(shotCommand);
 
         operatorController.leftBumper().whileTrue(allCommands.manualController(
-            operatorController::getLeftTriggerAxis,
+            () -> operatorController.getRightTriggerAxis() * (operatorController.rightBumper().getAsBoolean() ? -1 : 1),
+            () -> {
+                if (operatorController.y().getAsBoolean()) return 0.2;
+                if (operatorController.b().getAsBoolean()) return -0.2;
+                return 0;
+            },
             operatorController::getRightY,
             operatorController::getRightX,
-            operatorController::getLeftX, 
             operatorController::getLeftY));
+
+        operatorController.povLeft().onTrue(allCommands.fourbarClose());
+        operatorController.povRight().onTrue(allCommands.fourbarOpen());
+        operatorController.povUp().onTrue(new InstantCommand(() -> shotControl.adjustRpmOffset(25)));
+        operatorController.povDown().onTrue(new InstantCommand(() -> shotControl.adjustRpmOffset(-25)));
+        operatorController.y().and(operatorController.leftBumper().negate()).onTrue(new InstantCommand(() -> shotControl.adjustHoodOffset(2.5)));
+        operatorController.b().and(operatorController.leftBumper().negate()).onTrue(new InstantCommand(() -> shotControl.adjustHoodOffset(-2.5)));
+
         TunablesManager.add("Tunable Shoot Command", allCommands.tunableShoot().fullTunable());
         TunablesManager.add("Tunable Shoot With Passing", allCommands.tunableShootWithPassing().fullTunable());
         // TunablesManager.add("Tunable Shoot Hub With Distance", allCommands.tunableShootWithDistance(hubShootingCalculator).fullTunable());

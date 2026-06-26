@@ -52,10 +52,25 @@ public class AllCommands {
 
     public Command intake() {
         return Commands.parallel(
-                fourbarCMDs.runWithVoltage(FOURBAR_OPEN_VOLTAGE).until(fourbar::isStuck)
-                    .andThen(fourbarCMDs.bounce(FOURBAR_BOUNCE_WAVE_FOLLOWER)),
+                fourbarCMDs.bounce(FOURBAR_BOUNCE_WAVE_FOLLOWER),
                 rollerCMDs.spin(ROLLER_VOLTAGE)
             ).withName("intake");
+    }
+
+    public Command manualRoller(DoubleSupplier speed) {
+        return rollerCMDs.manualController(speed).withName("Manual Roller");
+    }
+
+    public Command manualFourbar(DoubleSupplier speed) {
+        return fourbarCMDs.manualController(speed).withName("Manual Fourbar");
+    }
+
+    public Command manualIndex(DoubleSupplier speed) {
+        return indexCMDs.manualController(speed).withName("Manual Index");
+    }
+
+    public Command delivery() {
+        return shoot(() -> 5500, () -> 45).withName("delivery");
     }
 
     public Command stopIntake() {
@@ -103,6 +118,10 @@ public class AllCommands {
     }
 
     public Command fourbarOpen() {
+        return fourbarCMDs.runWithVoltage(FOURBAR_OPEN_VOLTAGE);
+    }
+
+    public Command fourbarClose() {
         return fourbarCMDs.runWithVoltage(FOURBAR_OPEN_VOLTAGE);
     }
 
