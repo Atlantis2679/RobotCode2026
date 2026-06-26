@@ -16,6 +16,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.PowerDistribution;
+import edu.wpi.first.wpilibj.XboxController.Axis;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -151,16 +152,22 @@ public class RobotContainer {
             operatorController::getRightX,
             operatorController::getLeftY));
 
-        operatorController.povLeft().onTrue(allCommands.fourbarClose());
-        operatorController.povRight().onTrue(allCommands.fourbarOpen());
-        operatorController.povUp().onTrue(new InstantCommand(() -> shotControl.adjustRpmOffset(25)));
-        operatorController.povDown().onTrue(new InstantCommand(() -> shotControl.adjustRpmOffset(-25)));
-        operatorController.y().and(operatorController.leftBumper().negate()).onTrue(new InstantCommand(() -> shotControl.adjustHoodOffset(2.5)));
-        operatorController.b().and(operatorController.leftBumper().negate()).onTrue(new InstantCommand(() -> shotControl.adjustHoodOffset(-2.5)));
+        operatorController.povLeft().whileTrue(allCommands.fourbarClose());
+        operatorController.povRight().whileTrue(allCommands.fourbarOpen());
+        operatorController.povUp().onTrue(new InstantCommand(() -> shotControl.adjustRpmOffset(25)).ignoringDisable(true));
+        operatorController.povDown().onTrue(new InstantCommand(() -> shotControl.adjustRpmOffset(-25)).ignoringDisable(true));
+        operatorController.y().and(operatorController.leftBumper().negate()).onTrue(new InstantCommand(() -> shotControl.adjustHoodOffset(2.5)).ignoringDisable(true));
+        operatorController.b().and(operatorController.leftBumper().negate()).onTrue(new InstantCommand(() -> shotControl.adjustHoodOffset(-2.5)).ignoringDisable(true));
+
+        operatorController.axisGreaterThan(Axis.kRightY.value, 0.1).whileTrue(allCommands.manualFourbar(() -> -operatorController.getRightY()));
+        operatorController.axisLessThan(Axis.kRightY.value, -0.1).whileTrue(allCommands.manualFourbar(() -> -operatorController.getRightY()));
+        operatorController.axisGreaterThan(Axis.kRightX.value, 0.1).whileTrue(allCommands.manualRoller(() -> -operatorController.getRightX()));
+        operatorController.axisLessThan(Axis.kRightX.value, -0.1).whileTrue(allCommands.manualRoller(() -> -operatorController.getRightX()));
+        operatorController.axisGreaterThan(Axis.kLeftY.value, 0.1).whileTrue(allCommands.manualIndex(() -> -operatorController.getLeftY()));
+        operatorController.axisLessThan(Axis.kLeftY.value, -0.1).whileTrue(allCommands.manualIndex(() -> -operatorController.getLeftY()));
 
         TunablesManager.add("Tunable Shoot Command", allCommands.tunableShoot().fullTunable());
         TunablesManager.add("Tunable Shoot With Passing", allCommands.tunableShootWithPassing().fullTunable());
-        // TunablesManager.add("Tunable Shoot Hub With Distance", allCommands.tunableShootWithDistance(hubShootingCalculator).fullTunable());
     }
 
     public void configureAuto() {

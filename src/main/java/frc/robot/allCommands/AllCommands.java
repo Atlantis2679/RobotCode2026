@@ -122,7 +122,7 @@ public class AllCommands {
     }
 
     public Command fourbarClose() {
-        return fourbarCMDs.runWithVoltage(FOURBAR_OPEN_VOLTAGE);
+        return fourbarCMDs.runWithVoltage(FOURBAR_CLOSE_VOLTAGE);
     }
 
     public Command stopAll() {
