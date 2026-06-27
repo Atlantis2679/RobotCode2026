@@ -36,18 +36,18 @@ public class VisionConstants {
   };
 
   public static CameraConfig[] CAMERAS = {
-    // new CameraConfig(
-    // "LeftFront", 1.0,
-    // new Transform3d(new Translation3d(0.185, 0.297, 0.177),
-    //     new Rotation3d(Degrees.of(0), Degrees.of(35), Degrees.of(22.5)))),
+    new CameraConfig(
+      "LeftFront", 1.0,
+      new Transform3d(new Translation3d(0.185, 0.297, -0.177),
+        new Rotation3d(Degrees.of(0), Degrees.of(-48), Degrees.of(22.5)))),
       new CameraConfig(
           "RightFront", 1.0,
-          new Transform3d(new Translation3d(0.155, 0.297, 0.177),
-              new Rotation3d(Degrees.of(0), Degrees.of(35), Degrees.of(-22.5)))),
+          new Transform3d(new Translation3d(0.155, 0.297, -0.177),
+              new Rotation3d(Degrees.of(0), Degrees.of(-48), Degrees.of(-22.5)))),
       new CameraConfig(
           "BackCam", 1.0,
           new Transform3d(new Translation3d(0.17, -0.345, 0.30),
-              new Rotation3d(Degrees.of(0), Degrees.of(0), Degrees.of(180))))
+              new Rotation3d(Degrees.of(270), Degrees.of(0), Degrees.of(180))))
   };
 
   public static class Sim {
