@@ -34,7 +34,7 @@ public final class ShotConstants {
 
     public static final double POSE_CONFIDENCE = 0.9;
     
-    public static final Translation2d BLUE_HUB = new Translation2d(4.6, 4.0);
+    public static final Translation2d BLUE_HUB = new Translation2d(4.6, 4.035);
     public static final Translation2d RED_HUB = FlippingUtil.flipFieldPosition(BLUE_HUB);
     // public static final Translation2d RED_HUB = new Translation2d(-0.955, 0.0);
     public static final Translation2d RED_HUB_HEADING = new Translation2d(0, 0);

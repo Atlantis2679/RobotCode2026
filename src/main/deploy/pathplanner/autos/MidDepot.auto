@@ -5,6 +5,12 @@
     "data": {
       "commands": [
         {
+          "type": "path",
+          "data": {
+            "pathName": "MidToShoot"
+          }
+        },
+        {
           "type": "named",
           "data": {
             "name": "shoot"
@@ -13,13 +19,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "MidToRightClimb"
+            "pathName": "MidShootToLeftWall"
           }
         },
         {
-          "type": "named",
+          "type": "path",
           "data": {
-            "name": "climb"
+            "pathName": "LeftWallToDepot"
           }
         }
       ]

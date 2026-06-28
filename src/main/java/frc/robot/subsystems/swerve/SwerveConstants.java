@@ -88,14 +88,14 @@ public final class SwerveConstants {
 
         public static final ModuleConfig MODULES_CONFIG = new ModuleConfig(Modules.WHEEL_RADIUS_METERS,
                 Modules.MAX_SPEED_MPS,
-                PathPlanner.MOMENT_OF_INERTIA, DCMotor.getFalcon500(1), Modules.DRIVE_SUPPLY_CURRENT_LIMIT, 1);
+                PathPlanner.MOMENT_OF_INERTIA, DCMotor.getKrakenX60(1), Modules.DRIVE_SUPPLY_CURRENT_LIMIT, 4);
 
         public static final RobotConfig ROBOT_CONFIG = new RobotConfig(PathPlanner.ROBOT_MASS_KG,
                 PathPlanner.MOMENT_OF_INERTIA,
                 MODULES_CONFIG, MODULES_LOCATIONS);
 
-        public static final PIDConstants TRANSLATION_PID = new PIDConstants(0, 0, 0);
-        public static final PIDConstants ROTATION_PID = new PIDConstants(0, 0, 0);
+        public static final PIDConstants TRANSLATION_PID = new PIDConstants(7, 0, 0.1);
+        public static final PIDConstants ROTATION_PID = new PIDConstants(11.3, 0, 0.1);
 
         public static final PathFollowingController FOLLOWING_CONTROLLER = new PPHolonomicDriveController(
                 TRANSLATION_PID, ROTATION_PID);
