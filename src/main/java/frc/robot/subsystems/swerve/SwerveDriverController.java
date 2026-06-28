@@ -53,6 +53,7 @@ public class SwerveDriverController extends TunableCommand {
     this.isSensetiveMode = isSensetiveMode;
 
     velocityMultiplierChooser.setDefaultOption("REGULAR (100%)", 1.0);
+    velocityMultiplierChooser.addOption("TEENEGER (75%)", 0.75);
     velocityMultiplierChooser.addOption("CHILD (50%)", 0.5);
     velocityMultiplierChooser.addOption("BABY (30%)", 0.3);
     velocityMultiplierChooser.addOption("EGG (10%)", 0.1);

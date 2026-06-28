@@ -83,8 +83,8 @@ public final class SwerveConstants {
 
     public static final class PathPlanner {
         public static final double FRICTION_WITH_CARPET = 1;
-        public static final double ROBOT_MASS_KG = 1;
-        public static final double MOMENT_OF_INERTIA = 0.5;
+        public static final double ROBOT_MASS_KG = 59.4;
+        public static final double MOMENT_OF_INERTIA = 4.3;
 
         public static final ModuleConfig MODULES_CONFIG = new ModuleConfig(Modules.WHEEL_RADIUS_METERS,
                 Modules.MAX_SPEED_MPS,
