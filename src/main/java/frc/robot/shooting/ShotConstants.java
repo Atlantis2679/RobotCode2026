@@ -1,7 +1,5 @@
 package frc.robot.shooting;
 
-import static frc.robot.shooting.ShotConstants.BLUE_HUB;
-
 import com.pathplanner.lib.util.FlippingUtil;
 
 import edu.wpi.first.math.geometry.Translation2d;

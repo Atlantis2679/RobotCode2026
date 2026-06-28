@@ -110,7 +110,7 @@ public class RobotContainer {
                 driverController::getLeftX,
                 driverController::getRightX,
                 shotControl::getDriveAngleDegrees,
-                operatorController.leftTrigger(),
+                driverController.leftTrigger(),
                 driverController.leftBumper().negate()::getAsBoolean,
                 driverController.rightBumper()::getAsBoolean);
 
@@ -161,8 +161,8 @@ public class RobotContainer {
 
         operatorController.axisGreaterThan(Axis.kRightY.value, 0.1).whileTrue(allCommands.manualFourbar(() -> -operatorController.getRightY()));
         operatorController.axisLessThan(Axis.kRightY.value, -0.1).whileTrue(allCommands.manualFourbar(() -> -operatorController.getRightY()));
-        operatorController.axisGreaterThan(Axis.kRightX.value, 0.1).whileTrue(allCommands.manualRoller(() -> -operatorController.getRightX()));
-        operatorController.axisLessThan(Axis.kRightX.value, -0.1).whileTrue(allCommands.manualRoller(() -> -operatorController.getRightX()));
+        operatorController.axisGreaterThan(Axis.kRightX.value, 0.1).whileTrue(allCommands.manualRoller(operatorController::getRightX));
+        operatorController.axisLessThan(Axis.kRightX.value, -0.1).whileTrue(allCommands.manualRoller(operatorController::getRightX));
         operatorController.axisGreaterThan(Axis.kLeftY.value, 0.1).whileTrue(allCommands.manualIndex(() -> -operatorController.getLeftY()));
         operatorController.axisLessThan(Axis.kLeftY.value, -0.1).whileTrue(allCommands.manualIndex(() -> -operatorController.getLeftY()));
 

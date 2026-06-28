@@ -27,7 +27,7 @@ public class FourbarIOSparkMax extends FourbarIO {
         super(fields);
 
         motorConfig.smartCurrentLimit(FourbarConstants.CURRENT_LIMIT);
-        motorConfig.idleMode(IdleMode.kCoast);
+        motorConfig.idleMode(IdleMode.kBrake);
         REVLibError motorConfigError = motor.configure(motorConfig, ResetMode.kNoResetSafeParameters,
                 PersistMode.kNoPersistParameters);
         AlertsFactory.revMotor(PeriodicAlertsGroup.defaultInstance.getSubGroup("Fourbar"),
