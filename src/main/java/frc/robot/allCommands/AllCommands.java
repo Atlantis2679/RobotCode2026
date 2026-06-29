@@ -119,6 +119,10 @@ public class AllCommands {
         return hoodCMDs.moveToAngle(angle);
     }
 
+    public Command rehomeHood() {
+        return hoodCMDs.rehoming();
+    }
+
     public Command fourbarOpen() {
         return fourbarCMDs.runWithVoltage(FOURBAR_OPEN_VOLTAGE);
     }

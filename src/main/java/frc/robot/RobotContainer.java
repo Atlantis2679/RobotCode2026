@@ -41,8 +41,8 @@ import team2679.atlantiskit.tunables.Tunable;
 import team2679.atlantiskit.tunables.TunableBuilder;
 import team2679.atlantiskit.tunables.TunablesManager;
 import team2679.atlantiskit.tunables.extensions.TunableCommand;
+import team2679.atlantiskit.valueholders.BooleanHolder;
 import team2679.atlantiskit.valueholders.DoubleHolder;
-import team2679.atlantiskit.valueholders.ValueHolder;
 
 public class RobotContainer {
     private final Swerve swerve = new Swerve();
@@ -62,6 +62,8 @@ public class RobotContainer {
 
     private static final LoggedDashboardChooser<Boolean> isRedAlliance = new LoggedDashboardChooser<>("alliance");
 
+    private static final BooleanHolder isAutoTurn = new BooleanHolder(false);
+
     static {
         isRedAlliance.addDefaultOption("red", true);
         isRedAlliance.addOption("blue", false);
@@ -69,11 +71,6 @@ public class RobotContainer {
     }
 
     private final ShotControl shotControl = new ShotControl();
-
-    private final Command shotCommand = CommandsUtils.dynamicSwitchBetweenCommands(
-            shotControl::shoot,
-            allCommands.shoot(shotControl::getRpm, shotControl::getAngle),
-            allCommands.getReadyToShoot(shotControl::getRpm, shotControl::getAngle));
 
     private SendableChooser<Command> autoChooser = null;
 
@@ -111,7 +108,7 @@ public class RobotContainer {
                 driverController::getLeftX,
                 driverController::getRightX,
                 shotControl::getDriveAngleDegrees,
-                driverController.leftTrigger(),
+                driverController.leftTrigger().or(isAutoTurn::get),
                 driverController.leftBumper().negate()::getAsBoolean,
                 driverController.rightBumper()::getAsBoolean);
 
@@ -139,6 +136,11 @@ public class RobotContainer {
         operatorController.a().whileTrue(allCommands.delivery());
 
         hood.setDefaultCommand(allCommands.hoodFollow(shotControl::getAngle));
+
+        Command shotCommand = CommandsUtils.dynamicSwitchBetweenCommands(
+            shotControl::shoot,
+            allCommands.shoot(shotControl::getRpm, shotControl::getAngle),
+            allCommands.getReadyToShoot(shotControl::getRpm, shotControl::getAngle));
         
         operatorController.rightTrigger().whileTrue(shotCommand);
 
@@ -167,6 +169,8 @@ public class RobotContainer {
         operatorController.axisGreaterThan(Axis.kLeftY.value, 0.1).whileTrue(allCommands.manualIndex(() -> -operatorController.getLeftY()));
         operatorController.axisLessThan(Axis.kLeftY.value, -0.1).whileTrue(allCommands.manualIndex(() -> -operatorController.getLeftY()));
 
+        operatorController.leftStick().onTrue(allCommands.rehomeHood());
+
         TunablesManager.add("Tunable Shoot Command", allCommands.tunableShoot().fullTunable());
         TunablesManager.add("Tunable Shoot With Passing", allCommands.tunableShootWithPassing().fullTunable());
     }
@@ -186,13 +190,14 @@ public class RobotContainer {
                 swerve::getRobotRelativeChassisSpeeds, (speeds, feedforwards) -> {
                     swerve.driveChassisSpeeds(speeds, true);
                 }, PathPlanner.FOLLOWING_CONTROLLER, PathPlanner.ROBOT_CONFIG, RobotContainer::isRedAlliance);
-
+        
         NamedCommands.registerCommand("stopAll", allCommands.stopAll());
         NamedCommands.registerCommand("startIntake", allCommands.intake());
         NamedCommands.registerCommand("stopIntake", allCommands.stopIntake());
-        NamedCommands.registerCommand("shoot", shotCommand);
+        NamedCommands.registerCommand("shoot", allCommands.shoot(shotControl::getRpm, shotControl::getAngle).alongWith(new InstantCommand(() -> isAutoTurn.set(true))).finallyDo(() -> isAutoTurn.set(false)));
 
         autoChooser = AutoBuilder.buildAutoChooser();
+        autoChooser.addOption("Just shoot mid", allCommands.shoot(shotControl::getRpm, shotControl::getAngle));
         SmartDashboard.putData("Auto Chooser", autoChooser);
 
         autoChooser.onChange((command) -> {

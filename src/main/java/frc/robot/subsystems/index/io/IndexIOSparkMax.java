@@ -16,7 +16,7 @@ import team2679.atlantiskit.periodicalerts.PeriodicAlertsGroup;
 
 public class IndexIOSparkMax extends IndexIO {
     private SparkMax spindexLeaderMotor = new SparkMax(CANBUS.SPINDEX_LEADER_ID, MotorType.kBrushless);
-    private SparkMax spindexFollowerMotor = new SparkMax(CANBUS.SPINDEX_FOLLOWER_ID, MotorType.kBrushless);
+    // private SparkMax spindexFollowerMotor = new SparkMax(CANBUS.SPINDEX_FOLLOWER_ID, MotorType.kBrushless);
     private SparkMax indexerMotor = new SparkMax(CANBUS.INDEXER_ID, MotorType.kBrushless);
 
     public IndexIOSparkMax(LogFieldsTable fields){
@@ -31,11 +31,11 @@ public class IndexIOSparkMax extends IndexIO {
         REVLibError spindexLeaderConfigError = spindexLeaderMotor.configure(spindexMotorConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
         AlertsFactory.revMotor(alerts, 
             () -> spindexLeaderConfigError, spindexLeaderMotor::getWarnings, spindexLeaderMotor::getFaults, "Spinex Leader Motor");
-        spindexMotorConfig.follow(CANBUS.SPINDEX_LEADER_ID);
-        spindexMotorConfig.smartCurrentLimit(IndexConstants.SPINDEX_FOLLOWER_CURRENT_LIMIT);
-        REVLibError spindexFollowerConfigError = spindexFollowerMotor.configure(spindexMotorConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
-        AlertsFactory.revMotor(alerts, 
-            () -> spindexFollowerConfigError, spindexFollowerMotor::getWarnings, spindexFollowerMotor::getFaults, "Spinex Follower Motor");
+        // spindexMotorConfig.follow(CANBUS.SPINDEX_LEADER_ID);
+        // spindexMotorConfig.smartCurrentLimit(IndexConstants.SPINDEX_FOLLOWER_CURRENT_LIMIT);
+        // REVLibError spindexFollowerConfigError = spindexFollowerMotor.configure(spindexMotorConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
+        // AlertsFactory.revMotor(alerts, 
+        //     () -> spindexFollowerConfigError, spindexFollowerMotor::getWarnings, spindexFollowerMotor::getFaults, "Spinex Follower Motor");
         
         SparkMaxConfig indexerMotorConfig = new SparkMaxConfig();
         indexerMotorConfig.smartCurrentLimit(IndexConstants.INDEXER_CURRENT_LIMIT);
@@ -58,7 +58,8 @@ public class IndexIOSparkMax extends IndexIO {
     }
 
     protected double getSpindexFollowerCurrent(){
-        return spindexFollowerMotor.getOutputCurrent();
+        // return spindexFollowerMotor.getOutputCurrent();
+        return 0;
     }
     
     protected double getIndexerCurrent(){

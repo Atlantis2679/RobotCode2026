@@ -52,11 +52,11 @@ public final class SwerveConstants {
                 -117.24609375 + 270,
         };
 
-        public static final double DRIVE_STATOR_CURRENT_LIMIT = 90;
+        public static final double DRIVE_STATOR_CURRENT_LIMIT = 70;
         public static final double TURN_STATOR_CURRENT_LIMIT = 30;
 
-        public static final double DRIVE_SUPPLY_CURRENT_LIMIT = 70;
-        public static final double DRIVE_SUPPLY_CURRENT_LOWER_LIMIT = 40;
+        public static final double DRIVE_SUPPLY_CURRENT_LIMIT = 50;
+        public static final double DRIVE_SUPPLY_CURRENT_LOWER_LIMIT = 20;
         public static final double DRIVE_SUPPLY_CURRENT_LOWER_TIME = 1;
     }
 
@@ -95,7 +95,7 @@ public final class SwerveConstants {
                 MODULES_CONFIG, MODULES_LOCATIONS);
 
         public static final PIDConstants TRANSLATION_PID = new PIDConstants(7, 0, 0.1);
-        public static final PIDConstants ROTATION_PID = new PIDConstants(11.3, 0, 0.1);
+        public static final PIDConstants ROTATION_PID = new PIDConstants(0.04, 0.1, 0.005);
 
         public static final PathFollowingController FOLLOWING_CONTROLLER = new PPHolonomicDriveController(
                 TRANSLATION_PID, ROTATION_PID);
