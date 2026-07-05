@@ -96,7 +96,7 @@ public class RobotContainer {
             swerve.resetGyroYawZero();
         }));
         new Trigger(DriverStation::isDisabled).whileTrue(swerveCommands.stop().alongWith(allCommands.stopAll()));
-        SignalLogger.setPath("/media/sda1/"); // Cofigure pheonixLib logging path
+        // SignalLogger.setPath("/media/sda1/"); // Cofigure pheonixLib logging path
         configureDrive();
         configureOperator();
         configureAuto();

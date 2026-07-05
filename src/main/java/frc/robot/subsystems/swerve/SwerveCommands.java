@@ -1,23 +1,34 @@
 package frc.robot.subsystems.swerve;
 
+import static edu.wpi.first.units.Units.Seconds;
 import static frc.robot.subsystems.swerve.SwerveConstants.Modules.MAX_SPEED_MPS;
 import static frc.robot.subsystems.swerve.SwerveConstants.Modules.MAX_VOLTAGE;
 
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
+import com.ctre.phoenix6.SignalLogger;
+
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.*;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import team2679.atlantiskit.tunables.extensions.TunableCommand;
 import team2679.atlantiskit.valueholders.BooleanHolder;
 
 public class SwerveCommands {
   private final Swerve swerve;
 
+  private final SysIdRoutine sysIdRoutine;
+
   public SwerveCommands(Swerve swerve) {
     this.swerve = swerve;
+    this.sysIdRoutine =  new SysIdRoutine(
+      new Config(null, null, Seconds.of(3), (state) -> SignalLogger.writeString("swerveSysidState", state.toString())),
+      new Mechanism((voltage) -> driveForward(() -> voltage.baseUnitMagnitude() / MAX_VOLTAGE), null, swerve));
   }
 
   public TunableCommand driverController(DoubleSupplier forwardSupplier, DoubleSupplier sidewaysSupplier,
@@ -32,12 +43,23 @@ public class SwerveCommands {
   public Command driveForward(DoubleSupplier forwardPrecentageSupplier) {
     return swerve.run(
       () -> swerve.drive(forwardPrecentageSupplier.getAsDouble() * MAX_VOLTAGE, 0.0, 0.0, false, true));
-  } 
+  }
 
   public Command autoDrive() {
     return swerve.run(
       () -> swerve.drive(-0.5, 0, 0, false, false)
     ).withTimeout(3).finallyDo(swerve::stop).withName("autoDrive");
+  }
+
+  public Command sysid() {
+    return Commands.sequence(
+      Commands.runOnce(() -> SignalLogger.start()),
+      sysIdRoutine.quasistatic(Direction.kForward),
+      sysIdRoutine.quasistatic(Direction.kReverse),
+      sysIdRoutine.dynamic(Direction.kForward),
+      sysIdRoutine.dynamic(Direction.kReverse),
+      Commands.runOnce(() -> SignalLogger.stop())
+    ).withName("sysID");
   }
 
   public Command xWheelLock() {

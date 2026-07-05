@@ -22,7 +22,7 @@ public class FlyWheelCommands {
         this.flyWheel = flyWheel;
         sysIdRoutine = new SysIdRoutine(
                 new SysIdRoutine.Config(null, Volts.of(4), null,
-                        (state) -> SignalLogger.writeString("state", state.toString())),
+                        (state) -> SignalLogger.writeString("flywheelSysidState", state.toString())),
                 new SysIdRoutine.Mechanism((volts) -> flyWheel.setVoltage(volts.in(Volts)), null, flyWheel));
         TunablesManager.add("TunableSetVoltages/FlywheelSetVoltage", tunableSetVoltage().fullTunable());
         TunablesManager.add(flyWheel.getName() + "/SysId", executeSysID());
