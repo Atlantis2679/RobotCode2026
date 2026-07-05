@@ -13,7 +13,6 @@ public class RollerCommands {
     public RollerCommands(Roller roller) {
         this.roller = roller;
         TunablesManager.add("TunableSetVoltages/RollerSetVoltage", tunableSetVoltage().fullTunable());
-        TunablesManager.add(roller.getName() + "/RollerGetToPosition", tunableGetToPosition().fullTunable());
     }
 
     public Command spin(DoubleSupplier voltage) {
@@ -24,10 +23,6 @@ public class RollerCommands {
 
     public Command spin(double speed) {
         return spin(() -> speed);
-    }
-
-    public Command getToPosition(DoubleSupplier position) {
-        return roller.run(() -> roller.setVoltage(roller.calculatePositionVoltage(position.getAsDouble())));
     }
 
     public Command manualController(DoubleSupplier speed) {
@@ -41,13 +36,6 @@ public class RollerCommands {
             DoubleHolder voltage = tunablesTable.addNumber("voltage", 0.0);
             return spin(voltage::get)
                 .withName("Tunable Flywheel set voltage");
-        });
-    }
-
-    private TunableCommand tunableGetToPosition() {
-        return TunableCommand.wrap((tunablesTable) -> {
-            DoubleHolder position = tunablesTable.addNumber("Target Pos", 0.0);
-            return getToPosition(position::get).withName("tunableGetToPosition");
         });
     }
 }
