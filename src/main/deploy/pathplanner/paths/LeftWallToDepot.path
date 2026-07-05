@@ -3,35 +3,42 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.5,
-        "y": 4.0
+        "x": 2.0076890156918683,
+        "y": 7.651355206847361
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.5,
-        "y": 4.0
+        "x": 3.0076890156918683,
+        "y": 7.651355206847361
       },
       "isLocked": false,
-      "linkedName": "MidLeftShoot"
+      "linkedName": "MidToLeftWall"
     },
     {
       "anchor": {
-        "x": 1.0,
-        "y": 4.0
+        "x": 0.4032952924393719,
+        "y": 4.960114122681883
       },
       "prevControl": {
-        "x": 2.0,
-        "y": 4.0
+        "x": -0.596704707560628,
+        "y": 4.960114122681883
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "LeftClimb"
+      "linkedName": null
     }
   ],
   "rotationTargets": [],
   "constraintZones": [],
   "pointTowardsZones": [],
-  "eventMarkers": [],
+  "eventMarkers": [
+    {
+      "name": "startIntake",
+      "waypointRelativePos": 0.5223311546840956,
+      "endWaypointRelativePos": 0,
+      "command": null
+    }
+  ],
   "globalConstraints": {
     "maxVelocity": 3.0,
     "maxAcceleration": 3.0,

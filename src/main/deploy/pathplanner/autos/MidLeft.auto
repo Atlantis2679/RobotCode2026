@@ -13,13 +13,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "MidToLeftClimb"
+            "pathName": "MidToShoot"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "climb"
+            "name": "shoot"
           }
         }
       ]

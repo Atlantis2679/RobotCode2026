@@ -46,6 +46,14 @@ public class HoodCommands {
                 .finallyDo(hood::stop).withName("Homing");
     }
 
+    public Command rehoming() {
+        return Commands.sequence(
+            hood.runOnce(() -> hood.setCurrentLimit(HOMING_CURRENT_LIMIT)),
+            hood.runOnce(() -> hood.calibrated = false),
+            homing()
+        ).withName("Rehoming");
+    }
+
     public TunableCommand tunableHoming() {
         return TunableCommand.wrap((tunablesTable) -> {
             DoubleHolder voltage = tunablesTable.addNumber("voltage", HOMING_VOLTAGE);
@@ -53,8 +61,7 @@ public class HoodCommands {
                 hood.runOnce(() -> hood.setCurrentLimit(HOMING_CURRENT_LIMIT)),
                 hood.runOnce(() -> hood.calibrated = false),
                 hood.run(() -> hood.setVoltage(voltage.get()))
-                    .onlyWhile(() -> !hood.isCalibrated()),
-                hood.runOnce(() -> hood.setCurrentLimit(CURRENT_LIMIT))
+                    .onlyWhile(() -> !hood.isCalibrated())
             ).finallyDo(hood::stop).withName("Tunable Homing");
         });
     }

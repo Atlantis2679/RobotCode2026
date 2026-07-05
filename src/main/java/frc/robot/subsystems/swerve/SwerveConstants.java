@@ -52,11 +52,11 @@ public final class SwerveConstants {
                 -117.24609375 + 270,
         };
 
-        public static final double DRIVE_STATOR_CURRENT_LIMIT = 90;
+        public static final double DRIVE_STATOR_CURRENT_LIMIT = 60;
         public static final double TURN_STATOR_CURRENT_LIMIT = 30;
 
-        public static final double DRIVE_SUPPLY_CURRENT_LIMIT = 70;
-        public static final double DRIVE_SUPPLY_CURRENT_LOWER_LIMIT = 40;
+        public static final double DRIVE_SUPPLY_CURRENT_LIMIT = 60;
+        public static final double DRIVE_SUPPLY_CURRENT_LOWER_LIMIT = 30;
         public static final double DRIVE_SUPPLY_CURRENT_LOWER_TIME = 1;
     }
 
@@ -83,19 +83,19 @@ public final class SwerveConstants {
 
     public static final class PathPlanner {
         public static final double FRICTION_WITH_CARPET = 1;
-        public static final double ROBOT_MASS_KG = 1;
-        public static final double MOMENT_OF_INERTIA = 0.5;
+        public static final double ROBOT_MASS_KG = 59.4;
+        public static final double MOMENT_OF_INERTIA = 4.3;
 
         public static final ModuleConfig MODULES_CONFIG = new ModuleConfig(Modules.WHEEL_RADIUS_METERS,
                 Modules.MAX_SPEED_MPS,
-                PathPlanner.MOMENT_OF_INERTIA, DCMotor.getFalcon500(1), Modules.DRIVE_SUPPLY_CURRENT_LIMIT, 1);
+                PathPlanner.MOMENT_OF_INERTIA, DCMotor.getKrakenX60(1), Modules.DRIVE_SUPPLY_CURRENT_LIMIT, 4);
 
         public static final RobotConfig ROBOT_CONFIG = new RobotConfig(PathPlanner.ROBOT_MASS_KG,
                 PathPlanner.MOMENT_OF_INERTIA,
                 MODULES_CONFIG, MODULES_LOCATIONS);
 
-        public static final PIDConstants TRANSLATION_PID = new PIDConstants(0, 0, 0);
-        public static final PIDConstants ROTATION_PID = new PIDConstants(0, 0, 0);
+        public static final PIDConstants TRANSLATION_PID = new PIDConstants(7, 0, 0.1);
+        public static final PIDConstants ROTATION_PID = new PIDConstants(0.04, 0.1, 0.005);
 
         public static final PathFollowingController FOLLOWING_CONTROLLER = new PPHolonomicDriveController(
                 TRANSLATION_PID, ROTATION_PID);

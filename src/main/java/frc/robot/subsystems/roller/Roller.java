@@ -10,8 +10,7 @@ public class Roller extends SubsystemBase {
     private LogFieldsTable fieldsTable = new LogFieldsTable(getName());
     private RollerIO io = Robot.isReal() ? new RollerIOTalon(fieldsTable) : new RollerIOSim(fieldsTable);
 
-    public Roller() {
-    }
+    public Roller() {}
 
     @Override
     public void periodic() {

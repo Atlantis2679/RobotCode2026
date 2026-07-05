@@ -46,8 +46,8 @@ public class VisionConstants {
               new Rotation3d(Degrees.of(0), Degrees.of(-48), Degrees.of(-22.5)))),
       new CameraConfig(
           "BackCam", 1.0,
-          new Transform3d(new Translation3d(0.17, -0.345, 0.30),
-              new Rotation3d(Degrees.of(270), Degrees.of(0), Degrees.of(180))))
+          new Transform3d(new Translation3d(0.17, -0.325, -0.505),
+              new Rotation3d(Degrees.of(.0), Degrees.of(0), Degrees.of(180))))
   };
 
   public static class Sim {

@@ -32,5 +32,4 @@ public class RollerIOTalon extends RollerIO {
     protected double getCurrent() {
         return motor.getStatorCurrent().getValueAsDouble();
     }
-
 }

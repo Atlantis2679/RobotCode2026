@@ -10,6 +10,7 @@ import frc.robot.subsystems.hood.Hood;
 import frc.robot.subsystems.hood.HoodCommands;
 import frc.robot.subsystems.index.Index;
 import frc.robot.subsystems.index.IndexCommands;
+import frc.robot.subsystems.poseestimation.PoseEstimator;
 import frc.robot.subsystems.roller.Roller;
 import frc.robot.subsystems.roller.RollerCommands;
 import frc.robot.utils.CommandsUtils;
@@ -17,6 +18,7 @@ import team2679.atlantiskit.tunables.extensions.TunableCommand;
 import team2679.atlantiskit.valueholders.DoubleHolder;
 
 import static frc.robot.allCommands.AllCommandsConstants.*;
+import static frc.robot.subsystems.swerve.SwerveConstants.Modules.MAX_SPEED_MPS;
 
 import java.util.function.DoubleSupplier;
 
@@ -70,7 +72,7 @@ public class AllCommands {
     }
 
     public Command delivery() {
-        return shoot(() -> 5500, () -> 45).withName("delivery");
+        return shoot(() -> PoseEstimator.getInstance().getEstimatedPose().getX() * MAX_SPEED_MPS / 11.0, () -> 45).withName("delivery");
     }
 
     public Command stopIntake() {
@@ -115,6 +117,10 @@ public class AllCommands {
 
     public Command hoodFollow(DoubleSupplier angle) {
         return hoodCMDs.moveToAngle(angle);
+    }
+
+    public Command rehomeHood() {
+        return hoodCMDs.rehoming();
     }
 
     public Command fourbarOpen() {
