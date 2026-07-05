@@ -5,16 +5,12 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Robot;
 import frc.robot.subsystems.roller.io.*;
 import team2679.atlantiskit.logfields.LogFieldsTable;
-import team2679.atlantiskit.tunables.Tunable;
-import team2679.atlantiskit.tunables.TunablesManager;
 
 public class Roller extends SubsystemBase {
     private LogFieldsTable fieldsTable = new LogFieldsTable(getName());
     private RollerIO io = Robot.isReal() ? new RollerIOTalon(fieldsTable) : new RollerIOSim(fieldsTable);
 
-    public Roller() {
-        TunablesManager.add("Roller", (Tunable) this);
-    }
+    public Roller() {}
 
     @Override
     public void periodic() {
