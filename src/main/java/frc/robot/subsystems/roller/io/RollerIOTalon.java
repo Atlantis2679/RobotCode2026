@@ -21,6 +21,7 @@ public class RollerIOTalon extends RollerIO {
         motorConfig.CurrentLimits.SupplyCurrentLimit = CURRENT_LIMIT;
         motorConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
         statusCode = motor.getConfigurator().apply(motorConfig);
+        motor.setPosition(0);
         PeriodicAlertsGroup alertsGroup = new PeriodicAlertsGroup("Roller");
         AlertsFactory.phoenixMotor(alertsGroup, () -> statusCode, "Roller error");
     }
@@ -33,4 +34,8 @@ public class RollerIOTalon extends RollerIO {
         return motor.getStatorCurrent().getValueAsDouble();
     }
 
+    @Override
+    protected double getPosition() {
+        return 0.0;
+    }
 }

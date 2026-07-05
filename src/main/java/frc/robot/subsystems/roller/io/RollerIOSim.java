@@ -14,4 +14,9 @@ public class RollerIOSim extends RollerIO {
     protected double getCurrent() {
         return 0;
     }
+
+    @Override
+    protected double getPosition() {
+        return 0;
+    }
 }

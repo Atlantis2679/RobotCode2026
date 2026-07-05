@@ -32,6 +32,12 @@ public class SwerveCommands {
   public Command driveForward(DoubleSupplier forwardPrecentageSupplier) {
     return swerve.run(
       () -> swerve.drive(forwardPrecentageSupplier.getAsDouble() * MAX_VOLTAGE, 0.0, 0.0, false, true));
+  } 
+
+  public Command autoDrive() {
+    return swerve.run(
+      () -> swerve.drive(-0.5, 0, 0, false, false)
+    ).withTimeout(3).finallyDo(swerve::stop).withName("autoDrive");
   }
 
   public Command xWheelLock() {

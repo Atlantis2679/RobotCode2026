@@ -123,7 +123,7 @@ public class RobotContainer {
                         driverController::getLeftY,
                         driverController::getRightY).fullTunable());
 
-        driverController.a().onTrue(new InstantCommand(() -> {
+        driverController.start().onTrue(new InstantCommand(() -> {
             swerve.resetGyroYawZero();
             PoseEstimator.getInstance().resetYawZero();
         }));
@@ -242,6 +242,12 @@ public class RobotContainer {
     }
 
     public Command getAutonomousCommand() {
+        // Command shotCommand = CommandsUtils.dynamicSwitchBetweenCommands(
+        //     shotControl::shoot,
+        //     allCommands.shoot(shotControl::getRpm, shotControl::getAngle),
+        //     allCommands.getReadyToShoot(shotControl::getRpm, shotControl::getAngle));
+        // return swerveCommands.autoDrive().andThen(shotCommand);
         return autoChooser.getSelected();
     }
 }
+ 

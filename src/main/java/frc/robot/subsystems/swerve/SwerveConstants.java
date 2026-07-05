@@ -52,11 +52,11 @@ public final class SwerveConstants {
                 -117.24609375 + 270,
         };
 
-        public static final double DRIVE_STATOR_CURRENT_LIMIT = 70;
+        public static final double DRIVE_STATOR_CURRENT_LIMIT = 60;
         public static final double TURN_STATOR_CURRENT_LIMIT = 30;
 
-        public static final double DRIVE_SUPPLY_CURRENT_LIMIT = 50;
-        public static final double DRIVE_SUPPLY_CURRENT_LOWER_LIMIT = 20;
+        public static final double DRIVE_SUPPLY_CURRENT_LIMIT = 60;
+        public static final double DRIVE_SUPPLY_CURRENT_LOWER_LIMIT = 30;
         public static final double DRIVE_SUPPLY_CURRENT_LOWER_TIME = 1;
     }
 
