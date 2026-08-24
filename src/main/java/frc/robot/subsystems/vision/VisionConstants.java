@@ -13,9 +13,10 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Robot;
 import frc.robot.subsystems.poseestimation.PoseEstimator;
+import frc.robot.subsystems.vision.Vision.TrustLevel;
 
 public class VisionConstants {
-  public static AprilTagFieldLayout APRTIL_TAGS_FIELD_LAYOUT = AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltWelded);
+  public static final AprilTagFieldLayout APRTIL_TAGS_FIELD_LAYOUT = AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltWelded);
   // static {
   //   try {
   //     APRTIL_TAGS_FIELD_LAYOUT = new AprilTagFieldLayout(Filesystem.getDeployDirectory() + "/2026-rebuilt-welded-edit.json");
@@ -24,13 +25,12 @@ public class VisionConstants {
   //   }
   // };
 
-  public static final double TRANSLATION_STD_MULTIPLYER = 0.01;
-  public static final double ROTATION_STD_MULTIPLYER = 0.03;
+  public static final TrustLevel TRUST_LEVEL_MULTIPLIER = new TrustLevel(0.01, 0.03);
 
-  public static final double AVG_DISTANCE_THREASHOLD_METERS = 5;
-  public static final double AMBIGUITY_THREASHOLD = 0.4;
+  public static final double AVG_DISTANCE_THRESHOLD_METERS = 3;
+  public static final double AMBIGUITY_THRESHOLD = 0.4;
 
-  public static final double NO_ODOMETRY_STD_MULTIPLAYER = 5;
+  public static final double NO_ODOMETRY_STD_MULTIPLIER = 0.2;
 
   public record CameraConfig(String name, double stdFactor, Transform3d robotToCam) {
   };
@@ -38,15 +38,15 @@ public class VisionConstants {
   public static CameraConfig[] CAMERAS = {
     new CameraConfig(
       "LeftFront", 1.0,
-      new Transform3d(new Translation3d(0.185, 0.297, -0.177),
+      new Transform3d(new Translation3d(0.297, 0.185, 0.177),
         new Rotation3d(Degrees.of(0), Degrees.of(-48), Degrees.of(22.5)))),
       new CameraConfig(
           "RightFront", 1.0,
-          new Transform3d(new Translation3d(0.155, 0.297, -0.177),
+          new Transform3d(new Translation3d(0.297, 0.155, 0.177),
               new Rotation3d(Degrees.of(0), Degrees.of(-48), Degrees.of(-22.5)))),
       new CameraConfig(
           "BackCam", 1.0,
-          new Transform3d(new Translation3d(0.17, -0.325, -0.505),
+          new Transform3d(new Translation3d(0.17, -0.325, 0.505),
               new Rotation3d(Degrees.of(.0), Degrees.of(0), Degrees.of(180))))
   };
 

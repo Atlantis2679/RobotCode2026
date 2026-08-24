@@ -175,7 +175,7 @@ public class Swerve extends SubsystemBase implements Tunable {
       module.setTargetState(moduleStates[module.getModuleNumber()], optimize, preventJittering, useVoltage);
   }
 
-  public void costAll() {
+  public void coastAll() {
     for (SwerveModule module : modules) {
       module.setCoast();
     }

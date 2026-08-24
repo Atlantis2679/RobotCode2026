@@ -1,5 +1,7 @@
 package frc.robot.utils;
 
+import java.util.Arrays;
+
 import team2679.atlantiskit.tunables.Tunable;
 import team2679.atlantiskit.tunables.TunableBuilder;
 
@@ -59,16 +61,17 @@ public class MathUtils {
         return Math.round(sum / values.length);
     }
 
-    public static class DynamicAvarage {
-        private Double[] values;
+    public static class DynamicAverage {
+        private double[] values;
         private int i = 0;
         private boolean isEmpty = true;
         
-        public DynamicAvarage(int len) {
-            values = new Double[len];
+        public DynamicAverage(int len) {
+            values = new double[len];
+            Arrays.fill(values, Double.NaN);
         }
 
-        public void update(Double val) {
+        public void update(double val) {
             values[i] = val;
             ++i;
             if (i>=values.length) {
@@ -77,11 +80,11 @@ public class MathUtils {
             isEmpty = false;
         }
 
-        public Double get() {
-            Double sum = 0.0;
+        public double get() {
+            double sum = 0.0;
             int len = values.length;
-            for (Double num : values) {
-                if (num == null) {
+            for (double num : values) {
+                if (Double.isNaN(num)) {
                     --len;
                 } else {
                     sum += num;
@@ -95,7 +98,8 @@ public class MathUtils {
 
         public void reset() {
             if (!isEmpty) {
-                this.values = new Double[values.length];
+                this.values = new double[values.length];
+                Arrays.fill(values, Double.NaN);
                 i = 0;
                 isEmpty = true;
             }
@@ -103,11 +107,10 @@ public class MathUtils {
     }
 
     public static double[] getHighestX(int x, double[] vals) {
-        java.util.Arrays.sort(vals);
+        double[] sorted = vals.clone();
+        Arrays.sort(sorted);
         double[] res = new double[x];
-        for (int i = 0; i < x; i++) {
-            res[i] = vals[vals.length-1-i];
-        }
+        for (int i = 0; i < x; i++) res[i] = sorted[sorted.length - 1 - i];
         return res;
     }
 }

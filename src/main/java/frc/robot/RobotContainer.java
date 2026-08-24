@@ -222,7 +222,7 @@ public class RobotContainer {
     }
 
     public void enterSwerveIntoTest() {
-        swerve.costAll();
+        swerve.coastAll();
     }
 
     public void periodicUpdate() {

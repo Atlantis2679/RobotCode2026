@@ -59,7 +59,7 @@ public class SwerveModule implements Tunable {
     public void setTargetState(SwerveModuleState targetState, boolean optimize, boolean preventJittering,
             boolean useVoltage) {
         if (preventJittering
-                && Math.abs(targetState.speedMetersPerSecond) < MAX_SPEED_MPS * PREVENT_JITTERING_MULTIPLAYER) {
+                && Math.abs(targetState.speedMetersPerSecond) < MAX_SPEED_MPS * PREVENT_JITTERING_MULTIPLIER) {
             io.setDrivePercentageSpeed(0);
             return;
         }

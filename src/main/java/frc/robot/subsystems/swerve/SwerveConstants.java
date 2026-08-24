@@ -37,7 +37,7 @@ public final class SwerveConstants {
         // MAY cause the modules to faster
         // - always calibrate before changing!
 
-        public static final double PREVENT_JITTERING_MULTIPLAYER = 0.01;
+        public static final double PREVENT_JITTERING_MULTIPLIER = 0.01;
 
         public static final double DRIVE_GEAR_RATIO = 6.12;
         public static final double TURN_GEAR_RATIO = 150.0 / 7;

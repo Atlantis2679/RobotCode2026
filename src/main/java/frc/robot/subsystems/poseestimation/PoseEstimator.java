@@ -1,5 +1,10 @@
 package frc.robot.subsystems.poseestimation;
 
+import static frc.robot.subsystems.poseestimation.PoseEstimatorConstants.IN_COLLISION_DEBOUNCE_SEC;
+import static frc.robot.subsystems.poseestimation.PoseEstimatorConstants.MAX_VISION_AGE_SEC;
+import static frc.robot.subsystems.poseestimation.PoseEstimatorConstants.ODOMETRY_POSES_BUFFER_SIZE_SEC;
+import static frc.robot.subsystems.poseestimation.PoseEstimatorConstants.VISION_Q_STD_DEVS;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -9,6 +14,7 @@ import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.Nat;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.filter.Debouncer;
+import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
@@ -16,19 +22,19 @@ import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.interpolation.TimeInterpolatableBuffer;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
-import frc.robot.RobotContainer;
-import frc.robot.subsystems.poseestimation.CollisionDetector.CollisionDetectorInfo;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.wpilibj.Timer;
+import frc.robot.RobotContainer;
+import frc.robot.subsystems.poseestimation.CollisionDetector.CollisionDetectorInfo;
+import frc.robot.subsystems.vision.Vision.TrustLevel;
 import team2679.atlantiskit.logfields.LogFieldsTable;
-
-import static frc.robot.subsystems.poseestimation.PoseEstimatorConstants.*;
 
 public class PoseEstimator {
     private static final PoseEstimator instance = new PoseEstimator();
     private static final List<Consumer<Pose2d>> callbackOnPoseUpdate = new ArrayList<>();
 
-    private Pose2d odomertryPose = Pose2d.kZero;
+    private Pose2d odometryPose = Pose2d.kZero;
     private Pose2d estimatedPose = Pose2d.kZero;
 
     private final TimeInterpolatableBuffer<Pose2d> odometryPosesBuffer = TimeInterpolatableBuffer
@@ -38,7 +44,8 @@ public class PoseEstimator {
 
     private final CollisionDetector collisionDetector = new CollisionDetector(fieldsTable);
 
-    private final Debouncer inCollisionDebouncer = new Debouncer(IN_COLLISION_DEBOUNCE_SEC);
+    private final Debouncer inCollisionDebouncer = new Debouncer(IN_COLLISION_DEBOUNCE_SEC, DebounceType.kFalling);
+    private boolean inCollision = false;
 
     private SwerveModulePosition[] lastModulePositions = new SwerveModulePosition[] {
             new SwerveModulePosition(),
@@ -55,56 +62,62 @@ public class PoseEstimator {
 
     public void updateCollision(CollisionDetectorInfo collisionInfo) {
         collisionDetector.update(collisionInfo);
-        fieldsTable.recordOutput("In Collision?", inCollision());
+        inCollision = inCollisionDebouncer.calculate(collisionDetector.inCollision());
+        fieldsTable.recordOutput("In Collision?", inCollision);
     }
 
     public void addOdometryMeasurment(OdometryMeasurment measurment) {
-        if (collisionDetector.inCollision())
-            return;
         Twist2d twist2d = measurment.kinematics.toTwist2d(lastModulePositions, measurment.modulePositions);
         lastModulePositions = measurment.modulePositions;
-        Pose2d lastOdometryPose = odomertryPose;
-        odomertryPose = odomertryPose.exp(twist2d);
+        Pose2d lastOdometryPose = odometryPose;
+        odometryPose = odometryPose.exp(twist2d);
         if (measurment.gyroAngle.isPresent()) {
-            odomertryPose = new Pose2d(odomertryPose.getTranslation(), measurment.gyroAngle.get());
+            odometryPose = new Pose2d(odometryPose.getTranslation(), measurment.gyroAngle.get());
         }
-        fieldsTable.recordOutput("Current Odomertry Pose", odomertryPose);
-        odometryPosesBuffer.addSample(measurment.timestamp, odomertryPose);
-        Twist2d odometryTwistFromLastPose = lastOdometryPose.log(odomertryPose);
-        estimatedPose = estimatedPose.exp(odometryTwistFromLastPose);
+        fieldsTable.recordOutput("Current Odomertry Pose", odometryPose);
+        odometryPosesBuffer.addSample(measurment.timestamp, odometryPose);
+        if (!collisionDetector.inCollision()) {
+            Twist2d odometryTwistFromLastPose = lastOdometryPose.log(odometryPose);
+            estimatedPose = estimatedPose.exp(odometryTwistFromLastPose);
+        }
         fieldsTable.recordOutput("Current Estimated Pose", estimatedPose);
         callAllCallbacks();
     }
 
-    public void addVisionMeasurment(VisionMesurment mesurment) {
-        Optional<Pose2d> sample = odometryPosesBuffer.getSample(mesurment.timestamp());
+    public void addVisionMeasurment(VisionMeasurement measurement) {
+        double now = Timer.getFPGATimestamp();
+        double age = now - measurement.timestamp();
+        if (age < 0 || age > MAX_VISION_AGE_SEC) {
+            return;
+        }
+        fieldsTable.recordOutput("Vision measurment age", age);
+        Optional<Pose2d> sample = odometryPosesBuffer.getSample(measurement.timestamp());
         if (sample.isEmpty())
             return;
-        Transform2d odometryToSampleTransform = new Transform2d(odomertryPose, sample.get());
+        Transform2d odometryToSampleTransform = new Transform2d(odometryPose, sample.get());
         Pose2d estimateAtTime = estimatedPose.plus(odometryToSampleTransform);
-        Transform2d visionTransform = calculateVisionTransform(mesurment, estimateAtTime);
+        Transform2d visionTransform = calculateVisionTransform(measurement, estimateAtTime);
         estimatedPose = estimateAtTime.plus(visionTransform).plus(odometryToSampleTransform.inverse());
         fieldsTable.recordOutput("Current Estimated Pose", estimatedPose);
         callAllCallbacks();
     }
 
-    private Transform2d calculateVisionTransform(VisionMesurment visionMesurment, Pose2d estimateAtTime) {
+    private Transform2d calculateVisionTransform(VisionMeasurement visionMeasurement, Pose2d estimateAtTime) {
         // Solve for closed form Kalman gain for continuous Kalman filter with A = 0
         // and C = I. See wpimath/algorithms.md
-        double[] r = new double[] { visionMesurment.xyStdDev(), visionMesurment.xyStdDev(),
-                visionMesurment.thetaStdDev() };
-
+        double[] r = trustLevelToArraySquared(visionMeasurement.trustLevel);
+        double[] q = trustLevelToArraySquared(VISION_Q_STD_DEVS);
         Matrix<N3, N3> visionK = new Matrix<N3, N3>(Nat.N3(), Nat.N3());
         for (int row = 0; row < 3; row++) {
-            if (VISION_Q_STD_DEVS[row] == 0) {
+            if (q[row] == 0) {
                 visionK.set(row, row, 0);
             } else {
                 visionK.set(row, row,
-                        VISION_Q_STD_DEVS[row] / (VISION_Q_STD_DEVS[row] + Math.sqrt(VISION_Q_STD_DEVS[row] * r[row])));
+                        q[row] / (q[row] + Math.sqrt(q[row] * r[row])));
             }
         }
 
-        Transform2d transform = new Transform2d(estimateAtTime, visionMesurment.pose());
+        Transform2d transform = new Transform2d(estimateAtTime, visionMeasurement.pose());
 
         Matrix<N3, N1> kTimesTransform = visionK.times(
                 VecBuilder.fill(transform.getX(), transform.getY(), transform.getRotation().getRadians()));
@@ -115,8 +128,16 @@ public class PoseEstimator {
                 Rotation2d.fromRadians(kTimesTransform.get(2, 0)));
     }
 
+    double[] trustLevelToArraySquared(TrustLevel trustLevel) {
+        double[] arr = new double[3];
+        arr[0] = Math.pow(trustLevel.xyStdDev(), 2);
+        arr[1] = Math.pow(trustLevel.xyStdDev(), 2);
+        arr[2] = Math.pow(trustLevel.rotationStdDev(), 2);
+        return arr;
+    }
+
     public boolean inCollision() {
-        return inCollisionDebouncer.calculate(collisionDetector.inCollision());
+        return inCollision;
     }
 
     private void callAllCallbacks() {
@@ -130,10 +151,10 @@ public class PoseEstimator {
     }
 
     public void resetPose(Pose2d newPose) {
-        odomertryPose = newPose;
+        odometryPose = newPose;
         estimatedPose = newPose;
         odometryPosesBuffer.clear();
-        fieldsTable.recordOutput("Current Odomertry Pose", odomertryPose);
+        fieldsTable.recordOutput("Current Odomertry Pose", odometryPose);
         fieldsTable.recordOutput("Current Estimated Pose", estimatedPose);
         callAllCallbacks();
     }
@@ -151,10 +172,10 @@ public class PoseEstimator {
     }
 
     public Pose2d getOdometryPose() {
-        return odomertryPose;
+        return odometryPose;
     }
 
-    public record VisionMesurment(Pose2d pose, double xyStdDev, double thetaStdDev, double timestamp) {
+    public record VisionMeasurement(Pose2d pose, TrustLevel trustLevel, double timestamp) {
     }
 
     public record OdometryMeasurment(SwerveDriveKinematics kinematics, SwerveModulePosition[] modulePositions,

@@ -1,7 +1,7 @@
 package frc.robot.subsystems.poseestimation;
 
 import static frc.robot.subsystems.poseestimation.CollisionDetectionConstants.*;
-import frc.robot.utils.MathUtils.DynamicAvarage;
+import frc.robot.utils.MathUtils.DynamicAverage;
 import static frc.robot.utils.MathUtils.getHighestX;
 
 import team2679.atlantiskit.logfields.LogFieldsTable;
@@ -13,8 +13,8 @@ public class CollisionDetector {
     private double lastYAcceleration = 0;
     private boolean inCollision = false;
 
-    private DynamicAvarage lowCurreentAvarage = new DynamicAvarage(10);
-    private DynamicAvarage highCurreentAvarage = new DynamicAvarage(10);
+    private DynamicAverage lowCurrentAverage = new DynamicAverage(10);
+    private DynamicAverage highCurrentAverage = new DynamicAverage(10);
 
     private final LogFieldsTable fieldsTable;
 
@@ -23,13 +23,13 @@ public class CollisionDetector {
     }
 
     private void updateAVGs(double[] vals) {
-        highCurreentAvarage.update(vals[0]);
-        lowCurreentAvarage.update(vals[1]);
+        highCurrentAverage.update(vals[0]);
+        lowCurrentAverage.update(vals[1]);
     }
 
     private void resetAVGs() {
-        highCurreentAvarage.reset();
-        lowCurreentAvarage.reset();
+        highCurrentAverage.reset();
+        lowCurrentAverage.reset();
     }
 
     public void update(CollisionDetectorInfo info) {
@@ -40,8 +40,8 @@ public class CollisionDetector {
                 &&info.yAcceleration<=STATIC_ACCELERATION_THRESHOLD)) {
             double[] currents = getHighestX(2, info.currents);
             updateAVGs(currents);
-            inCollision = highCurreentAvarage.get() >= HIGH_CURRENT_COLLISION_THRESHOLD
-                &&lowCurreentAvarage.get() >= LOW_CURRENT_COLLISION_THRESHOLD;
+            inCollision = highCurrentAverage.get() >= HIGH_CURRENT_COLLISION_THRESHOLD
+                &&lowCurrentAverage.get() >= LOW_CURRENT_COLLISION_THRESHOLD;
         } else {
             inCollision = abs(lastXAcceleration-info.xAcceleration)>=JERK_COLLISION_THRESHOLD
                 ||abs(lastYAcceleration-info.yAcceleration)>=JERK_COLLISION_THRESHOLD;

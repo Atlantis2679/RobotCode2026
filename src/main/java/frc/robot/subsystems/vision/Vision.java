@@ -1,11 +1,10 @@
 package frc.robot.subsystems.vision;
 
-import static frc.robot.subsystems.vision.VisionConstants.AMBIGUITY_THREASHOLD;
-import static frc.robot.subsystems.vision.VisionConstants.AVG_DISTANCE_THREASHOLD_METERS;
+import static frc.robot.subsystems.vision.VisionConstants.AMBIGUITY_THRESHOLD;
+import static frc.robot.subsystems.vision.VisionConstants.AVG_DISTANCE_THRESHOLD_METERS;
 import static frc.robot.subsystems.vision.VisionConstants.CAMERAS;
-import static frc.robot.subsystems.vision.VisionConstants.NO_ODOMETRY_STD_MULTIPLAYER;
-import static frc.robot.subsystems.vision.VisionConstants.ROTATION_STD_MULTIPLYER;
-import static frc.robot.subsystems.vision.VisionConstants.TRANSLATION_STD_MULTIPLYER;
+import static frc.robot.subsystems.vision.VisionConstants.NO_ODOMETRY_STD_MULTIPLIER;
+import static frc.robot.subsystems.vision.VisionConstants.TRUST_LEVEL_MULTIPLIER;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,7 +13,7 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.wpilibj.DriverStation;
 import frc.robot.FieldConstants;
 import frc.robot.subsystems.poseestimation.PoseEstimator;
-import frc.robot.subsystems.poseestimation.PoseEstimator.VisionMesurment;
+import frc.robot.subsystems.poseestimation.PoseEstimator.VisionMeasurement;
 import frc.robot.subsystems.vision.VisionConstants.CameraConfig;
 import frc.robot.subsystems.vision.io.VisionAprilTagsIO;
 import frc.robot.subsystems.vision.io.VisionAprilTagsIOPhoton;
@@ -30,59 +29,63 @@ public class Vision {
     for (int i = 0; i < visionCameras.length; i++) {
       CameraConfig camera = CAMERAS[i];
       visionCameras[i] = new VisionAprilTagsIOPhoton(fieldsTable, camera);
-      alertsGroup.addWarningAlert(() -> camera.name(), visionCameras[i].isConnected);
+      VisionAprilTagsIO io = visionCameras[i];
+      alertsGroup.addWarningAlert(() -> camera.name() + " Disconnected!", () -> !io.isConnected.getAsBoolean());
     }
   }
 
-  private static List<VisionMesurment> getAllResultsInIO(VisionAprilTagsIO io) {
+  private static List<VisionMeasurement> getAllResultsInIO(VisionAprilTagsIO io) {
     int length = io.posesEstimates.get().length;
-    List<VisionMesurment> visionMesurments = new ArrayList<>();
+    List<VisionMeasurement> visionMesurments = new ArrayList<>();
     double stdFactor = io.getCameraConfig().stdFactor();
     for (int i = 0; i < length; i++) {
       int tagsUsed = io.tagsPoses.get()[i].length;
+      if (tagsUsed == 0) continue;
       Pose3d pose = io.posesEstimates.get()[i];
       double ambiguity = io.tagsAmbiguities.get()[i];
-      if (ambiguity > AMBIGUITY_THREASHOLD) continue;
+      if (ambiguity > AMBIGUITY_THRESHOLD) continue;
       if (!FieldConstants.isOnField(pose)) continue;
       double distanceSum = 0;
       for (double distance : io.tagsDistanceToCam.get()[i]) {
         distanceSum += distance;
       }
       double avgDistance = distanceSum / tagsUsed;
-      if (avgDistance > AVG_DISTANCE_THREASHOLD_METERS) continue;
-      double[] trustLevels = calculateTrustLevel(stdFactor, tagsUsed, avgDistance, ambiguity);
-      visionMesurments.add(new VisionMesurment(pose.toPose2d(), trustLevels[0], trustLevels[1], io.cameraTimestampsSeconds.get()[i]));
+      if (avgDistance > AVG_DISTANCE_THRESHOLD_METERS) continue;
+      TrustLevel trustLevels = calculateTrustLevel(stdFactor, tagsUsed, avgDistance, ambiguity);
+      visionMesurments.add(new VisionMeasurement(pose.toPose2d(), trustLevels, io.cameraTimestampsSeconds.get()[i]));
     }
     return visionMesurments;
   }
 
-  private List<VisionMesurment> getAllResults() {
-    List<VisionMesurment> measurments = new ArrayList<>();
+  private List<VisionMeasurement> getAllResults() {
+    List<VisionMeasurement> measurments = new ArrayList<>();
     for (VisionAprilTagsIO io : visionCameras) {
-      for (VisionMesurment measurment : getAllResultsInIO(io)) {
+      for (VisionMeasurement measurment : getAllResultsInIO(io)) {
         measurments.add(measurment);
       }
     }
-    fieldsTable.recordOutput("Vision measurments", measurments.toArray(new VisionMesurment[0]));
+    fieldsTable.recordOutput("Vision measurments", measurments.toArray(new VisionMeasurement[0]));
     return measurments;
   }
 
   public void update() {
-    for (VisionMesurment mesurment : getAllResults()) {
+    for (VisionMeasurement mesurment : getAllResults()) {
       PoseEstimator.getInstance().addVisionMeasurment(mesurment);
     }
   }
 
-  private static double[] calculateTrustLevel(double stdFactor, int tagsUsed, double avgDistanceToCam, double ambiguity) {
+  public record TrustLevel(double xyStdDev, double rotationStdDev) { }
+
+  private static TrustLevel calculateTrustLevel(double stdFactor, int tagsUsed, double avgDistanceToCam, double ambiguity) {
     if (ambiguity == 1 || tagsUsed == 0 || avgDistanceToCam == 0)
-      return new double[] {Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY};
+      return new TrustLevel(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
     double value = Math.pow(avgDistanceToCam, 1.2) / Math.pow(tagsUsed, 2) / Math.pow(1 - ambiguity, 2) * stdFactor;
-    double xyStdDev = TRANSLATION_STD_MULTIPLYER * value;
-    double rotationStdDevs = ROTATION_STD_MULTIPLYER * value;
+    double xyStdDev = TRUST_LEVEL_MULTIPLIER.xyStdDev * value;
+    double rotationStdDevs = TRUST_LEVEL_MULTIPLIER.rotationStdDev * value;
     if (PoseEstimator.getInstance().inCollision() || DriverStation.isDisabled()) {
-      xyStdDev *= NO_ODOMETRY_STD_MULTIPLAYER;
-      rotationStdDevs *= NO_ODOMETRY_STD_MULTIPLAYER;
+      xyStdDev *= NO_ODOMETRY_STD_MULTIPLIER;
+      rotationStdDevs *= NO_ODOMETRY_STD_MULTIPLIER;
     }
-    return new double[] {xyStdDev, rotationStdDevs};
+    return new TrustLevel(xyStdDev, rotationStdDevs);
   }
 }
