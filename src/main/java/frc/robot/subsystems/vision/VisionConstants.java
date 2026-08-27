@@ -29,7 +29,7 @@ public class VisionConstants {
   public static final double AVG_DISTANCE_THRESHOLD_METERS = 3;
   public static final double AMBIGUITY_THRESHOLD = 0.4;
 
-  public static final double NO_ODOMETRY_STD_MULTIPLIER = 0.2;
+  public static final TrustLevel NO_ODOMETRY_TRUST_LEVEL_MULTIPLIER = new TrustLevel(0.2, 0.001);
 
   public record CameraConfig(String name, double stdFactor, Transform3d robotToCam) {
   };
