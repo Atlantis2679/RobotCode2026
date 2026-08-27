@@ -12,7 +12,6 @@ import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Robot;
-import frc.robot.subsystems.poseestimation.PoseEstimator;
 import frc.robot.subsystems.vision.Vision.TrustLevel;
 
 public class VisionConstants {
@@ -58,7 +57,6 @@ public class VisionConstants {
     static {
       if (Robot.isSimulation()) {
         VISION_SIM.addAprilTags(APRTIL_TAGS_FIELD_LAYOUT);
-        PoseEstimator.registerCallbackOnPoseUpdate(VISION_SIM::update);
         SmartDashboard.putData("VisionSimulation", VISION_SIM.getDebugField());
         configureSimCameraProperties();
       }

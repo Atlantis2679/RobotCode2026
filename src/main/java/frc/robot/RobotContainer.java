@@ -95,6 +95,7 @@ public class RobotContainer {
             PoseEstimator.getInstance().resetPose(new Pose2d());
             swerve.resetGyroYawZero();
         }));
+        TunablesManager.add("PoseEstimator", PoseEstimator.getInstance());
         new Trigger(DriverStation::isDisabled).whileTrue(swerveCommands.stop().alongWith(allCommands.stopAll()));
         SignalLogger.setPath("/media/sda1/"); // Cofigure pheonixLib logging path
         configureDrive();

@@ -9,7 +9,6 @@ import static frc.robot.subsystems.vision.VisionConstants.TRUST_LEVEL_MULTIPLIER
 import java.util.ArrayList;
 import java.util.List;
 
-import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.wpilibj.DriverStation;
 import frc.robot.FieldConstants;
 import frc.robot.subsystems.poseestimation.PoseEstimator;
@@ -17,6 +16,7 @@ import frc.robot.subsystems.poseestimation.PoseEstimator.VisionMeasurement;
 import frc.robot.subsystems.vision.VisionConstants.CameraConfig;
 import frc.robot.subsystems.vision.io.VisionAprilTagsIO;
 import frc.robot.subsystems.vision.io.VisionAprilTagsIOPhoton;
+import frc.robot.subsystems.vision.io.VisionAprilTagsIO.VisionData;
 import team2679.atlantiskit.logfields.LogFieldsTable;
 import team2679.atlantiskit.periodicalerts.PeriodicAlertsGroup;
 
@@ -35,24 +35,22 @@ public class Vision {
   }
 
   private static List<VisionMeasurement> getAllResultsInIO(VisionAprilTagsIO io) {
-    int length = io.posesEstimates.get().length;
+    VisionData[] visionDataArr = io.visionData.get();
     List<VisionMeasurement> visionMesurments = new ArrayList<>();
     double stdFactor = io.getCameraConfig().stdFactor();
-    for (int i = 0; i < length; i++) {
-      int tagsUsed = io.tagsPoses.get()[i].length;
+    for (VisionData visionData : visionDataArr) {
+      int tagsUsed = visionData.tagsPoses().length;
       if (tagsUsed == 0) continue;
-      Pose3d pose = io.posesEstimates.get()[i];
-      double ambiguity = io.tagsAmbiguities.get()[i];
-      if (ambiguity > AMBIGUITY_THRESHOLD) continue;
-      if (!FieldConstants.isOnField(pose)) continue;
+      if (visionData.ambiguity() > AMBIGUITY_THRESHOLD) continue;
+      if (!FieldConstants.isOnField(visionData.robotPose())) continue;
       double distanceSum = 0;
-      for (double distance : io.tagsDistanceToCam.get()[i]) {
+      for (double distance : visionData.tagsDistancesToCam()) {
         distanceSum += distance;
       }
       double avgDistance = distanceSum / tagsUsed;
       if (avgDistance > AVG_DISTANCE_THRESHOLD_METERS) continue;
-      TrustLevel trustLevels = calculateTrustLevel(stdFactor, tagsUsed, avgDistance, ambiguity);
-      visionMesurments.add(new VisionMeasurement(pose.toPose2d(), trustLevels, io.cameraTimestampsSeconds.get()[i]));
+      TrustLevel trustLevels = calculateTrustLevel(stdFactor, tagsUsed, avgDistance, visionData.ambiguity());
+      visionMesurments.add(new VisionMeasurement(visionData.robotPose().toPose2d(), trustLevels, visionData.timestamp()));
     }
     return visionMesurments;
   }

@@ -19,10 +19,6 @@ import frc.robot.subsystems.vision.VisionConstants.Sim;
 import team2679.atlantiskit.logfields.LogFieldsTable;
 
 public class VisionAprilTagsIOPhoton extends VisionAprilTagsIO {
-    public record VisionData(double timestamp, Pose3d robotPose, Pose3d[] tagsPoses, double ambiguity,
-            double[] tagsDistancesToCam) {
-    }
-
     private final PhotonCamera camera;
     private List<PhotonPipelineResult> photonPipelineResults;
     private final CameraConfig cameraConfig;
@@ -50,7 +46,6 @@ public class VisionAprilTagsIOPhoton extends VisionAprilTagsIO {
             if (result.hasTargets()) {
                 if (result.getMultiTagResult().isPresent()) {
                     Transform3d cameraToPose = result.multitagResult.get().estimatedPose.best;
-                    // Transform3d robotToPose = cameraToPose.plus(cameraConfig.robotToCam());
                     Pose3d robotPose = new Pose3d().transformBy(cameraToPose).transformBy(cameraConfig.robotToCam().inverse());
                     double timestamp = result.getTimestampSeconds();
                     Pose3d[] targetsPoses = result.multitagResult.get().fiducialIDsUsed.stream()
@@ -83,49 +78,8 @@ public class VisionAprilTagsIOPhoton extends VisionAprilTagsIO {
         return cameraConfig;
     }
 
-    @Override
-    protected double[] getCameraTimestampsSeconds() {
-        double[] timestamps = new double[visionData.length];
-        for (int i = 0; i < timestamps.length; i++) {
-            timestamps[i] = visionData[i].timestamp;
-        }
-        return timestamps;
-    }
-
-    @Override
-    protected Pose3d[] getRobotPoses() {
-        Pose3d[] robotPoses = new Pose3d[visionData.length];
-        for (int i = 0; i < robotPoses.length; i++) {
-            robotPoses[i] = visionData[i].robotPose;
-        }
-        return robotPoses;
-    }
-
-    @Override
-    protected Pose3d[][] getTagsPoses() {
-        Pose3d[][] tagPoses = new Pose3d[visionData.length][];
-        for (int i = 0; i < tagPoses.length; i++) {
-            tagPoses[i] = visionData[i].tagsPoses;
-        }
-        return tagPoses;
-    }
-
-    @Override
-    protected double[][] getTagsDistanceToCam() {
-        double[][] distances = new double[visionData.length][];
-        for (int i = 0; i < distances.length; i++) {
-            distances[i] = visionData[i].tagsDistancesToCam;
-        }
-        return distances;
-    }
-
-    @Override
-    protected double[] getTagsAmbiguities() {
-        double[] ambiguities = new double[visionData.length];
-        for (int i = 0; i < ambiguities.length; i++) {
-            ambiguities[i] = visionData[i].ambiguity;
-        }
-        return ambiguities;
+    public VisionData[] visionData() {
+        return visionData;
     }
 
     @Override
