@@ -153,9 +153,9 @@ public class PoseEstimator implements Tunable {
 
     private static double[] trustLevelToArraySquared(TrustLevel trustLevel) {
         double[] arr = new double[3];
-        arr[0] = Math.pow(trustLevel.xyStdDev(), 2);
-        arr[1] = Math.pow(trustLevel.xyStdDev(), 2);
-        arr[2] = Math.pow(trustLevel.rotationStdDev(), 2);
+        arr[0] = Math.pow(trustLevel.getXyStdDev(), 2);
+        arr[1] = Math.pow(trustLevel.getXyStdDev(), 2);
+        arr[2] = Math.pow(trustLevel.getRotationStdDev(), 2);
         return arr;
     }
 
@@ -201,10 +201,10 @@ public class PoseEstimator implements Tunable {
     @Override
     public void initTunable(TunableBuilder builder) {
         if (RobotBase.isSimulation()) { builder.addChild("Odometry Drift Sim", odometryDriftSim); }
-        builder.addDoubleProperty("Vision xy Q", () -> this.visionTrustLevelQ.xyStdDev(),
-            (xyStdDev) -> this.visionTrustLevelQ = new TrustLevel(xyStdDev, this.visionTrustLevelQ.rotationStdDev()));
-        builder.addDoubleProperty("Vision rotation Q", () -> this.visionTrustLevelQ.rotationStdDev(),
-            (rotationStdDev) -> this.visionTrustLevelQ = new TrustLevel(this.visionTrustLevelQ.xyStdDev(), rotationStdDev));
+        builder.addDoubleProperty("Vision xy Q", () -> this.visionTrustLevelQ.getXyStdDev(),
+            (xyStdDev) -> this.visionTrustLevelQ = new TrustLevel(xyStdDev, this.visionTrustLevelQ.getRotationStdDev()));
+        builder.addDoubleProperty("Vision rotation Q", () -> this.visionTrustLevelQ.getRotationStdDev(),
+            (rotationStdDev) -> this.visionTrustLevelQ = new TrustLevel(this.visionTrustLevelQ.getXyStdDev(), rotationStdDev));
     }
 
     public record VisionMeasurement(Pose2d pose, TrustLevel trustLevel, double timestamp) {
