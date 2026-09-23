@@ -113,4 +113,8 @@ public class MathUtils {
         for (int i = 0; i < x; i++) res[i] = sorted[sorted.length - 1 - i];
         return res;
     }
+
+    public static boolean inRange(double value, double low, double high) {
+        return value >= low && value <= high;
+    }
 }

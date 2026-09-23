@@ -19,7 +19,6 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 
 import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import frc.robot.utils.AlertsFactory;
@@ -138,7 +137,7 @@ public class SwerveModuleIOTalonFX extends SwerveModuleIO {
     
     @Override
     protected double getIntegratedTurnAngleRotations() {
-        return integratedTurnAngleRotations.getAsDouble();
+        return turnPosition.getValueAsDouble();
     }
 
     @Override
@@ -190,15 +189,22 @@ public class SwerveModuleIOTalonFX extends SwerveModuleIO {
     @Override
     public void setTurnKP(double kP) {
         turnSlotConfigs.kP = kP;
+        applyTurnGains();
     }
 
     @Override
     public void setTurnKI(double kI) {
         turnSlotConfigs.kI = kI;
+        applyTurnGains();
     }
 
     @Override
     public void setTurnKD(double kD) {
         turnSlotConfigs.kD = kD;
+        applyTurnGains();
+    }
+
+    private void applyTurnGains() {
+        turnMotor.getConfigurator().apply(turnSlotConfigs);
     }
 }

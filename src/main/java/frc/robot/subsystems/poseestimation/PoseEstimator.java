@@ -23,8 +23,10 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Timer;
 import frc.robot.RobotContainer;
-import frc.robot.subsystems.vision.Vision.TrustLevel;
+import frc.robot.subsystems.vision.TrustLevel;
+import frc.robot.subsystems.vision.TunableTrustLevel;
 import team2679.atlantiskit.logfields.LogFieldsTable;
 import team2679.atlantiskit.tunables.Tunable;
 import team2679.atlantiskit.tunables.TunableBuilder;
@@ -41,12 +43,14 @@ public class PoseEstimator implements Tunable {
 
     private final LogFieldsTable fieldsTable = new LogFieldsTable("PoseEstimator");
     
-    private TrustLevel visionTrustLevelQ = VISION_Q_STD_DEVS;
+    private TunableTrustLevel visionTrustLevelQ = new TunableTrustLevel(VISION_Q_STD_DEVS);
 
-    private TrustLevel noOdometryTrustLevelMultiplier = NO_ODOMETRY_TRUST_LEVEL_MULTIPLIER;
+    private TunableTrustLevel noOdometryTrustLevelMultiplier = new TunableTrustLevel(NO_ODOMETRY_TRUST_LEVEL_MULTIPLIER);
 
     private Rotation2d gyroOffset = new Rotation2d();
-    private Rotation2d lastGyroAngle = new Rotation2d();
+    private Optional<Rotation2d> lastGyroAngle = Optional.empty();
+
+    private double lastResetTimestamp = Timer.getTimestamp();
 
     private SwerveModulePosition[] lastModulePositions = new SwerveModulePosition[] {
             new SwerveModulePosition(),
@@ -63,11 +67,20 @@ public class PoseEstimator implements Tunable {
 
     public void addOdometryMeasurement(OdometryMeasurement measurement) {
         Twist2d twist2d = measurement.kinematics.toTwist2d(lastModulePositions, measurement.modulePositions);
+        if (measurement.gyroAngle.isPresent()) {
+          if (lastGyroAngle.isEmpty()) {
+            gyroOffset = measurement.gyroAngle.get().minus(odometryPose.getRotation());
+          } else {
+            twist2d.dtheta = measurement.gyroAngle.get().minus(lastGyroAngle.get()).getRadians();
+          }
+          lastGyroAngle = Optional.of(measurement.gyroAngle.get());
+        } else {
+          lastGyroAngle = Optional.empty();
+        }
         lastModulePositions = measurement.modulePositions;
         Pose2d lastOdometryPose = odometryPose;
         odometryPose = odometryPose.exp(twist2d);
         if (measurement.gyroAngle.isPresent()) {
-            lastGyroAngle = measurement.gyroAngle.get();
             odometryPose = new Pose2d(odometryPose.getTranslation(), measurement.gyroAngle.get().minus(gyroOffset));
         }
         fieldsTable.recordOutput("Current Odometry Pose", odometryPose);
@@ -80,6 +93,7 @@ public class PoseEstimator implements Tunable {
     }
 
     public void addVisionMeasurement(VisionMeasurement measurement) {
+        if (measurement.timestamp < lastResetTimestamp) return;
         try {
           if (odometryPosesBuffer.getInternalBuffer().lastKey() - ODOMETRY_POSES_BUFFER_SIZE_SEC > measurement.timestamp()) {
             return;
@@ -88,7 +102,7 @@ public class PoseEstimator implements Tunable {
           return;
         }
         if (DriverStation.isDisabled()) {
-          measurement.trustLevel.multiply(noOdometryTrustLevelMultiplier);
+          measurement = new VisionMeasurement(measurement.pose, measurement.trustLevel.multiply(noOdometryTrustLevelMultiplier.get()), measurement.timestamp);
         }
         Optional<Pose2d> sample = odometryPosesBuffer.getSample(measurement.timestamp());
         if (sample.isEmpty())
@@ -105,8 +119,10 @@ public class PoseEstimator implements Tunable {
     private Transform2d calculateVisionTransform(VisionMeasurement visionMeasurement, Pose2d estimateAtTime) {
         // Solve for closed form Kalman gain for continuous Kalman filter with A = 0
         // and C = I. See wpimath/algorithms.md
+        // Worth noting that this in it's current form may be simplefied to
+        // k = 1 / (1 + q / r), meaning k is linearly proportional to the ratio between Q_STD and Vision STD
         double[] r = trustLevelToArraySquared(visionMeasurement.trustLevel);
-        double[] q = trustLevelToArraySquared(visionTrustLevelQ);
+        double[] q = trustLevelToArraySquared(visionTrustLevelQ.get());
         Matrix<N3, N3> visionK = new Matrix<N3, N3>(Nat.N3(), Nat.N3());
         for (int row = 0; row < 3; row++) {
             if (q[row] == 0) {
@@ -130,9 +146,9 @@ public class PoseEstimator implements Tunable {
 
     private static double[] trustLevelToArraySquared(TrustLevel trustLevel) {
         double[] arr = new double[3];
-        arr[0] = Math.pow(trustLevel.getXyStdDev(), 2);
-        arr[1] = Math.pow(trustLevel.getXyStdDev(), 2);
-        arr[2] = Math.pow(trustLevel.getRotationStdDev(), 2);
+        arr[0] = Math.pow(trustLevel.xyStdDev(), 2);
+        arr[1] = Math.pow(trustLevel.xyStdDev(), 2);
+        arr[2] = Math.pow(trustLevel.rotationStdDev(), 2);
         return arr;
     }
 
@@ -150,7 +166,8 @@ public class PoseEstimator implements Tunable {
         odometryPose = newPose;
         estimatedPose = newPose;
         odometryPosesBuffer.clear();
-        gyroOffset = lastGyroAngle.minus(newPose.getRotation());
+        lastGyroAngle = Optional.empty();
+        lastResetTimestamp = Timer.getTimestamp();
         fieldsTable.recordOutput("Current Odometry Pose", odometryPose);
         fieldsTable.recordOutput("Current Estimated Pose", estimatedPose);
         fieldsTable.recordOutput("Odometry to Estimated Transform (Odometry error)", new Transform2d(odometryPose, estimatedPose));

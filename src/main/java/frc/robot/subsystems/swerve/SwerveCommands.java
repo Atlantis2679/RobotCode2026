@@ -1,7 +1,6 @@
 package frc.robot.subsystems.swerve;
 
 import static frc.robot.subsystems.swerve.SwerveConstants.Modules.MAX_SPEED_MPS;
-import static frc.robot.subsystems.swerve.SwerveConstants.Modules.MAX_VOLTAGE;
 
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
@@ -21,17 +20,15 @@ public class SwerveCommands {
   }
 
   public TunableCommand driverController(DoubleSupplier forwardSupplier, DoubleSupplier sidewaysSupplier,
-      DoubleSupplier rotationSupplier, DoubleSupplier yawAutoRotationSupplier,
-      BooleanSupplier autoRotationMode, BooleanSupplier isFieldRelativeSupplier, BooleanSupplier isSensetiveMode) {
+      DoubleSupplier rotationSupplier, BooleanSupplier isFieldRelativeSupplier, BooleanSupplier isSensetiveMode) {
 
     return new SwerveDriverController(swerve, forwardSupplier, sidewaysSupplier, rotationSupplier,
-        yawAutoRotationSupplier, autoRotationMode,
         isFieldRelativeSupplier, isSensetiveMode);
   }
 
   public Command driveForward(DoubleSupplier forwardPrecentageSupplier) {
     return swerve.run(
-      () -> swerve.drive(forwardPrecentageSupplier.getAsDouble() * MAX_VOLTAGE, 0.0, 0.0, false, true));
+      () -> swerve.drive(forwardPrecentageSupplier.getAsDouble() * MAX_SPEED_MPS, 0.0, 0.0, false, true));
   } 
 
   public Command autoDrive() {

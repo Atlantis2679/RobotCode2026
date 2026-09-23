@@ -49,8 +49,10 @@ public class VisionAprilTagsIOPhoton extends VisionAprilTagsIO {
             PhotonPipelineResult result = photonPipelineResults.get(i);
             if (result.hasTargets()) {
                 if (result.getMultiTagResult().isPresent()) {
+                    moreThanOneTargetInSingleTargetMode = false;
                     Transform3d cameraToPose = result.multitagResult.get().estimatedPose.best;
-                    Pose3d robotPose = new Pose3d().transformBy(cameraToPose).transformBy(cameraConfig.robotToCam().inverse());
+                    Pose3d camPose = new Pose3d().transformBy(cameraToPose);
+                    Pose3d robotPose = camPose.transformBy(cameraConfig.robotToCam().inverse());
                     double timestamp = result.getTimestampSeconds();
                     Pose3d[] tagsPoses = result.multitagResult.get().fiducialIDsUsed.stream()
                             .map(targetId -> APRTIL_TAGS_FIELD_LAYOUT.getTagPose(targetId))
@@ -59,20 +61,25 @@ public class VisionAprilTagsIOPhoton extends VisionAprilTagsIO {
                     if (tagsUsed == 0) continue;
                     double distanceSum = 0;
                     for (Pose3d target : tagsPoses) {
-                      distanceSum += target.relativeTo(robotPose).getTranslation().getNorm();
+                      distanceSum += target.relativeTo(camPose).getTranslation().getNorm();
                     }
                     tagsPosesList.add(tagsPoses);
                     visionData.add(new VisionData(timestamp, robotPose, distanceSum / tagsUsed, result.multitagResult.get().estimatedPose.ambiguity, tagsUsed));
                 } else {
                     moreThanOneTargetInSingleTargetMode = result.getTargets().size() > 1;
-                    PhotonTrackedTarget target = result.getBestTarget();
+                    PhotonTrackedTarget target = null;
+                    for (PhotonTrackedTarget candidate : result.getTargets()) {
+                        if (candidate.poseAmbiguity < 0) continue; // -1 == not a fiducial
+                        if (target == null || candidate.poseAmbiguity < target.poseAmbiguity) target = candidate;
+                    }
+                    if (target == null) continue;
                     if (APRTIL_TAGS_FIELD_LAYOUT.getTagPose(target.fiducialId).isEmpty()) continue;
                     Pose3d tagPose = APRTIL_TAGS_FIELD_LAYOUT.getTagPose(target.fiducialId).get();
                     tagsPosesList.add(new Pose3d[] { tagPose });
                     Transform3d camToTarget = target.bestCameraToTarget;
                     Transform3d robotToTarget = cameraConfig.robotToCam().plus(camToTarget);
                     Pose3d robotPose = tagPose.transformBy(robotToTarget.inverse());
-                    double camToTargetDistance = robotToTarget.getTranslation().getNorm();
+                    double camToTargetDistance = camToTarget.getTranslation().getNorm();
                     double timestamp = result.getTimestampSeconds();
                     visionData.add(new VisionData(timestamp, robotPose, camToTargetDistance, target.poseAmbiguity, 1));
                 }

@@ -1,6 +1,6 @@
 package frc.robot.subsystems.poseestimation;
 
-import frc.robot.subsystems.vision.Vision.TrustLevel;
+import frc.robot.subsystems.vision.TrustLevel;
 
 public final class PoseEstimatorConstants {
     public static final TrustLevel VISION_Q_STD_DEVS = new TrustLevel(0.003,0.002);

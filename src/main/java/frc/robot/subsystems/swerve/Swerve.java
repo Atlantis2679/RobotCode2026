@@ -1,6 +1,7 @@
 package frc.robot.subsystems.swerve;
 
 import edu.wpi.first.math.filter.Debouncer;
+import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
@@ -50,7 +51,7 @@ public class Swerve extends SubsystemBase implements Tunable {
 
   private final ImuIO imuIO = Robot.isReal() ? new ImuIONavX(fieldsTable) : new ImuIOSim(fieldsTable);
 
-  private final Debouncer isGyroConnectedDebouncer = new Debouncer(GYRO_CONNECTED_DEBUNCER_SECONDS);
+  private final Debouncer isGyroConnectedDebouncer = new Debouncer(GYRO_CONNECTED_DEBUNCER_SECONDS, DebounceType.kFalling);
 
   public Swerve() {
     fieldsTable.update();

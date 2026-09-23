@@ -3,8 +3,6 @@ package frc.robot;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
-
 import com.ctre.phoenix6.SignalLogger;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
@@ -16,6 +14,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.PowerDistribution;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.XboxController.Axis;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -41,7 +40,6 @@ import team2679.atlantiskit.tunables.Tunable;
 import team2679.atlantiskit.tunables.TunableBuilder;
 import team2679.atlantiskit.tunables.TunablesManager;
 import team2679.atlantiskit.tunables.extensions.TunableCommand;
-import team2679.atlantiskit.valueholders.BooleanHolder;
 import team2679.atlantiskit.valueholders.DoubleHolder;
 
 public class RobotContainer {
@@ -60,15 +58,7 @@ public class RobotContainer {
     private final NaturalXboxController driverController = new NaturalXboxController( RobotMap.Controllers.DRIVER_PORT); private final NaturalXboxController operatorController = new NaturalXboxController(
             RobotMap.Controllers.OPERATOR_PORT);
 
-    private static final LoggedDashboardChooser<Boolean> isRedAlliance = new LoggedDashboardChooser<>("alliance");
-
-    private static final BooleanHolder isAutoTurn = new BooleanHolder(false);
-
-    static {
-        isRedAlliance.addDefaultOption("red", true);
-        isRedAlliance.addOption("blue", false);
-        SmartDashboard.putBoolean("isRedAlliance", RobotContainer.isRedAlliance());
-    }
+    private static Alliance lastAlliance = Alliance.Red;
 
     private final ShotControl shotControl = new ShotControl();
 
@@ -76,9 +66,9 @@ public class RobotContainer {
 
     public RobotContainer() {
         pdh.setSwitchableChannel(true);
-        isRedAlliance.onChange((isRedAlliance) -> {
-            PoseEstimator.getInstance().resetYawZero();
-        });
+        new Trigger(RobotContainer::isRedAlliance)
+            .onChange(new InstantCommand(() -> PoseEstimator.getInstance().resetYawZero())
+            .ignoringDisable(true));
         TunablesManager.add("Reset Yaw", new Tunable() {
             @Override
             public void initTunable(TunableBuilder builder) {
@@ -105,8 +95,6 @@ public class RobotContainer {
                 driverController::getLeftY,
                 driverController::getLeftX,
                 driverController::getRightX,
-                shotControl::getDriveAngleDegrees,
-                driverController.leftTrigger().or(isAutoTurn::get),
                 driverController.leftBumper().negate()::getAsBoolean,
                 driverController.rightBumper()::getAsBoolean);
 
@@ -191,7 +179,7 @@ public class RobotContainer {
         NamedCommands.registerCommand("stopAll", allCommands.stopAll());
         NamedCommands.registerCommand("startIntake", allCommands.intake());
         NamedCommands.registerCommand("stopIntake", allCommands.stopIntake());
-        NamedCommands.registerCommand("shoot", allCommands.shoot(shotControl::getRpm, shotControl::getAngle).alongWith(new InstantCommand(() -> isAutoTurn.set(true))).finallyDo(() -> isAutoTurn.set(false)));
+        NamedCommands.registerCommand("shoot", allCommands.shoot(shotControl::getRpm, shotControl::getAngle));
 
         autoChooser = AutoBuilder.buildAutoChooser();
         autoChooser.addOption("Just shoot mid", allCommands.shoot(shotControl::getRpm, shotControl::getAngle));
@@ -234,7 +222,10 @@ public class RobotContainer {
     }
 
     public static boolean isRedAlliance() {
-        return isRedAlliance.get() != null && isRedAlliance.get();
+        if (DriverStation.getAlliance().isPresent()) {
+          lastAlliance = DriverStation.getAlliance().get();
+        }
+        return lastAlliance == Alliance.Red;
     }
 
     public Command getAutonomousCommand() {

@@ -5,12 +5,10 @@ import static frc.robot.subsystems.vision.VisionConstants.AVG_DISTANCE_THRESHOLD
 import static frc.robot.subsystems.vision.VisionConstants.CAMERAS;
 import static frc.robot.subsystems.vision.VisionConstants.TRUST_LEVEL_MULTIPLIER;
 
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
-import edu.wpi.first.util.struct.Struct;
-import edu.wpi.first.util.struct.StructSerializable;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.FieldConstants;
 import frc.robot.subsystems.poseestimation.PoseEstimator;
@@ -26,11 +24,13 @@ import team2679.atlantiskit.tunables.TunableBuilder;
 import team2679.atlantiskit.tunables.TunablesManager;
 import team2679.atlantiskit.valueholders.DoubleHolder;
 
+import static frc.robot.utils.MathUtils.inRange;
+
 public class Vision extends SubsystemBase implements Tunable {
   private final LogFieldsTable fieldsTable = new LogFieldsTable("Vision");
   private final VisionAprilTagsIO[] visionCameras = new VisionAprilTagsIO[CAMERAS.length];
 
-  private static final TrustLevel trustLevelMultiplier = TRUST_LEVEL_MULTIPLIER;
+  private static final TunableTrustLevel trustLevelMultiplier = new TunableTrustLevel(TRUST_LEVEL_MULTIPLIER);
   private static final DoubleHolder ambiguityThreshold = new DoubleHolder(AMBIGUITY_THRESHOLD);
   private static final DoubleHolder distanceThresholdMeters = new DoubleHolder(AVG_DISTANCE_THRESHOLD_METERS);
 
@@ -50,8 +50,8 @@ public class Vision extends SubsystemBase implements Tunable {
     List<VisionMeasurement> visionMeasurements = new ArrayList<>();
     double stdFactor = io.getCameraConfig().stdFactor();
     for (VisionData visionData : visionDataArr) {
-      if (visionData.ambiguity() > ambiguityThreshold.get()) continue;
-      if (visionData.avgDistanceToCam() > distanceThresholdMeters.get()) continue;
+      if (!inRange(visionData.ambiguity(), 0, ambiguityThreshold.get())) continue;
+      if (!inRange(visionData.avgDistanceToCam(), 0, distanceThresholdMeters.get())) continue;
       if (!FieldConstants.isOnField(visionData.robotPose())) continue;
       TrustLevel trustLevels = calculateTrustLevel(stdFactor, visionData.tagsUsed(), visionData.avgDistanceToCam(), visionData.ambiguity());
       visionMeasurements.add(new VisionMeasurement(visionData.robotPose().toPose2d(), trustLevels, visionData.timestamp()));
@@ -82,63 +82,13 @@ public class Vision extends SubsystemBase implements Tunable {
     VisionConstants.Sim.VISION_SIM.update(PoseEstimator.getInstance().getOdometryPose());
   }
 
-  public static class TrustLevel implements StructSerializable, Tunable {
-    private double xyStdDev;
-    private double rotationStdDev;
-
-    public TrustLevel(double xyStdDev, double rotationStdDev) {
-      this.xyStdDev = xyStdDev;
-      this.rotationStdDev = rotationStdDev;
-    }
-
-    public double getXyStdDev() {
-      return xyStdDev;
-    }
-
-    public double getRotationStdDev() {
-      return rotationStdDev;
-    }
-
-    public void setXyStdDev(double xyStdDev) {
-      this.xyStdDev = xyStdDev;
-    }
-
-    public void setRotationStdDev(double rotationStdDev) {
-      this.rotationStdDev = rotationStdDev;
-    }
-
-    public void multiply(TrustLevel other) {
-      this.xyStdDev = this.xyStdDev * other.xyStdDev;
-      this.rotationStdDev = this.rotationStdDev * other.rotationStdDev;
-    }
-
-    @Override
-    public void initTunable(TunableBuilder builder) {
-        builder.addDoubleProperty("xyStdDev", this::getXyStdDev, this::setXyStdDev);
-        builder.addDoubleProperty("rotationStdDev", this::getRotationStdDev, this::setRotationStdDev);
-    }
-
-    public static final Struct<TrustLevel> struct = new Struct<>() {
-      public Class<TrustLevel> getTypeClass() { return TrustLevel.class; }
-      public String getTypeName() { return "TrustLevel"; }
-      public int getSize() { return kSizeDouble * 2; }
-      public String getSchema() { return "double xyStdDev;double rotationStdDev"; }
-      public TrustLevel unpack(ByteBuffer bb) {
-        return new TrustLevel(bb.getDouble(), bb.getDouble());
-      }
-      public void pack(ByteBuffer bb, TrustLevel v) {
-        bb.putDouble(v.getXyStdDev());
-        bb.putDouble(v.getRotationStdDev());
-      }
-    };
-  }
-
   private static TrustLevel calculateTrustLevel(double stdFactor, int tagsUsed, double avgDistanceToCam, double ambiguity) {
     if (ambiguity == 1 || tagsUsed == 0 || avgDistanceToCam == 0)
       return new TrustLevel(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
-    double value = Math.pow(avgDistanceToCam, 1.2) / Math.pow(tagsUsed, 2) / Math.pow(1 - ambiguity, 2) * stdFactor;
+    double value = Math.pow(avgDistanceToCam, 2) / Math.pow(tagsUsed, 2) / Math.pow(1 - ambiguity, 2) * stdFactor;
     TrustLevel result = new TrustLevel(value, value);
-    result.multiply(trustLevelMultiplier);
+    result = result.multiply(trustLevelMultiplier.get());
+    if (tagsUsed == 1 && !DriverStation.isDisabled()) result = new TrustLevel(result.xyStdDev(), Double.POSITIVE_INFINITY);
     return result;
   }
 
