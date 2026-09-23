@@ -31,7 +31,7 @@ public class VisionAprilTagsIOPhoton extends VisionAprilTagsIO {
         this.camera = new PhotonCamera(cameraConfig.name());
 
         if (Robot.isSimulation()) {
-            PhotonCameraSim photonCameraSim = new PhotonCameraSim(camera, Sim.SIM_CAMERA_PROPERTIES);
+            PhotonCameraSim photonCameraSim = new PhotonCameraSim(camera, cameraConfig.simCameraProperties());
             Sim.VISION_SIM.addCamera(photonCameraSim, cameraConfig.robotToCam());
         }
 
