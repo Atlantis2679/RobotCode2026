@@ -17,12 +17,13 @@ import frc.robot.Robot;
 import frc.robot.subsystems.vision.VisionConstants.CameraConfig;
 import frc.robot.subsystems.vision.VisionConstants.Sim;
 import team2679.atlantiskit.logfields.LogFieldsTable;
+import team2679.atlantiskit.periodicalerts.PeriodicAlertsGroup;
 
 public class VisionAprilTagsIOPhoton extends VisionAprilTagsIO {
     private final PhotonCamera camera;
-    private List<PhotonPipelineResult> photonPipelineResults;
     private final CameraConfig cameraConfig;
     private VisionData[] visionData;
+    private boolean moreThanOneTargetInSingleTargetMode = false;
 
     public VisionAprilTagsIOPhoton(LogFieldsTable fieldsTable, CameraConfig cameraConfig) {
         super(fieldsTable.getSubTable(cameraConfig.name()));
@@ -34,13 +35,16 @@ public class VisionAprilTagsIOPhoton extends VisionAprilTagsIO {
             Sim.VISION_SIM.addCamera(photonCameraSim, cameraConfig.robotToCam());
         }
 
+        new PeriodicAlertsGroup("Vision").addWarningAlert(() -> "PhotonVision multitag is failed or is disabled", () -> this.moreThanOneTargetInSingleTargetMode);
+
         this.cameraConfig = cameraConfig;
     }
 
     @Override
     public void periodicBeforeFields() {
-        photonPipelineResults = camera.getAllUnreadResults();
+        List<PhotonPipelineResult> photonPipelineResults = camera.getAllUnreadResults();
         List<VisionData> visionData = new ArrayList<>();
+        List<Pose3d[]> tagsPosesList = new ArrayList<>();
         for (int i = 0; i < photonPipelineResults.size(); i++) {
             PhotonPipelineResult result = photonPipelineResults.get(i);
             if (result.hasTargets()) {
@@ -48,28 +52,33 @@ public class VisionAprilTagsIOPhoton extends VisionAprilTagsIO {
                     Transform3d cameraToPose = result.multitagResult.get().estimatedPose.best;
                     Pose3d robotPose = new Pose3d().transformBy(cameraToPose).transformBy(cameraConfig.robotToCam().inverse());
                     double timestamp = result.getTimestampSeconds();
-                    Pose3d[] targetsPoses = result.multitagResult.get().fiducialIDsUsed.stream()
+                    Pose3d[] tagsPoses = result.multitagResult.get().fiducialIDsUsed.stream()
                             .map(targetId -> APRTIL_TAGS_FIELD_LAYOUT.getTagPose(targetId))
                             .flatMap(Optional::stream).toList().toArray(new Pose3d[0]);
-                    double[] tagsDistancesToCam = new double[result.targets.size()];
-                    for (int j = 0; j < tagsDistancesToCam.length; ++j) {
-                        tagsDistancesToCam[j] = result.targets.get(j).getBestCameraToTarget().getTranslation()
-                                .getNorm();
+                    int tagsUsed = tagsPoses.length;
+                    if (tagsUsed == 0) continue;
+                    double distanceSum = 0;
+                    for (Pose3d target : tagsPoses) {
+                      distanceSum += target.relativeTo(robotPose).getTranslation().getNorm();
                     }
-                    visionData.add(new VisionData(timestamp, robotPose, targetsPoses, 0, tagsDistancesToCam));
+                    tagsPosesList.add(tagsPoses);
+                    visionData.add(new VisionData(timestamp, robotPose, distanceSum / tagsUsed, result.multitagResult.get().estimatedPose.ambiguity, tagsUsed));
                 } else {
-                    PhotonTrackedTarget bestTarget = result.getBestTarget();
-                    if (APRTIL_TAGS_FIELD_LAYOUT.getTagPose(bestTarget.fiducialId).isEmpty()) continue;
-                    Pose3d tagPose = APRTIL_TAGS_FIELD_LAYOUT.getTagPose(bestTarget.fiducialId).get();
-                    Transform3d camToTarget = bestTarget.bestCameraToTarget;
+                    moreThanOneTargetInSingleTargetMode = result.getTargets().size() > 1;
+                    PhotonTrackedTarget target = result.getBestTarget();
+                    if (APRTIL_TAGS_FIELD_LAYOUT.getTagPose(target.fiducialId).isEmpty()) continue;
+                    Pose3d tagPose = APRTIL_TAGS_FIELD_LAYOUT.getTagPose(target.fiducialId).get();
+                    tagsPosesList.add(new Pose3d[] { tagPose });
+                    Transform3d camToTarget = target.bestCameraToTarget;
                     Transform3d robotToTarget = cameraConfig.robotToCam().plus(camToTarget);
                     Pose3d robotPose = tagPose.transformBy(robotToTarget.inverse());
+                    double camToTargetDistance = robotToTarget.getTranslation().getNorm();
                     double timestamp = result.getTimestampSeconds();
-                    visionData.add(new VisionData(timestamp, robotPose, new Pose3d[] { tagPose }, bestTarget.poseAmbiguity,
-                        new double[] { camToTarget.getTranslation().getNorm() }));
+                    visionData.add(new VisionData(timestamp, robotPose, camToTargetDistance, target.poseAmbiguity, 1));
                 }
             }
         }
+        fields.recordOutput("tagsPoses", tagsPosesList.toArray(new Pose3d[0][]));
         this.visionData = visionData.toArray(new VisionData[0]);
     }
 

@@ -103,8 +103,8 @@ public class Robot extends LoggedRobot {
         LogFieldsTable.updateAllTables();
         TunablesManager.update();
         PeriodicAlertsManager.update();
-        robotContainer.periodicUpdate();
         CommandScheduler.getInstance().run();
+        robotContainer.periodicUpdate();
         Logger.recordOutput("Tuning Mode", TunablesManager.isEnabled());
     }
 

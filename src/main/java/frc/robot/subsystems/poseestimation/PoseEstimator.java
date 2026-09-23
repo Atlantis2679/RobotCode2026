@@ -1,22 +1,18 @@
 package frc.robot.subsystems.poseestimation;
 
-import static frc.robot.subsystems.poseestimation.PoseEstimatorConstants.IN_COLLISION_DEBOUNCE_SEC;
-import static frc.robot.subsystems.poseestimation.PoseEstimatorConstants.MAX_VISION_AGE_SEC;
-import static frc.robot.subsystems.poseestimation.PoseEstimatorConstants.ODOMETRY_DRIFT_SIM_ROTATION_FACTOR;
-import static frc.robot.subsystems.poseestimation.PoseEstimatorConstants.ODOMETRY_DRIFT_SIM_TRANSLATION_FACTOR;
+import static frc.robot.subsystems.poseestimation.PoseEstimatorConstants.NO_ODOMETRY_TRUST_LEVEL_MULTIPLIER;
 import static frc.robot.subsystems.poseestimation.PoseEstimatorConstants.ODOMETRY_POSES_BUFFER_SIZE_SEC;
 import static frc.robot.subsystems.poseestimation.PoseEstimatorConstants.VISION_Q_STD_DEVS;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.function.Consumer;
 
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.Nat;
 import edu.wpi.first.math.VecBuilder;
-import edu.wpi.first.math.filter.Debouncer;
-import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
@@ -26,19 +22,16 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
-import edu.wpi.first.wpilibj.RobotBase;
-import edu.wpi.first.wpilibj.Timer;
-import frc.robot.Robot;
+import edu.wpi.first.wpilibj.DriverStation;
 import frc.robot.RobotContainer;
-import frc.robot.subsystems.poseestimation.CollisionDetector.CollisionDetectorInfo;
 import frc.robot.subsystems.vision.Vision.TrustLevel;
 import team2679.atlantiskit.logfields.LogFieldsTable;
 import team2679.atlantiskit.tunables.Tunable;
 import team2679.atlantiskit.tunables.TunableBuilder;
 
 public class PoseEstimator implements Tunable {
-    private static final PoseEstimator instance = new PoseEstimator();
     private static final List<Consumer<Pose2d>> callbackOnPoseUpdate = new ArrayList<>();
+    private static final PoseEstimator instance = new PoseEstimator();
 
     private Pose2d odometryPose = Pose2d.kZero;
     private Pose2d estimatedPose = Pose2d.kZero;
@@ -47,19 +40,13 @@ public class PoseEstimator implements Tunable {
             .createBuffer(ODOMETRY_POSES_BUFFER_SIZE_SEC);
 
     private final LogFieldsTable fieldsTable = new LogFieldsTable("PoseEstimator");
-
-    private final CollisionDetector collisionDetector = new CollisionDetector(fieldsTable);
-
-    private final OdometryDriftSim odometryDriftSim = new OdometryDriftSim(
-        ODOMETRY_DRIFT_SIM_TRANSLATION_FACTOR, 
-        ODOMETRY_DRIFT_SIM_ROTATION_FACTOR,
-        estimatedPose,
-        fieldsTable);
     
     private TrustLevel visionTrustLevelQ = VISION_Q_STD_DEVS;
 
-    private final Debouncer inCollisionDebouncer = new Debouncer(IN_COLLISION_DEBOUNCE_SEC, DebounceType.kFalling);
-    private boolean inCollision = false;
+    private TrustLevel noOdometryTrustLevelMultiplier = NO_ODOMETRY_TRUST_LEVEL_MULTIPLIER;
+
+    private Rotation2d gyroOffset = new Rotation2d();
+    private Rotation2d lastGyroAngle = new Rotation2d();
 
     private SwerveModulePosition[] lastModulePositions = new SwerveModulePosition[] {
             new SwerveModulePosition(),
@@ -68,52 +55,41 @@ public class PoseEstimator implements Tunable {
             new SwerveModulePosition(),
     };
 
-    private PoseEstimator() {
-        PoseEstimator.registerCallbackOnPoseUpdate((pose) -> {
-            if (RobotBase.isSimulation()) {
-                odometryDriftSim.recordError(pose);
-            }
-        });
-    }
+    private PoseEstimator() {}
 
     public static PoseEstimator getInstance() {
         return instance;
     }
 
-    public void updateCollision(CollisionDetectorInfo collisionInfo) {
-        collisionDetector.update(collisionInfo);
-        inCollision = inCollisionDebouncer.calculate(collisionDetector.inCollision());
-        fieldsTable.recordOutput("In Collision?", inCollision);
-    }
-
-    public void addOdometryMeasurment(OdometryMeasurment measurment) {
-        Twist2d twist2d = measurment.kinematics.toTwist2d(lastModulePositions, measurment.modulePositions);
-        if (Robot.isSimulation()) {
-            twist2d = odometryDriftSim.process(twist2d);
-        }
-        lastModulePositions = measurment.modulePositions;
+    public void addOdometryMeasurement(OdometryMeasurement measurement) {
+        Twist2d twist2d = measurement.kinematics.toTwist2d(lastModulePositions, measurement.modulePositions);
+        lastModulePositions = measurement.modulePositions;
         Pose2d lastOdometryPose = odometryPose;
         odometryPose = odometryPose.exp(twist2d);
-        if (measurment.gyroAngle.isPresent()) {
-            odometryPose = new Pose2d(odometryPose.getTranslation(), measurment.gyroAngle.get());
+        if (measurement.gyroAngle.isPresent()) {
+            lastGyroAngle = measurement.gyroAngle.get();
+            odometryPose = new Pose2d(odometryPose.getTranslation(), measurement.gyroAngle.get().minus(gyroOffset));
         }
-        fieldsTable.recordOutput("Current Odomertry Pose", odometryPose);
-        odometryPosesBuffer.addSample(measurment.timestamp, odometryPose);
-        if (!collisionDetector.inCollision()) {
-            Twist2d odometryTwistFromLastPose = lastOdometryPose.log(odometryPose);
-            estimatedPose = estimatedPose.exp(odometryTwistFromLastPose);
-        }
+        fieldsTable.recordOutput("Current Odometry Pose", odometryPose);
+        odometryPosesBuffer.addSample(measurement.timestamp, odometryPose);
+        Twist2d odometryTwistFromLastPose = lastOdometryPose.log(odometryPose);
+        estimatedPose = estimatedPose.exp(odometryTwistFromLastPose);
         fieldsTable.recordOutput("Current Estimated Pose", estimatedPose);
+        fieldsTable.recordOutput("Odometry to Estimated Transform (Odometry error)", new Transform2d(odometryPose, estimatedPose));
         callAllCallbacks();
     }
 
-    public void addVisionMeasurment(VisionMeasurement measurement) {
-        double now = Timer.getFPGATimestamp();
-        double age = now - measurement.timestamp();
-        if (age < 0 || age > MAX_VISION_AGE_SEC) {
+    public void addVisionMeasurement(VisionMeasurement measurement) {
+        try {
+          if (odometryPosesBuffer.getInternalBuffer().lastKey() - ODOMETRY_POSES_BUFFER_SIZE_SEC > measurement.timestamp()) {
             return;
+          }
+        } catch (NoSuchElementException ex) {
+          return;
         }
-        fieldsTable.recordOutput("Vision measurment age", age);
+        if (DriverStation.isDisabled()) {
+          measurement.trustLevel.multiply(noOdometryTrustLevelMultiplier);
+        }
         Optional<Pose2d> sample = odometryPosesBuffer.getSample(measurement.timestamp());
         if (sample.isEmpty())
             return;
@@ -122,6 +98,7 @@ public class PoseEstimator implements Tunable {
         Transform2d visionTransform = calculateVisionTransform(measurement, estimateAtTime);
         estimatedPose = estimateAtTime.plus(visionTransform).plus(odometryToSampleTransform.inverse());
         fieldsTable.recordOutput("Current Estimated Pose", estimatedPose);
+        fieldsTable.recordOutput("Odometry to Estimated Transform (Odometry error)", new Transform2d(odometryPose, estimatedPose));
         callAllCallbacks();
     }
 
@@ -159,10 +136,6 @@ public class PoseEstimator implements Tunable {
         return arr;
     }
 
-    public boolean inCollision() {
-        return inCollision;
-    }
-
     private void callAllCallbacks() {
         for (Consumer<Pose2d> callback : callbackOnPoseUpdate) {
             callback.accept(estimatedPose);
@@ -177,8 +150,10 @@ public class PoseEstimator implements Tunable {
         odometryPose = newPose;
         estimatedPose = newPose;
         odometryPosesBuffer.clear();
-        fieldsTable.recordOutput("Current Odomertry Pose", odometryPose);
+        gyroOffset = lastGyroAngle.minus(newPose.getRotation());
+        fieldsTable.recordOutput("Current Odometry Pose", odometryPose);
         fieldsTable.recordOutput("Current Estimated Pose", estimatedPose);
+        fieldsTable.recordOutput("Odometry to Estimated Transform (Odometry error)", new Transform2d(odometryPose, estimatedPose));
         callAllCallbacks();
     }
 
@@ -200,17 +175,14 @@ public class PoseEstimator implements Tunable {
 
     @Override
     public void initTunable(TunableBuilder builder) {
-        if (RobotBase.isSimulation()) { builder.addChild("Odometry Drift Sim", odometryDriftSim); }
-        builder.addDoubleProperty("Vision xy Q", () -> this.visionTrustLevelQ.getXyStdDev(),
-            (xyStdDev) -> this.visionTrustLevelQ = new TrustLevel(xyStdDev, this.visionTrustLevelQ.getRotationStdDev()));
-        builder.addDoubleProperty("Vision rotation Q", () -> this.visionTrustLevelQ.getRotationStdDev(),
-            (rotationStdDev) -> this.visionTrustLevelQ = new TrustLevel(this.visionTrustLevelQ.getXyStdDev(), rotationStdDev));
+        builder.addChild("Vision Q", this.visionTrustLevelQ);
+        builder.addChild("No Odometry trust level multiplyer", noOdometryTrustLevelMultiplier);
     }
 
     public record VisionMeasurement(Pose2d pose, TrustLevel trustLevel, double timestamp) {
     }
 
-    public record OdometryMeasurment(SwerveDriveKinematics kinematics, SwerveModulePosition[] modulePositions,
+    public record OdometryMeasurement(SwerveDriveKinematics kinematics, SwerveModulePosition[] modulePositions,
             Optional<Rotation2d> gyroAngle, double timestamp) {
     }
 }

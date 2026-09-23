@@ -2,7 +2,9 @@ package frc.robot.subsystems.swerve.io;
 
 import static frc.robot.subsystems.swerve.SwerveConstants.Modules.*;
 
+import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusCode;
+import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -16,15 +18,25 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularAcceleration;
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Current;
 import frc.robot.utils.AlertsFactory;
 import team2679.atlantiskit.logfields.LogFieldsTable;
 import team2679.atlantiskit.periodicalerts.PeriodicAlertsGroup;
 
-public class SwerveModuleIOFalcon extends SwerveModuleIO {
+public class SwerveModuleIOTalonFX extends SwerveModuleIO {
     private final TalonFX driveMotor;
     private final TalonFX turnMotor;
     private final CANcoder canCoder;
 
+    private final StatusSignal<Angle> drivePosition;
+    private final StatusSignal<AngularVelocity> driveVelocity;
+    private final StatusSignal<Angle> turnPosition;
+    private final StatusSignal<Current> driveTorqueCurrent;
+    private final StatusSignal<Angle> canCoderAbsolute;
+    
     private final VoltageOut driveVoltageControl = new VoltageOut(0);
     private final DutyCycleOut drivePercentageControl = new DutyCycleOut(0);
 
@@ -36,7 +48,7 @@ public class SwerveModuleIOFalcon extends SwerveModuleIO {
 
     private final Slot0Configs turnSlotConfigs;
 
-    public SwerveModuleIOFalcon(LogFieldsTable fieldsTable, int moduleNum, int driveMotorID, int turnMotorID,
+    public SwerveModuleIOTalonFX(LogFieldsTable fieldsTable, int moduleNum, int driveMotorID, int turnMotorID,
             int canCoderID) {
         super(fieldsTable);
         driveMotor = new TalonFX(driveMotorID);
@@ -90,52 +102,43 @@ public class SwerveModuleIOFalcon extends SwerveModuleIO {
                 () -> turnMotorStatus, moduleAlertPrefix + "Turn Motor Status");
         AlertsFactory.phoenixMotor(PeriodicAlertsGroup.defaultInstance,
                 () -> canCoderStatus, moduleAlertPrefix + "Can Coder Status");
+
+        drivePosition = driveMotor.getPosition();
+        driveVelocity = driveMotor.getVelocity();
+        turnPosition = turnMotor.getPosition();
+        driveTorqueCurrent = driveMotor.getTorqueCurrent();
+        canCoderAbsolute = canCoder.getAbsolutePosition();
+
+        BaseStatusSignal.setUpdateFrequencyForAll(100.0, drivePosition, driveVelocity, turnPosition);
+        BaseStatusSignal.setUpdateFrequencyForAll(50.0, driveTorqueCurrent, canCoderAbsolute);
+        driveMotor.optimizeBusUtilization();
+        turnMotor.optimizeBusUtilization();
+        canCoder.optimizeBusUtilization();
     }
 
     @Override
-    protected double getAbsoluteTurnAngleRotations() {
-        return canCoder.getAbsolutePosition().getValueAsDouble();
-    }
-    
-    @Override
-    protected double getIntegratedTurnAngleRotations() {
-        return turnMotor.getPosition().getValueAsDouble();
-    }
-
-    @Override
-    public void setDriveVoltage(double voltage) {
-        driveMotor.setControl(driveVoltageControl.withOutput(voltage));
-    }
-
-    @Override
-    public void setDrivePercentageSpeed(double speed) {
-        driveMotor.setControl(drivePercentageControl.withOutput(speed));
-    }
-
-    @Override
-    public void setTurnAngleRotations(double rotations) {
-        turnMotor.setControl(turnVoltageControl.withPosition(rotations));
+    protected void periodicBeforeFields() {
+        BaseStatusSignal.refreshAll(drivePosition, driveVelocity, turnPosition, driveTorqueCurrent, canCoderAbsolute);
     }
 
     @Override
     protected double getDriveDistanceRotations() {
-        return driveMotor.getPosition().getValueAsDouble();
+        return BaseStatusSignal.getLatencyCompensatedValueAsDouble(drivePosition, driveVelocity);
     }
 
     @Override
     protected double getDriveSpeedRPS() {
-        return driveMotor.getVelocity().getValueAsDouble();
+        return driveVelocity.getValueAsDouble();
     }
 
     @Override
-    public void setCoast() {
-        driveMotor.setControl(new CoastOut());
-        turnMotor.setControl(new CoastOut());
+    protected double getAbsoluteTurnAngleRotations() {
+        return canCoderAbsolute.getValueAsDouble();
     }
-
+    
     @Override
-    public void resetIntegratedAngleRotations(double newAngle) {
-        turnMotor.setPosition(newAngle);
+    protected double getIntegratedTurnAngleRotations() {
+        return integratedTurnAngleRotations.getAsDouble();
     }
 
     @Override
@@ -154,6 +157,37 @@ public class SwerveModuleIOFalcon extends SwerveModuleIO {
     }
 
     @Override
+    protected double getCurrent() {
+        return driveTorqueCurrent.getValueAsDouble();
+    }
+
+    @Override
+    public void setDriveVoltage(double voltage) {
+        driveMotor.setControl(driveVoltageControl.withOutput(voltage));
+    }
+
+    @Override
+    public void setDrivePercentageSpeed(double speed) {
+        driveMotor.setControl(drivePercentageControl.withOutput(speed));
+    }
+
+    @Override
+    public void setTurnAngleRotations(double rotations) {
+        turnMotor.setControl(turnVoltageControl.withPosition(rotations));
+    }
+
+    @Override
+    public void setCoast() {
+        driveMotor.setControl(new CoastOut());
+        turnMotor.setControl(new CoastOut());
+    }
+
+    @Override
+    public void resetIntegratedAngleRotations(double newAngle) {
+        turnMotor.setPosition(newAngle);
+    }
+
+    @Override
     public void setTurnKP(double kP) {
         turnSlotConfigs.kP = kP;
     }
@@ -166,10 +200,5 @@ public class SwerveModuleIOFalcon extends SwerveModuleIO {
     @Override
     public void setTurnKD(double kD) {
         turnSlotConfigs.kD = kD;
-    }
-
-    @Override
-    protected double getCurrent() {
-        return driveMotor.getTorqueCurrent().getValueAsDouble();
     }
 }

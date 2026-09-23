@@ -42,9 +42,9 @@ public final class ShotConstants {
 
     public static final double SHOT_CONFIDENCE_FILTER_THRESHOLD = 60;
 
-    public static final ShotLUT SHOT_MEASURMENTS = new ShotLUT();
+    public static final ShotLUT SHOT_MEASUREMENTS = new ShotLUT();
 
     static {
-        SHOT_MEASURMENTS.put(0.0, 0.0, 0.0, 0.0);
+        SHOT_MEASUREMENTS.put(0.0, 0.0, 0.0, 0.0);
     }
 }

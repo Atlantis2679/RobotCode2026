@@ -77,7 +77,6 @@ public class RobotContainer {
     public RobotContainer() {
         pdh.setSwitchableChannel(true);
         isRedAlliance.onChange((isRedAlliance) -> {
-            swerve.resetGyroYawZero();
             PoseEstimator.getInstance().resetYawZero();
         });
         TunablesManager.add("Reset Yaw", new Tunable() {
@@ -86,14 +85,12 @@ public class RobotContainer {
                 DoubleHolder angleToReset = new DoubleHolder(0);
                 builder.addDoubleProperty("angleToResetDegrees", angleToReset::get, angleToReset::set);
                 builder.addChild("Reset!", new InstantCommand(() -> {
-                    swerve.resetGyroYaw(angleToReset.get());
                     PoseEstimator.getInstance().resetYaw(Rotation2d.fromDegrees(angleToReset.get()));
                 }));
             }
         });
         TunablesManager.add("Reset Pose", new InstantCommand(() -> {
             PoseEstimator.getInstance().resetPose(new Pose2d());
-            swerve.resetGyroYawZero();
         }));
         TunablesManager.add("PoseEstimator", PoseEstimator.getInstance());
         new Trigger(DriverStation::isDisabled).whileTrue(swerveCommands.stop().alongWith(allCommands.stopAll()));
@@ -125,7 +122,6 @@ public class RobotContainer {
                         driverController::getRightY).fullTunable());
 
         driverController.start().onTrue(new InstantCommand(() -> {
-            swerve.resetGyroYawZero();
             PoseEstimator.getInstance().resetYawZero();
         }));
     }
@@ -227,7 +223,6 @@ public class RobotContainer {
     }
 
     public void periodicUpdate() {
-        vision.update();
         shotControl.update(
             PoseEstimator.getInstance().getEstimatedPose(),
             isRedAlliance(),

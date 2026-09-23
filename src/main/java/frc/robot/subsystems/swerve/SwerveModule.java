@@ -8,7 +8,7 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import frc.robot.Robot;
 import frc.robot.subsystems.swerve.io.SwerveModuleIO;
-import frc.robot.subsystems.swerve.io.SwerveModuleIOFalcon;
+import frc.robot.subsystems.swerve.io.SwerveModuleIOTalonFX;
 import frc.robot.subsystems.swerve.io.SwerveModuleSim;
 import team2679.atlantiskit.helpers.RotationalSensorHelper;
 import team2679.atlantiskit.logfields.LogFieldsTable;
@@ -29,7 +29,7 @@ public class SwerveModule implements Tunable {
     public SwerveModule(LogFieldsTable swerveFieldsTable, int moudleNum, int driveMotorID, int turnMotorID,
             int canCoderID) {
         fieldsTable = swerveFieldsTable.getSubTable("Module " + moudleNum + " " + getModuleName(moudleNum));
-        io = Robot.isReal() ? new SwerveModuleIOFalcon(fieldsTable, moudleNum, driveMotorID, turnMotorID, canCoderID)
+        io = Robot.isReal() ? new SwerveModuleIOTalonFX(fieldsTable, moudleNum, driveMotorID, turnMotorID, canCoderID)
                 : new SwerveModuleSim(fieldsTable);
 
         fieldsTable.update();

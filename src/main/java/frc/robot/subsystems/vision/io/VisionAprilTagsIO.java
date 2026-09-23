@@ -15,9 +15,9 @@ public abstract class VisionAprilTagsIO extends IOBase {
     public record VisionData(
         double timestamp,
         Pose3d robotPose,
-        Pose3d[] tagsPoses,
+        double avgDistanceToCam,
         double ambiguity,
-        double[] tagsDistancesToCam
+        int tagsUsed
     ) implements StructSerializable {
         public static final Struct<VisionData> struct = StructGenerator.genRecord(VisionData.class);
     }

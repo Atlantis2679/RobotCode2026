@@ -23,17 +23,19 @@ public class SwerveModuleSim extends SwerveModuleIO {
 
         DCMotor motorsModel = DCMotor.getFalcon500(1);
 
+        turnPIDController.enableContinuousInput(-0.5, 0.5);
+
         driveMotor = new FlywheelSim(
                 LinearSystemId.createFlywheelSystem(motorsModel, DRIVE_MOTOR_MOMENT_OF_INERTIA, DRIVE_GEAR_RATIO),
                 motorsModel);
-        turnMotor = new FlywheelSim(LinearSystemId.createFlywheelSystem(motorsModel, TURN_GEAR_RATIO, TURN_GEAR_RATIO),
+        turnMotor = new FlywheelSim(LinearSystemId.createFlywheelSystem(motorsModel, TURN_MOTOR_MOMENT_OF_INERTIA, TURN_GEAR_RATIO),
                 motorsModel);
     }
 
     @Override
     protected void periodicBeforeFields() {
-        driveMotor.update(0.2);
-        turnMotor.update(0.2);
+        driveMotor.update(0.02);
+        turnMotor.update(0.02);
 
         driveMotorRotations += driveMotor.getAngularVelocityRPM() / 60 * 0.02;
 
@@ -42,7 +44,7 @@ public class SwerveModuleSim extends SwerveModuleIO {
     }
 
     private double wrapAngle(double angle) {
-        return ((angle + 1) % 2 + 2) % 2 - 1;
+        return ((angle + 0.5) % 2 + 2) % 2 - 0.5;
     }
 
     @Override
