@@ -1,8 +1,8 @@
 package frc.robot.subsystems.poseestimation;
 
-import static frc.robot.subsystems.poseestimation.PoseEstimatorConstants.NO_ODOMETRY_TRUST_LEVEL_MULTIPLIER;
+import static frc.robot.subsystems.poseestimation.PoseEstimatorConstants.PRE_MATCH_VISION_TRUST_LEVEL_MULTIPLIER;
 import static frc.robot.subsystems.poseestimation.PoseEstimatorConstants.ODOMETRY_POSES_BUFFER_SIZE_SEC;
-import static frc.robot.subsystems.poseestimation.PoseEstimatorConstants.VISION_Q_STD_DEVS;
+import static frc.robot.subsystems.poseestimation.PoseEstimatorConstants.ODOMETRY_STD_DEVS;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,6 +10,7 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.function.Consumer;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.Nat;
 import edu.wpi.first.math.VecBuilder;
@@ -17,9 +18,11 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Twist2d;
+import edu.wpi.first.math.interpolation.Interpolatable;
 import edu.wpi.first.math.interpolation.TimeInterpolatableBuffer;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
+import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -36,26 +39,28 @@ public class PoseEstimator implements Tunable {
     private Pose2d odometryPose = Pose2d.kZero;
     private Pose2d estimatedPose = Pose2d.kZero;
 
-    private final TimeInterpolatableBuffer<Pose2d> odometryPosesBuffer = TimeInterpolatableBuffer
-            .createBuffer(ODOMETRY_POSES_BUFFER_SIZE_SEC);
+    public record OdoemtrySample(Pose2d pose, double skidRatio) implements Interpolatable<OdoemtrySample> {
+        @Override
+        public OdoemtrySample interpolate(OdoemtrySample endValue, double t) {
+            Pose2d interpolatedPose = this.pose.interpolate(endValue.pose, t);
+            double interpolatedSkidRatio = MathUtil.interpolate(this.skidRatio, endValue.skidRatio, t);
+            return new OdoemtrySample(interpolatedPose, interpolatedSkidRatio);
+        }
+    }
 
-    private final LogFieldsTable fieldsTable = new LogFieldsTable("PoseEstimator");
+    private final TimeInterpolatableBuffer<OdoemtrySample> odometryPosesBuffer = TimeInterpolatableBuffer.createBuffer(ODOMETRY_POSES_BUFFER_SIZE_SEC);
     
-    private TunableTrustLevel visionTrustLevelQ = new TunableTrustLevel(VISION_Q_STD_DEVS);
+    private final LogFieldsTable fieldsTable = new LogFieldsTable("PoseEstimator");
 
-    private TunableTrustLevel noOdometryTrustLevelMultiplier = new TunableTrustLevel(NO_ODOMETRY_TRUST_LEVEL_MULTIPLIER);
+    private final SkidDetector skidDetector = new SkidDetector(fieldsTable.getSubTable("SkidDetector"));
+    
+    private TunableTrustLevel odometryTrustLevel = new TunableTrustLevel(ODOMETRY_STD_DEVS);
+    private TunableTrustLevel preMatchVisionTrustLevelMultiplier = new TunableTrustLevel(PRE_MATCH_VISION_TRUST_LEVEL_MULTIPLIER);
 
     private Rotation2d gyroOffset = new Rotation2d();
     private Optional<Rotation2d> lastGyroAngle = Optional.empty();
 
     private double lastResetTimestamp = Timer.getTimestamp();
-
-    private SwerveModulePosition[] lastModulePositions = new SwerveModulePosition[] {
-            new SwerveModulePosition(),
-            new SwerveModulePosition(),
-            new SwerveModulePosition(),
-            new SwerveModulePosition(),
-    };
 
     private PoseEstimator() {}
 
@@ -64,9 +69,10 @@ public class PoseEstimator implements Tunable {
     }
 
     public void addOdometryMeasurement(OdometryMeasurement measurement) {
-        Twist2d twist2d = measurement.kinematics.toTwist2d(lastModulePositions, measurement.modulePositions);
+        Twist2d twist2d = measurement.kinematics.toTwist2d(measurement.modulePositionsDelta);
         if (measurement.gyroAngle.isPresent()) {
           if (lastGyroAngle.isEmpty()) {
+
             gyroOffset = measurement.gyroAngle.get().minus(odometryPose.getRotation());
           } else {
             twist2d.dtheta = measurement.gyroAngle.get().minus(lastGyroAngle.get()).getRadians();
@@ -75,14 +81,14 @@ public class PoseEstimator implements Tunable {
         } else {
           lastGyroAngle = Optional.empty();
         }
-        lastModulePositions = measurement.modulePositions;
         Pose2d lastOdometryPose = odometryPose;
         odometryPose = odometryPose.exp(twist2d);
         if (measurement.gyroAngle.isPresent()) {
             odometryPose = new Pose2d(odometryPose.getTranslation(), measurement.gyroAngle.get().minus(gyroOffset));
         }
         fieldsTable.recordOutput("Current Odometry Pose", odometryPose);
-        odometryPosesBuffer.addSample(measurement.timestamp, odometryPose);
+        double skidRatio = skidDetector.update(measurement.kinematics, measurement.modulesStates);
+        odometryPosesBuffer.addSample(measurement.timestamp, new OdoemtrySample(odometryPose, skidRatio));
         Twist2d odometryTwistFromLastPose = lastOdometryPose.log(odometryPose);
         estimatedPose = estimatedPose.exp(odometryTwistFromLastPose);
         fieldsTable.recordOutput("Current Estimated Pose", estimatedPose);
@@ -100,27 +106,30 @@ public class PoseEstimator implements Tunable {
           return;
         }
         if (DriverStation.isDisabled()) {
-          measurement = new VisionMeasurement(measurement.pose, measurement.trustLevel.multiply(noOdometryTrustLevelMultiplier.get()), measurement.timestamp);
+          measurement = new VisionMeasurement(measurement.pose, measurement.trustLevel.multiply(preMatchVisionTrustLevelMultiplier.get()), measurement.timestamp);
         }
-        Optional<Pose2d> sample = odometryPosesBuffer.getSample(measurement.timestamp());
+        Optional<OdoemtrySample> sample = odometryPosesBuffer.getSample(measurement.timestamp());
         if (sample.isEmpty())
             return;
-        Transform2d odometryToSampleTransform = new Transform2d(odometryPose, sample.get());
+        Transform2d odometryToSampleTransform = new Transform2d(odometryPose, sample.get().pose);
         Pose2d estimateAtTime = estimatedPose.plus(odometryToSampleTransform);
-        Transform2d visionTransform = calculateVisionTransform(measurement, estimateAtTime);
+        Transform2d visionTransform = calculateVisionTransform(measurement, estimateAtTime, sample.get().skidRatio);
         estimatedPose = estimateAtTime.plus(visionTransform).plus(odometryToSampleTransform.inverse());
         fieldsTable.recordOutput("Current Estimated Pose", estimatedPose);
         fieldsTable.recordOutput("Odometry to Estimated Transform (Odometry error)", new Transform2d(odometryPose, estimatedPose));
         callAllCallbacks();
     }
 
-    private Transform2d calculateVisionTransform(VisionMeasurement visionMeasurement, Pose2d estimateAtTime) {
+    private Transform2d calculateVisionTransform(VisionMeasurement visionMeasurement, Pose2d estimateAtTime,
+        double skidRatioAtTime) {
         // Solve for closed form Kalman gain for continuous Kalman filter with A = 0
         // and C = I. See wpimath/algorithms.md
         // Worth noting that this in it's current form may be simplefied to
         // k = 1 / (1 + q / r), meaning k is linearly proportional to the ratio between Q_STD and Vision STD
+        TrustLevel skidTrustLevelMutliplier = new TrustLevel(Math.pow(2, skidRatioAtTime - 1), Math.pow(2, skidRatioAtTime - 1));
+        TrustLevel odometryTrustLevel = this.odometryTrustLevel.get().multiply(skidTrustLevelMutliplier);
         double[] r = trustLevelToArraySquared(visionMeasurement.trustLevel);
-        double[] q = trustLevelToArraySquared(visionTrustLevelQ.get());
+        double[] q = trustLevelToArraySquared(odometryTrustLevel);
         Matrix<N3, N3> visionK = new Matrix<N3, N3>(Nat.N3(), Nat.N3());
         for (int row = 0; row < 3; row++) {
             if (q[row] == 0) {
@@ -190,14 +199,15 @@ public class PoseEstimator implements Tunable {
 
     @Override
     public void initTunable(TunableBuilder builder) {
-        builder.addChild("Vision Q", this.visionTrustLevelQ);
-        builder.addChild("No Odometry trust level multiplyer", noOdometryTrustLevelMultiplier);
+        builder.addChild("Vision Q", this.odometryTrustLevel);
+        builder.addChild("No Odometry trust level multiplyer", preMatchVisionTrustLevelMultiplier);
     }
 
     public record VisionMeasurement(Pose2d pose, TrustLevel trustLevel, double timestamp) {
     }
 
-    public record OdometryMeasurement(SwerveDriveKinematics kinematics, SwerveModulePosition[] modulePositions,
+    public record OdometryMeasurement(SwerveDriveKinematics kinematics, SwerveModulePosition[] modulePositionsDelta,
+            SwerveModuleState[] modulesStates,
             Optional<Rotation2d> gyroAngle, double timestamp) {
     }
 }

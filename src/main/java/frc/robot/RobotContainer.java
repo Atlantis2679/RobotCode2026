@@ -49,6 +49,7 @@ public class RobotContainer {
     private final Index index = new Index();
     private final Hood hood = new Hood();
     private final FlyWheel flyWheel = new FlyWheel();
+    @SuppressWarnings("unused")
     private final Vision vision = new Vision();
 
     private final SwerveCommands swerveCommands = new SwerveCommands(swerve);

@@ -75,7 +75,7 @@ public class Swerve extends SubsystemBase implements Tunable {
     Optional<Rotation2d> gyroAngle = isGyroConnected() ? Optional.of(Rotation2d.fromDegrees(getGyroYawDegreesCCW()))
         : Optional.empty();
     PoseEstimator.getInstance().addOdometryMeasurement(
-        new OdometryMeasurement(kinematics, getModulePositions(), gyroAngle, Timer.getTimestamp()));
+        new OdometryMeasurement(kinematics, getModulePositionsDelta(), getModulesStates(), gyroAngle, Timer.getTimestamp()));
 
     fieldsTable.recordOutput("Is gryo connected", isGyroConnected());
     fieldsTable.recordOutput("Robot Relative Real Chassis Speeds", getRobotRelativeChassisSpeeds());
@@ -111,6 +111,14 @@ public class Swerve extends SubsystemBase implements Tunable {
     SwerveModulePosition[] positions = new SwerveModulePosition[modules.length];
     for (int i = 0; i < modules.length; i++) {
       positions[i] = modules[i].getModulePosition();
+    }
+    return positions;
+  }
+
+  public SwerveModulePosition[] getModulePositionsDelta() {
+    SwerveModulePosition[] positions = new SwerveModulePosition[modules.length];
+    for (int i = 0; i < modules.length; i++) {
+      positions[i] = modules[i].getModulePositionDelta();
     }
     return positions;
   }

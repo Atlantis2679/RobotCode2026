@@ -69,8 +69,8 @@ public final class SwerveConstants {
         public static final double SIM_TURN_MOTOR_KD = 0;
     }
 
-    public static final double TRACK_LENGTH_METERS = 0.69;
-    public static final double TRACK_WIDTH_METERS = 0.69;
+    public static final double TRACK_LENGTH_METERS = 0.557;
+    public static final double TRACK_WIDTH_METERS = 0.557;
 
     public static final Translation2d[] MODULES_LOCATIONS = {
             new Translation2d(TRACK_LENGTH_METERS / 2, TRACK_WIDTH_METERS / 2),
