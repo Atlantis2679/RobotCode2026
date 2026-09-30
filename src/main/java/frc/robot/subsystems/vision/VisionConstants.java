@@ -12,6 +12,7 @@ import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Robot;
+import frc.robot.subsystems.poseestimation.TrustLevel;
 
 public class VisionConstants {
   public static final AprilTagFieldLayout APRTIL_TAGS_FIELD_LAYOUT = AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltWelded);
@@ -33,21 +34,15 @@ public class VisionConstants {
 
   public static CameraConfig[] CAMERAS = {
     new CameraConfig(
-      "LeftFront", 1.0,
-      new Transform3d(new Translation3d(0.297, 0.185, 0.177),
-      new Rotation3d(Degrees.of(0), Degrees.of(-48), Degrees.of(22.5))),
-      new SimCameraProperties()
-    ),
-    new CameraConfig(
-      "RightFront", 1.0,
+      "Front", 1.0,
       new Transform3d(new Translation3d(0.297, 0.155, 0.177),
       new Rotation3d(Degrees.of(0), Degrees.of(-48), Degrees.of(-22.5))),
       new SimCameraProperties()
     ),
     new CameraConfig(
-      "BackCam", 1.0,
-      new Transform3d(new Translation3d(0.17, -0.325, 0.505),
-      new Rotation3d(Degrees.of(.0), Degrees.of(0), Degrees.of(180))),
+      "Side", 1.0,
+      new Transform3d(new Translation3d(-0.155, -0.2, 0.605),
+      new Rotation3d(Degrees.of(.0), Degrees.of(5), Degrees.of(0))),
       new SimCameraProperties()
     )
   };

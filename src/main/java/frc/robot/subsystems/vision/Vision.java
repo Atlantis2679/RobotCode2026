@@ -12,6 +12,8 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.FieldConstants;
 import frc.robot.subsystems.poseestimation.PoseEstimator;
+import frc.robot.subsystems.poseestimation.TrustLevel;
+import frc.robot.subsystems.poseestimation.TunableTrustLevel;
 import frc.robot.subsystems.poseestimation.PoseEstimator.VisionMeasurement;
 import frc.robot.subsystems.vision.VisionConstants.CameraConfig;
 import frc.robot.subsystems.vision.io.VisionAprilTagsIO;

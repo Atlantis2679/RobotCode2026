@@ -7,7 +7,7 @@ import team2679.atlantiskit.logfields.LogFieldsTable;
 public class ImuIONavX extends ImuIO {
   private final AHRS navX = new AHRS(AHRS.NavXComType.kMXP_SPI);
 
-  private static final boolean GYRO_UPSIDE_DOWN = true;
+  private static final boolean GYRO_UPSIDE_DOWN = false;
 
   public ImuIONavX(LogFieldsTable fieldsTable) {
     super(fieldsTable);
