@@ -126,7 +126,7 @@ public class PoseEstimator implements Tunable {
         // and C = I. See wpimath/algorithms.md
         // Worth noting that this in it's current form may be simplefied to
         // k = 1 / (1 + q / r), meaning k is linearly proportional to the ratio between Q_STD and Vision STD
-        TrustLevel skidTrustLevelMutliplier = new TrustLevel(Math.pow(2, skidRatioAtTime - 1), Math.pow(2, skidRatioAtTime - 1));
+        TrustLevel skidTrustLevelMutliplier = new TrustLevel(Math.pow(2, skidRatioAtTime), Math.pow(2, skidRatioAtTime));
         TrustLevel odometryTrustLevel = this.odometryTrustLevel.get().multiply(skidTrustLevelMutliplier);
         double[] r = trustLevelToArraySquared(visionMeasurement.trustLevel);
         double[] q = trustLevelToArraySquared(odometryTrustLevel);
@@ -206,8 +206,10 @@ public class PoseEstimator implements Tunable {
     public record VisionMeasurement(Pose2d pose, TrustLevel trustLevel, double timestamp) {
     }
 
-    public record OdometryMeasurement(SwerveDriveKinematics kinematics, SwerveModulePosition[] modulePositionsDelta,
-            SwerveModuleState[] modulesStates,
-            Optional<Rotation2d> gyroAngle, double timestamp) {
+    public record OdometryMeasurement(
+        SwerveDriveKinematics kinematics, SwerveModulePosition[] modulePositionsDelta,
+        SwerveModuleState[] moduleStates,
+        Optional<Rotation2d> gyroAngle,
+        double timestamp) {
     }
 }

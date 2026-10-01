@@ -39,10 +39,7 @@ public class MathUtils {
         }
     }
 
-    public static double avg(double[] values) {
-        if (values == null || values.length == 0) {
-            return 0.0;
-        }
+    public static double avg(double... values) {
         double sum = 0.0;
         for (double v : values) {
             sum += v;
@@ -50,68 +47,13 @@ public class MathUtils {
         return sum / values.length;
     }
 
-    public static int avg(int[] values) {
-        if (values == null || values.length == 0) {
-            return 0;
+    public static double median(double... arr) {
+        int n = arr.length;
+        Arrays.sort(arr);
+        if (n % 2 != 0) {
+          return arr[n / 2];
         }
-        long sum = 0;
-        for (int v : values) {
-            sum += v;
-        }
-        return Math.round(sum / values.length);
-    }
-
-    public static class DynamicAverage {
-        private double[] values;
-        private int i = 0;
-        private boolean isEmpty = true;
-        
-        public DynamicAverage(int len) {
-            values = new double[len];
-            Arrays.fill(values, Double.NaN);
-        }
-
-        public void update(double val) {
-            values[i] = val;
-            ++i;
-            if (i>=values.length) {
-                i=0;
-            }
-            isEmpty = false;
-        }
-
-        public double get() {
-            double sum = 0.0;
-            int len = values.length;
-            for (double num : values) {
-                if (Double.isNaN(num)) {
-                    --len;
-                } else {
-                    sum += num;
-                }
-            }
-            if (len==0) {
-                return 0.0;
-            }
-            return sum/len;
-        }
-
-        public void reset() {
-            if (!isEmpty) {
-                this.values = new double[values.length];
-                Arrays.fill(values, Double.NaN);
-                i = 0;
-                isEmpty = true;
-            }
-        }
-    }
-
-    public static double[] getHighestX(int x, double[] vals) {
-        double[] sorted = vals.clone();
-        Arrays.sort(sorted);
-        double[] res = new double[x];
-        for (int i = 0; i < x; i++) res[i] = sorted[sorted.length - 1 - i];
-        return res;
+        return avg(arr[n / 2], arr[n / 2 + 1]);
     }
 
     public static boolean inRange(double value, double low, double high) {

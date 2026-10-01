@@ -103,6 +103,38 @@ public class Swerve extends SubsystemBase implements Tunable {
     drive(0, 0, 0, false, true);
   }
 
+  public void driveChassisSpeeds(ChassisSpeeds speeds, boolean useVoltage) {
+    fieldsTable.recordOutput("Modules Target Chassis Speeds", speeds);
+
+    SwerveModuleState[] swerveModuleStates = kinematics.toSwerveModuleStates(speeds);
+
+    SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, Modules.MAX_SPEED_MPS);
+
+    setModulesState(swerveModuleStates, true, true, useVoltage);
+  }
+
+  public void resetModulesToAbsoulte() {
+    for (SwerveModule module : modules)
+      module.resetIntegratedAngleToAbsolute();
+  }
+
+  public void setModulesState(SwerveModuleState[] moduleStates, boolean optimize, boolean preventJittering,
+      boolean useVoltage) {
+    fieldsTable.recordOutput("Modules Target States", moduleStates);
+
+    for (SwerveModule module : modules)
+      module.setTargetState(moduleStates[module.getModuleNumber()], optimize, preventJittering, useVoltage);
+  }
+
+  public void setGyroOffset(double newGyroOffsetCCW) {
+  }
+
+  public void coastAll() {
+    for (SwerveModule module : modules) {
+      module.setCoast();
+    }
+  }
+
   public double getGyroYawDegreesCCW() {
     return gyroYawDegreesCCW.getAngle();
   }
@@ -146,35 +178,6 @@ public class Swerve extends SubsystemBase implements Tunable {
 
   public boolean isGyroConnected() {
     return isGyroConnectedDebouncer.calculate(imuIO.isConnected.getAsBoolean());
-  }
-
-  public void driveChassisSpeeds(ChassisSpeeds speeds, boolean useVoltage) {
-    fieldsTable.recordOutput("Modules Target Chassis Speeds", speeds);
-
-    SwerveModuleState[] swerveModuleStates = kinematics.toSwerveModuleStates(speeds);
-
-    SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, Modules.MAX_SPEED_MPS);
-
-    setModulesState(swerveModuleStates, true, true, useVoltage);
-  }
-
-  public void resetModulesToAbsoulte() {
-    for (SwerveModule module : modules)
-      module.resetIntegratedAngleToAbsolute();
-  }
-
-  public void setModulesState(SwerveModuleState[] moduleStates, boolean optimize, boolean preventJittering,
-      boolean useVoltage) {
-    fieldsTable.recordOutput("Modules Target States", moduleStates);
-
-    for (SwerveModule module : modules)
-      module.setTargetState(moduleStates[module.getModuleNumber()], optimize, preventJittering, useVoltage);
-  }
-
-  public void coastAll() {
-    for (SwerveModule module : modules) {
-      module.setCoast();
-    }
   }
 
   public double getXAcceleration() {
