@@ -21,7 +21,7 @@ import frc.robot.subsystems.poseestimation.PoseEstimator;
 import frc.robot.subsystems.poseestimation.PoseEstimator.OdometryMeasurement;
 import frc.robot.subsystems.swerve.SwerveConstants.Modules;
 import frc.robot.subsystems.swerve.io.ImuIO;
-import frc.robot.subsystems.swerve.io.ImuIONavX;
+import frc.robot.subsystems.swerve.io.ImuIORedux;
 import frc.robot.subsystems.swerve.io.ImuIOSim;
 import team2679.atlantiskit.helpers.RotationalSensorHelper;
 import team2679.atlantiskit.logfields.LogFieldsTable;
@@ -49,7 +49,7 @@ public class Swerve extends SubsystemBase implements Tunable {
 
   private final RotationalSensorHelper gyroYawDegreesCCW;
 
-  private final ImuIO imuIO = Robot.isReal() ? new ImuIONavX(fieldsTable) : new ImuIOSim(fieldsTable);
+  private final ImuIO imuIO = Robot.isReal() ? new ImuIORedux(fieldsTable) : new ImuIOSim(fieldsTable);
 
   private final Debouncer isGyroConnectedDebouncer = new Debouncer(GYRO_CONNECTED_DEBUNCER_SECONDS, DebounceType.kFalling);
 

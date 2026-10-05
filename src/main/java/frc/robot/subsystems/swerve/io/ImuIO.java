@@ -1,6 +1,7 @@
 package frc.robot.subsystems.swerve.io;
 
 import java.util.function.DoubleSupplier;
+
 import java.util.function.BooleanSupplier;
 
 import team2679.atlantiskit.logfields.IOBase;

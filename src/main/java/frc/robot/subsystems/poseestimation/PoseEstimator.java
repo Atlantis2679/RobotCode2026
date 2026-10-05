@@ -87,7 +87,7 @@ public class PoseEstimator implements Tunable {
             odometryPose = new Pose2d(odometryPose.getTranslation(), measurement.gyroAngle.get().minus(gyroOffset));
         }
         fieldsTable.recordOutput("Current Odometry Pose", odometryPose);
-        double skidRatio = skidDetector.update(measurement.kinematics, measurement.modulesStates);
+        double skidRatio = skidDetector.update(measurement.kinematics, measurement.moduleStates);
         odometryPosesBuffer.addSample(measurement.timestamp, new OdoemtrySample(odometryPose, skidRatio));
         Twist2d odometryTwistFromLastPose = lastOdometryPose.log(odometryPose);
         estimatedPose = estimatedPose.exp(odometryTwistFromLastPose);

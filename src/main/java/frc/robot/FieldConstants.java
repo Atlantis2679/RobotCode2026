@@ -5,7 +5,7 @@ import com.pathplanner.lib.util.FlippingUtil;
 import edu.wpi.first.math.geometry.Pose3d;
 
 public class FieldConstants {
-    public static final double HEIGHT_ABOVE_FIELD_THRESHOLD_METERS = 0.4;
+    public static final double HEIGHT_ABOVE_FIELD_THRESHOLD_METERS = 0.05;
     public static final double PITCH_ROLL_THRESHOLD_DEGRESS = 10;
 
     public static boolean isOnField(Pose3d pose) {

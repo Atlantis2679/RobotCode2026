@@ -82,7 +82,7 @@ public class RobotContainer {
         });
         TunablesManager.add("Reset Pose", new InstantCommand(() -> {
             PoseEstimator.getInstance().resetPose(new Pose2d());
-        }));
+        }).ignoringDisable(true));
         TunablesManager.add("PoseEstimator", PoseEstimator.getInstance());
         new Trigger(DriverStation::isDisabled).whileTrue(swerveCommands.stop().alongWith(allCommands.stopAll()));
         SignalLogger.setPath("/media/sda1/"); // Cofigure pheonixLib logging path
