@@ -3,6 +3,7 @@ package frc.robot.subsystems.swerve;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
@@ -75,7 +76,14 @@ public class Swerve extends SubsystemBase implements Tunable {
     Optional<Rotation2d> gyroAngle = isGyroConnected() ? Optional.of(Rotation2d.fromDegrees(getGyroYawDegreesCCW()))
         : Optional.empty();
     PoseEstimator.getInstance().addOdometryMeasurement(
-        new OdometryMeasurement(kinematics, getModulePositionsDelta(), getModulesStates(), gyroAngle, Timer.getTimestamp()));
+        new OdometryMeasurement(
+          Timer.getTimestamp(),
+          kinematics,
+          getModulePositionsDelta(),
+          getModulesStates(),
+          new Translation2d(imuIO.xAcceleration.getAsDouble(), imuIO.yAcceleration.getAsDouble()),
+          gyroAngle
+    ));
 
     fieldsTable.recordOutput("Is gryo connected", isGyroConnected());
     fieldsTable.recordOutput("Robot Relative Real Chassis Speeds", getRobotRelativeChassisSpeeds());

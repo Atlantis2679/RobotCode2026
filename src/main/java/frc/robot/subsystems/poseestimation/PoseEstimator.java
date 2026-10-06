@@ -1,6 +1,7 @@
 package frc.robot.subsystems.poseestimation;
 
 import static frc.robot.subsystems.poseestimation.PoseEstimatorConstants.PRE_MATCH_VISION_TRUST_LEVEL_MULTIPLIER;
+import static edu.wpi.first.units.Units.DegreesPerSecond;
 import static frc.robot.subsystems.poseestimation.PoseEstimatorConstants.ODOMETRY_POSES_BUFFER_SIZE_SEC;
 import static frc.robot.subsystems.poseestimation.PoseEstimatorConstants.ODOMETRY_STD_DEVS;
 
@@ -17,6 +18,7 @@ import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.interpolation.Interpolatable;
 import edu.wpi.first.math.interpolation.TimeInterpolatableBuffer;
@@ -26,8 +28,10 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj.Timer;
 import frc.robot.RobotContainer;
+import team2679.atlantiskit.helpers.RotationalSensorHelper;
 import team2679.atlantiskit.logfields.LogFieldsTable;
 import team2679.atlantiskit.tunables.Tunable;
 import team2679.atlantiskit.tunables.TunableBuilder;
@@ -57,7 +61,7 @@ public class PoseEstimator implements Tunable {
     private TunableTrustLevel odometryTrustLevel = new TunableTrustLevel(ODOMETRY_STD_DEVS);
     private TunableTrustLevel preMatchVisionTrustLevelMultiplier = new TunableTrustLevel(PRE_MATCH_VISION_TRUST_LEVEL_MULTIPLIER);
 
-    private Rotation2d gyroOffset = new Rotation2d();
+    private RotationalSensorHelper yawRotationalSensorHelper = new RotationalSensorHelper(0);
     private Optional<Rotation2d> lastGyroAngle = Optional.empty();
 
     private double lastResetTimestamp = Timer.getTimestamp();
@@ -72,8 +76,7 @@ public class PoseEstimator implements Tunable {
         Twist2d twist2d = measurement.kinematics.toTwist2d(measurement.modulePositionsDelta);
         if (measurement.gyroAngle.isPresent()) {
           if (lastGyroAngle.isEmpty()) {
-
-            gyroOffset = measurement.gyroAngle.get().minus(odometryPose.getRotation());
+            yawRotationalSensorHelper.setOffset(measurement.gyroAngle.get().minus(odometryPose.getRotation()).getDegrees());
           } else {
             twist2d.dtheta = measurement.gyroAngle.get().minus(lastGyroAngle.get()).getRadians();
           }
@@ -81,13 +84,21 @@ public class PoseEstimator implements Tunable {
         } else {
           lastGyroAngle = Optional.empty();
         }
+        yawRotationalSensorHelper.update(measurement.gyroAngle.get().getDegrees());
         Pose2d lastOdometryPose = odometryPose;
         odometryPose = odometryPose.exp(twist2d);
         if (measurement.gyroAngle.isPresent()) {
-            odometryPose = new Pose2d(odometryPose.getTranslation(), measurement.gyroAngle.get().minus(gyroOffset));
+            odometryPose = new Pose2d(odometryPose.getTranslation(), Rotation2d.fromDegrees(yawRotationalSensorHelper.getAngle()));
         }
         fieldsTable.recordOutput("Current Odometry Pose", odometryPose);
-        double skidRatio = skidDetector.update(measurement.kinematics, measurement.moduleStates);
+        double skidRatio = skidDetector.update(
+            measurement.timestamp,
+            measurement.moduleStates,
+            Rotation2d.fromDegrees(yawRotationalSensorHelper.getAngle()),
+            DegreesPerSecond.of(yawRotationalSensorHelper.getVelocity()),
+            measurement.robotIMUAcceleration,
+            RobotState.isDisabled()
+            );
         odometryPosesBuffer.addSample(measurement.timestamp, new OdoemtrySample(odometryPose, skidRatio));
         Twist2d odometryTwistFromLastPose = lastOdometryPose.log(odometryPose);
         estimatedPose = estimatedPose.exp(odometryTwistFromLastPose);
@@ -207,9 +218,11 @@ public class PoseEstimator implements Tunable {
     }
 
     public record OdometryMeasurement(
+        double timestamp,
         SwerveDriveKinematics kinematics, SwerveModulePosition[] modulePositionsDelta,
         SwerveModuleState[] moduleStates,
-        Optional<Rotation2d> gyroAngle,
-        double timestamp) {
+        Translation2d robotIMUAcceleration,
+        Optional<Rotation2d> gyroAngle
+        ) {
     }
 }
