@@ -87,9 +87,9 @@ public class PoseEstimator implements Tunable {
         } else {
           lastGyroAngle = Optional.empty();
         }
-        yawRotationalSensorHelper.update(measurement.gyroAngle.get().getDegrees());
         Pose2d lastOdometryPose = odometryPose;
         odometryPose = odometryPose.exp(twist2d);
+        yawRotationalSensorHelper.update(odometryPose.getRotation().getDegrees());
         if (measurement.gyroAngle.isPresent()) {
             odometryPose = new Pose2d(odometryPose.getTranslation(), Rotation2d.fromDegrees(yawRotationalSensorHelper.getAngle()));
         }
@@ -102,6 +102,7 @@ public class PoseEstimator implements Tunable {
             measurement.robotIMUAcceleration,
             RobotState.isDisabled()
             );
+        fieldsTable.recordOutput("Skid ratio", skidRatio);
         odometryPosesBuffer.addSample(measurement.timestamp.in(Seconds), new OdoemtrySample(odometryPose, skidRatio));
         Twist2d odometryTwistFromLastPose = lastOdometryPose.log(odometryPose);
         estimatedPose = estimatedPose.exp(odometryTwistFromLastPose);

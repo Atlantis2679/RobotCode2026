@@ -133,12 +133,8 @@ public class SkidDetector {
 
             Translation2d imuAccelerationField = imuAccelerationRobot.minus(accelerometerBiasRobot).rotateBy(gyroYaw);
 
-            Translation2d pullTowardOdometry = odometryVelocityField
-                    .minus(imuVelocityEstimateField)
-                    .times(dt.div(LEAK_TIME_CONSTANT).magnitude());
             imuVelocityEstimateField = imuVelocityEstimateField
-                    .plus(imuAccelerationField.times(dt.in(Seconds)))
-                    .plus(pullTowardOdometry);
+                    .plus(imuAccelerationField.times(dt.in(Seconds)));
 
             return odometryVelocityField.minus(imuVelocityEstimateField).getNorm();
         }
