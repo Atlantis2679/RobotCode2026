@@ -4,11 +4,13 @@ import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
 import static frc.robot.subsystems.poseestimation.PoseEstimatorConstants.SkidDetectorConstants.*;
+import static frc.robot.utils.MathUtils.median;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Time;
 import frc.robot.subsystems.swerve.SwerveConstants;
 import team2679.atlantiskit.logfields.LogFieldsTable;
 
@@ -20,14 +22,14 @@ public class SkidDetector {
     private final ImuSlipLayer imuSlipLayer = new ImuSlipLayer();
 
     private double heldSeverity = 0.0;
-    private double lastTimestamp = 0.0;
+    private Time lastTimestamp = Seconds.of(0);
 
     public SkidDetector(LogFieldsTable fieldsTable) {
         this.fieldsTable = fieldsTable;
     }
 
     public double update(
-            double timestamp,
+            Time timestamp,
             SwerveModuleState[] moduleStates,
             Rotation2d yaw,
             AngularVelocity yawAngluarVelocity,
@@ -92,13 +94,10 @@ public class SkidDetector {
         return moduleSkids;
     }
 
-    private double holdWithDecay(double timestamp, double combinedSeverity) {
-        double dt = timestamp - lastTimestamp;
+    private double holdWithDecay(Time timestamp, double combinedSeverity) {
+        Time dt = timestamp.minus(lastTimestamp);
         lastTimestamp = timestamp;
-        if (Double.isNaN(dt) || dt <= 0) {
-            return combinedSeverity;
-        }
-        double decayedSeverity = heldSeverity * Math.exp(-dt / HOLD_DECAY_SECONDS.in(Seconds));
+        double decayedSeverity = heldSeverity * Math.exp(-dt.div(HOLD_DECAY_SECONDS).magnitude());
         return Math.max(combinedSeverity, decayedSeverity);
     }
 
@@ -108,36 +107,26 @@ public class SkidDetector {
         return new Translation2d(xMedian, yMedian);
     }
 
-    private static double median(double[] values) {
-        double[] sorted = values.clone();
-        Arrays.sort(sorted);
-        int count = sorted.length;
-        return (count % 2 == 0)
-                ? (sorted[count / 2 - 1] + sorted[count / 2]) / 2.0
-                : sorted[count / 2];
-    }
-
     private static class ImuSlipLayer {
-        private static final double LEAK_TIME_CONSTANT_SECONDS = 0.4;
-        private static final double MAX_PHYSICAL_ACCELERATION_METERS_PER_SECOND_SQUARED = 30.0;
-        private static final double BIAS_LEARNING_RATE = 0.01;
-        private static final double MAX_VALID_DT_SECONDS = 0.1;
+        private static final Time LEAK_TIME_CONSTANT_SECONDS = Seconds.of(0.1); // The time i
+        private static final double BIAS_LEARNING_RATE = 0.01; // Use as IMU background learning rate
+        private static final Time MAX_VALID_DT = Seconds.of(0.1); // Used to update late arriving updates without interpolation
 
         private Translation2d imuVelocityEstimateField = new Translation2d();
-        private Translation2d accelerometerBiasRobot = new Translation2d();
-        private double lastTimestamp = Double.NaN;
+        private Translation2d accelerometerBiasRobot = new Translation2d(); // Used to remove IMU background noise
+        private Time lastTimestamp = Seconds.of(0);
 
         double update(
-                double timestamp,
+                Time timestamp,
                 Translation2d imuAccelerationRobot,
                 Translation2d medianTranslationalVelocityRobot,
                 Rotation2d gyroYaw,
                 boolean robotDisabled) {
             Translation2d odometryVelocityField = medianTranslationalVelocityRobot.rotateBy(gyroYaw);
 
-            double dt = timestamp - lastTimestamp;
+            Time dt = timestamp.minus(lastTimestamp);
             lastTimestamp = timestamp;
-            if (Double.isNaN(dt) || dt <= 0 || dt > MAX_VALID_DT_SECONDS) {
+            if (dt.baseUnitMagnitude() == 0 || dt.gt(MAX_VALID_DT)) {
                 imuVelocityEstimateField = odometryVelocityField;
                 return 0.0;
             }
@@ -146,19 +135,13 @@ public class SkidDetector {
                 accelerometerBiasRobot = accelerometerBiasRobot.interpolate(imuAccelerationRobot, BIAS_LEARNING_RATE);
             }
 
-            Translation2d correctedAcceleration = imuAccelerationRobot.minus(accelerometerBiasRobot);
-            double accelerationMagnitude = correctedAcceleration.getNorm();
-            if (accelerationMagnitude > MAX_PHYSICAL_ACCELERATION_METERS_PER_SECOND_SQUARED) {
-                correctedAcceleration = correctedAcceleration.times(
-                        MAX_PHYSICAL_ACCELERATION_METERS_PER_SECOND_SQUARED / accelerationMagnitude);
-            }
-            Translation2d imuAccelerationField = correctedAcceleration.rotateBy(gyroYaw);
+            Translation2d imuAccelerationField = imuAccelerationRobot.minus(accelerometerBiasRobot).rotateBy(gyroYaw);
 
             Translation2d pullTowardOdometry = odometryVelocityField
                     .minus(imuVelocityEstimateField)
-                    .times(dt / LEAK_TIME_CONSTANT_SECONDS);
+                    .times(dt.div(LEAK_TIME_CONSTANT_SECONDS).magnitude());
             imuVelocityEstimateField = imuVelocityEstimateField
-                    .plus(imuAccelerationField.times(dt))
+                    .plus(imuAccelerationField.times(dt.in(Seconds)))
                     .plus(pullTowardOdometry);
 
             return odometryVelocityField.minus(imuVelocityEstimateField).getNorm();

@@ -32,6 +32,7 @@ import team2679.atlantiskit.tunables.TunableBuilder;
 import team2679.atlantiskit.tunables.TunablesManager;
 import team2679.atlantiskit.valueholders.DoubleHolder;
 
+import static edu.wpi.first.units.Units.Seconds;
 import static frc.robot.subsystems.swerve.SwerveConstants.*;
 
 import java.util.Optional;
@@ -77,7 +78,7 @@ public class Swerve extends SubsystemBase implements Tunable {
         : Optional.empty();
     PoseEstimator.getInstance().addOdometryMeasurement(
         new OdometryMeasurement(
-          Timer.getTimestamp(),
+          Seconds.of(Timer.getTimestamp()),
           kinematics,
           getModulePositionsDelta(),
           getModulesStates(),

@@ -2,7 +2,8 @@ package frc.robot.subsystems.poseestimation;
 
 import static frc.robot.subsystems.poseestimation.PoseEstimatorConstants.PRE_MATCH_VISION_TRUST_LEVEL_MULTIPLIER;
 import static edu.wpi.first.units.Units.DegreesPerSecond;
-import static frc.robot.subsystems.poseestimation.PoseEstimatorConstants.ODOMETRY_POSES_BUFFER_SIZE_SEC;
+import static edu.wpi.first.units.Units.Seconds;
+import static frc.robot.subsystems.poseestimation.PoseEstimatorConstants.ODOMETRY_POSES_BUFFER_SIZE;
 import static frc.robot.subsystems.poseestimation.PoseEstimatorConstants.ODOMETRY_STD_DEVS;
 
 import java.util.ArrayList;
@@ -27,6 +28,7 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj.Timer;
@@ -52,7 +54,8 @@ public class PoseEstimator implements Tunable {
         }
     }
 
-    private final TimeInterpolatableBuffer<OdoemtrySample> odometryPosesBuffer = TimeInterpolatableBuffer.createBuffer(ODOMETRY_POSES_BUFFER_SIZE_SEC);
+    private final TimeInterpolatableBuffer<OdoemtrySample> odometryPosesBuffer =
+        TimeInterpolatableBuffer.createBuffer(ODOMETRY_POSES_BUFFER_SIZE.in(Seconds));
     
     private final LogFieldsTable fieldsTable = new LogFieldsTable("PoseEstimator");
 
@@ -64,7 +67,7 @@ public class PoseEstimator implements Tunable {
     private RotationalSensorHelper yawRotationalSensorHelper = new RotationalSensorHelper(0);
     private Optional<Rotation2d> lastGyroAngle = Optional.empty();
 
-    private double lastResetTimestamp = Timer.getTimestamp();
+    private Time lastResetTimestamp = Seconds.of(0);
 
     private PoseEstimator() {}
 
@@ -99,7 +102,7 @@ public class PoseEstimator implements Tunable {
             measurement.robotIMUAcceleration,
             RobotState.isDisabled()
             );
-        odometryPosesBuffer.addSample(measurement.timestamp, new OdoemtrySample(odometryPose, skidRatio));
+        odometryPosesBuffer.addSample(measurement.timestamp.in(Seconds), new OdoemtrySample(odometryPose, skidRatio));
         Twist2d odometryTwistFromLastPose = lastOdometryPose.log(odometryPose);
         estimatedPose = estimatedPose.exp(odometryTwistFromLastPose);
         fieldsTable.recordOutput("Current Estimated Pose", estimatedPose);
@@ -108,18 +111,19 @@ public class PoseEstimator implements Tunable {
     }
 
     public void addVisionMeasurement(VisionMeasurement measurement) {
-        if (measurement.timestamp < lastResetTimestamp) return;
+        if (measurement.timestamp.lt(lastResetTimestamp)) return;
         try {
-          if (odometryPosesBuffer.getInternalBuffer().lastKey() - ODOMETRY_POSES_BUFFER_SIZE_SEC > measurement.timestamp()) {
-            return;
-          }
+            Time dt = measurement.timestamp.minus(Seconds.of(odometryPosesBuffer.getInternalBuffer().lastKey()));
+            if (dt.gt(ODOMETRY_POSES_BUFFER_SIZE)) {
+                return;
+            }
         } catch (NoSuchElementException ex) {
-          return;
+            return;
         }
         if (DriverStation.isDisabled()) {
-          measurement = new VisionMeasurement(measurement.pose, measurement.trustLevel.multiply(preMatchVisionTrustLevelMultiplier.get()), measurement.timestamp);
+            measurement = new VisionMeasurement(measurement.pose, measurement.trustLevel.multiply(preMatchVisionTrustLevelMultiplier.get()), measurement.timestamp);
         }
-        Optional<OdoemtrySample> sample = odometryPosesBuffer.getSample(measurement.timestamp());
+        Optional<OdoemtrySample> sample = odometryPosesBuffer.getSample(measurement.timestamp().in(Seconds));
         if (sample.isEmpty())
             return;
         Transform2d odometryToSampleTransform = new Transform2d(odometryPose, sample.get().pose);
@@ -185,7 +189,7 @@ public class PoseEstimator implements Tunable {
         estimatedPose = newPose;
         odometryPosesBuffer.clear();
         lastGyroAngle = Optional.empty();
-        lastResetTimestamp = Timer.getTimestamp();
+        lastResetTimestamp = Seconds.of(Timer.getTimestamp());
         fieldsTable.recordOutput("Current Odometry Pose", odometryPose);
         fieldsTable.recordOutput("Current Estimated Pose", estimatedPose);
         fieldsTable.recordOutput("Odometry to Estimated Transform (Odometry error)", new Transform2d(odometryPose, estimatedPose));
@@ -214,11 +218,11 @@ public class PoseEstimator implements Tunable {
         builder.addChild("No Odometry trust level multiplyer", preMatchVisionTrustLevelMultiplier);
     }
 
-    public record VisionMeasurement(Pose2d pose, TrustLevel trustLevel, double timestamp) {
+    public record VisionMeasurement(Pose2d pose, TrustLevel trustLevel, Time timestamp) {
     }
 
     public record OdometryMeasurement(
-        double timestamp,
+        Time timestamp,
         SwerveDriveKinematics kinematics, SwerveModulePosition[] modulePositionsDelta,
         SwerveModuleState[] moduleStates,
         Translation2d robotIMUAcceleration,

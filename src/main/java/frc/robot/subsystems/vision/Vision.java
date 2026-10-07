@@ -1,5 +1,6 @@
 package frc.robot.subsystems.vision;
 
+import static edu.wpi.first.units.Units.Seconds;
 import static frc.robot.subsystems.vision.VisionConstants.AMBIGUITY_THRESHOLD;
 import static frc.robot.subsystems.vision.VisionConstants.AVG_DISTANCE_THRESHOLD_METERS;
 import static frc.robot.subsystems.vision.VisionConstants.CAMERAS;
@@ -56,7 +57,7 @@ public class Vision extends SubsystemBase implements Tunable {
       if (!inRange(visionData.avgDistanceToCam(), 0, distanceThresholdMeters.get())) continue;
       if (!FieldConstants.isOnField(visionData.robotPose())) continue;
       TrustLevel trustLevels = calculateTrustLevel(stdFactor, visionData.tagsUsed(), visionData.avgDistanceToCam(), visionData.ambiguity());
-      visionMeasurements.add(new VisionMeasurement(visionData.robotPose().toPose2d(), trustLevels, visionData.timestamp()));
+      visionMeasurements.add(new VisionMeasurement(visionData.robotPose().toPose2d(), trustLevels, Seconds.of(visionData.timestampSeconds())));
     }
     return visionMeasurements;
   }

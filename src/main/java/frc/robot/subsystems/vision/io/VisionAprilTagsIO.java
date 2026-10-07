@@ -13,7 +13,7 @@ import team2679.atlantiskit.logfields.LogFieldsTable;
 
 public abstract class VisionAprilTagsIO extends IOBase {
     public record VisionData(
-        double timestamp,
+        double timestampSeconds,
         Pose3d robotPose,
         double avgDistanceToCam,
         double ambiguity,
