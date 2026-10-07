@@ -108,10 +108,6 @@ public class SkidDetector {
     }
 
     private static class ImuSlipLayer {
-        private static final Time LEAK_TIME_CONSTANT_SECONDS = Seconds.of(0.1); // The time i
-        private static final double BIAS_LEARNING_RATE = 0.01; // Use as IMU background learning rate
-        private static final Time MAX_VALID_DT = Seconds.of(0.1); // Used to update late arriving updates without interpolation
-
         private Translation2d imuVelocityEstimateField = new Translation2d();
         private Translation2d accelerometerBiasRobot = new Translation2d(); // Used to remove IMU background noise
         private Time lastTimestamp = Seconds.of(0);
@@ -139,7 +135,7 @@ public class SkidDetector {
 
             Translation2d pullTowardOdometry = odometryVelocityField
                     .minus(imuVelocityEstimateField)
-                    .times(dt.div(LEAK_TIME_CONSTANT_SECONDS).magnitude());
+                    .times(dt.div(LEAK_TIME_CONSTANT).magnitude());
             imuVelocityEstimateField = imuVelocityEstimateField
                     .plus(imuAccelerationField.times(dt.in(Seconds)))
                     .plus(pullTowardOdometry);
