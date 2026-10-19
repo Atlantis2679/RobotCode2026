@@ -1,9 +1,7 @@
 package frc.robot.subsystems.poseestimation;
 
-import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
 
-import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Time;
 
 public final class PoseEstimatorConstants {
