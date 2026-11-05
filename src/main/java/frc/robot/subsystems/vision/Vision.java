@@ -4,6 +4,7 @@ import static edu.wpi.first.units.Units.Seconds;
 import static frc.robot.subsystems.vision.VisionConstants.AMBIGUITY_THRESHOLD;
 import static frc.robot.subsystems.vision.VisionConstants.AVG_DISTANCE_THRESHOLD_METERS;
 import static frc.robot.subsystems.vision.VisionConstants.CAMERAS;
+import static frc.robot.subsystems.vision.VisionConstants.PRE_MATCH_TRUST_LEVEL_MULTIPLIER;
 import static frc.robot.subsystems.vision.VisionConstants.TRUST_LEVEL_MULTIPLIER;
 
 import java.util.ArrayList;
@@ -34,14 +35,15 @@ public class Vision extends SubsystemBase implements Tunable {
   private final VisionAprilTagsIO[] visionCameras = new VisionAprilTagsIO[CAMERAS.length];
 
   private static final TunableTrustLevel trustLevelMultiplier = new TunableTrustLevel(TRUST_LEVEL_MULTIPLIER);
+  private static final TunableTrustLevel preMatchTrustLevelMultiplier = new TunableTrustLevel(PRE_MATCH_TRUST_LEVEL_MULTIPLIER);
   private static final DoubleHolder ambiguityThreshold = new DoubleHolder(AMBIGUITY_THRESHOLD);
   private static final DoubleHolder distanceThresholdMeters = new DoubleHolder(AVG_DISTANCE_THRESHOLD_METERS);
 
   public Vision() {
-    PeriodicAlertsGroup alertsGroup = new PeriodicAlertsGroup("Vision");
+    PeriodicAlertsGroup alertsGroup = new PeriodicAlertsGroup("Vision Alerts");
     for (int i = 0; i < visionCameras.length; i++) {
       CameraConfig camera = CAMERAS[i];
-      visionCameras[i] = new VisionAprilTagsIOPhoton(fieldsTable, camera);
+      visionCameras[i] = new VisionAprilTagsIOPhoton(fieldsTable, camera, alertsGroup);
       VisionAprilTagsIO io = visionCameras[i];
       alertsGroup.addWarningAlert(() -> camera.name() + " Disconnected!", () -> !io.isConnected.getAsBoolean());
     }
@@ -65,18 +67,20 @@ public class Vision extends SubsystemBase implements Tunable {
   private List<VisionMeasurement> getAllResults() {
     List<VisionMeasurement> measurements = new ArrayList<>();
     for (VisionAprilTagsIO io : visionCameras) {
-      for (VisionMeasurement measurment : getAllResultsInIO(io)) {
-        measurements.add(measurment);
+      for (VisionMeasurement measurement : getAllResultsInIO(io)) {
+        measurements.add(measurement);
       }
     }
+    // Feed measurements oldest-first so the estimator never jumps back in time across cameras
+    measurements.sort((a, b) -> a.timestamp().compareTo(b.timestamp()));
     fieldsTable.recordOutput("Vision measurements", measurements.toArray(new VisionMeasurement[0]));
     return measurements;
   }
 
   @Override
   public void periodic() {
-    for (VisionMeasurement mesurement : getAllResults()) {
-      PoseEstimator.getInstance().addVisionMeasurement(mesurement);
+    for (VisionMeasurement measurement : getAllResults()) {
+      PoseEstimator.getInstance().addVisionMeasurement(measurement);
     }
   }
 
@@ -89,15 +93,25 @@ public class Vision extends SubsystemBase implements Tunable {
     if (ambiguity == 1 || tagsUsed == 0 || avgDistanceToCam == 0)
       return new TrustLevel(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
     double value = Math.pow(avgDistanceToCam, 2) / Math.pow(tagsUsed, 2) / Math.pow(1 - ambiguity, 2) * stdFactor;
-    TrustLevel result = new TrustLevel(value, value);
-    result = result.multiply(trustLevelMultiplier.get());
-    if (tagsUsed == 1 && !DriverStation.isDisabled()) result = new TrustLevel(result.xyStdDev(), Double.POSITIVE_INFINITY);
-    return result;
+    TrustLevel result = new TrustLevel(value, value).multiply(trustLevelMultiplier.get());
+    boolean robotDisabled = DriverStation.isDisabled();
+    if (robotDisabled) result = result.multiply(preMatchTrustLevelMultiplier.get());
+
+    // Rotation trust:
+    //   disabled           -> only trust multi-tag rotation (seeds the heading pre-match)
+    //   enabled + gyro     -> never trust vision rotation, the gyro is better
+    //   enabled + no gyro  -> fall back to vision rotation
+    double rotationStdDev;
+    if (robotDisabled) rotationStdDev = tagsUsed > 1 ? result.rotationStdDev() : Double.POSITIVE_INFINITY;
+    else if (PoseEstimator.getInstance().hasGyroAngle()) rotationStdDev = Double.POSITIVE_INFINITY;
+    else rotationStdDev = result.rotationStdDev();
+    return new TrustLevel(result.xyStdDev(), rotationStdDev);
   }
 
   @Override
   public void initTunable(TunableBuilder builder) {
     builder.addChild("Trust level multiplier", trustLevelMultiplier);
+    builder.addChild("PreMatch trust level multiplier", preMatchTrustLevelMultiplier);
     builder.addDoubleProperty("Ambiguity threshold", ambiguityThreshold::get, ambiguityThreshold::set);
     builder.addDoubleProperty("Distance threshold", distanceThresholdMeters::get, distanceThresholdMeters::set);
   }

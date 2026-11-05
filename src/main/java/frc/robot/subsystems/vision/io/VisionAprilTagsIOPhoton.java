@@ -22,10 +22,10 @@ import team2679.atlantiskit.periodicalerts.PeriodicAlertsGroup;
 public class VisionAprilTagsIOPhoton extends VisionAprilTagsIO {
     private final PhotonCamera camera;
     private final CameraConfig cameraConfig;
-    private VisionData[] visionData;
+    private VisionData[] visionData = new VisionData[0];
     private boolean moreThanOneTargetInSingleTargetMode = false;
 
-    public VisionAprilTagsIOPhoton(LogFieldsTable fieldsTable, CameraConfig cameraConfig) {
+    public VisionAprilTagsIOPhoton(LogFieldsTable fieldsTable, CameraConfig cameraConfig, PeriodicAlertsGroup alertsGroup) {
         super(fieldsTable.getSubTable(cameraConfig.name()));
 
         this.camera = new PhotonCamera(cameraConfig.name());
@@ -35,7 +35,7 @@ public class VisionAprilTagsIOPhoton extends VisionAprilTagsIO {
             Sim.VISION_SIM.addCamera(photonCameraSim, cameraConfig.robotToCam());
         }
 
-        new PeriodicAlertsGroup("Vision").addWarningAlert(() -> "PhotonVision multitag is failed or is disabled", () -> this.moreThanOneTargetInSingleTargetMode);
+        alertsGroup.addWarningAlert(() -> "PhotonVision multitag is failed or is disabled for " + cameraConfig.name() + " camera", () -> this.moreThanOneTargetInSingleTargetMode);
 
         this.cameraConfig = cameraConfig;
     }
@@ -50,8 +50,8 @@ public class VisionAprilTagsIOPhoton extends VisionAprilTagsIO {
             if (result.hasTargets()) {
                 if (result.getMultiTagResult().isPresent()) {
                     moreThanOneTargetInSingleTargetMode = false;
-                    Transform3d cameraToPose = result.multitagResult.get().estimatedPose.best;
-                    Pose3d camPose = new Pose3d().transformBy(cameraToPose);
+                    Transform3d fieldToCam = result.multitagResult.get().estimatedPose.best;
+                    Pose3d camPose = new Pose3d().transformBy(fieldToCam);
                     Pose3d robotPose = camPose.transformBy(cameraConfig.robotToCam().inverse());
                     double timestamp = result.getTimestampSeconds();
                     Pose3d[] tagsPoses = result.multitagResult.get().fiducialIDsUsed.stream()
@@ -64,7 +64,7 @@ public class VisionAprilTagsIOPhoton extends VisionAprilTagsIO {
                       distanceSum += target.relativeTo(camPose).getTranslation().getNorm();
                     }
                     tagsPosesList.add(tagsPoses);
-                    visionData.add(new VisionData(timestamp, robotPose, distanceSum / tagsUsed, result.multitagResult.get().estimatedPose.ambiguity, tagsUsed));
+                    visionData.add(new VisionData(timestamp, robotPose, distanceSum / tagsUsed, 0.0, tagsUsed));
                 } else {
                     moreThanOneTargetInSingleTargetMode = result.getTargets().size() > 1;
                     PhotonTrackedTarget target = null;

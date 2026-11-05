@@ -25,6 +25,7 @@ public class VisionConstants {
   // };
 
   public static final TrustLevel TRUST_LEVEL_MULTIPLIER = new TrustLevel(0.01, 1.9);
+  public static final TrustLevel PRE_MATCH_TRUST_LEVEL_MULTIPLIER = new TrustLevel(0.2, 0.05);
 
   public static final double AVG_DISTANCE_THRESHOLD_METERS = 3;
   public static final double AMBIGUITY_THRESHOLD = 0.2;
@@ -42,7 +43,7 @@ public class VisionConstants {
     new CameraConfig(
       "Side", 1.0,
       new Transform3d(new Translation3d(-0.155, -0.2, 0.605),
-      new Rotation3d(Degrees.of(.0), Degrees.of(5), Degrees.of(0))),
+      new Rotation3d(Degrees.of(.0), Degrees.of(5), Degrees.of(-90))),
       new SimCameraProperties()
     )
   };
