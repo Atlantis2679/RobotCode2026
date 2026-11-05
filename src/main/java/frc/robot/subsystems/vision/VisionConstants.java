@@ -27,7 +27,7 @@ public class VisionConstants {
   public static final TrustLevel TRUST_LEVEL_MULTIPLIER = new TrustLevel(0.01, 1.9);
   public static final TrustLevel PRE_MATCH_TRUST_LEVEL_MULTIPLIER = new TrustLevel(0.2, 0.05);
 
-  public static final double AVG_DISTANCE_THRESHOLD_METERS = 3;
+  public static final double AVG_DISTANCE_THRESHOLD_METERS = 5;
   public static final double AMBIGUITY_THRESHOLD = 0.2;
 
   public record CameraConfig(String name, double stdFactor, Transform3d robotToCam, SimCameraProperties simCameraProperties) {

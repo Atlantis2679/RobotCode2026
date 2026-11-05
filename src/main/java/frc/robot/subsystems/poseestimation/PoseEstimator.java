@@ -160,6 +160,7 @@ public class PoseEstimator implements Tunable {
         fieldsTable.recordOutput("Current Odometry Pose", odometryPose);
         fieldsTable.recordOutput("Current Estimated Pose", estimatedPose);
         fieldsTable.recordOutput("Odometry to Estimated Transform (Odometry error)", new Transform2d(odometryPose, estimatedPose));
+        fieldsTable.recordOutput("Odometry error (field frame)", estimatedPose.getTranslation().minus(odometryPose.getTranslation()));
         callAllCallbacks();
     }
 

@@ -64,7 +64,7 @@ public class SwerveDriverController extends TunableCommand {
     double precentageSideways = sidewaysSupplier.getAsDouble() * velocityMultiplier;
     double precentageRotation;
 
-    precentageRotation = rotationsSupplier.getAsDouble() * velocityMultiplier;
+    precentageRotation = -rotationsSupplier.getAsDouble() * velocityMultiplier;
 
     if (isSensetiveMode.getAsBoolean()) {
       precentageForward *= SENSETIVE_TRANSLATION_MULTIPLIER;

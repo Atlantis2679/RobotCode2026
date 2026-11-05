@@ -32,7 +32,7 @@ public final class SwerveConstants {
         public static final double TURN_MOTOR_KD = 0;
 
         public static final double MAX_VOLTAGE = 12;
-        public static final double MAX_SPEED_MPS = 5;
+        public static final double MAX_SPEED_MPS = 4.2;
         // Also used as a refrence for percantage speed calculation - so lowering this
         // MAY cause the modules to faster
         // - always calibrate before changing!
@@ -46,13 +46,13 @@ public final class SwerveConstants {
         public static final double WHEEL_CIRCUMFERENCE_METERS = 2 * Math.PI * WHEEL_RADIUS_METERS;
 
         public static final double[] OFFSETS = {
-                -62.05078125 + 180,
-                -91.669921875,
-                -131.66015625 + 180,
-                -31.904296875 + 180,
+                -62.05078125,
+                -91.669921875 + 180,
+                -131.66015625,
+                -31.904296875,
         };
 
-        public static final double DRIVE_STATOR_CURRENT_LIMIT = 60;
+        public static final double DRIVE_STATOR_CURRENT_LIMIT = 90;
         public static final double TURN_STATOR_CURRENT_LIMIT = 30;
 
         public static final double DRIVE_SUPPLY_CURRENT_LIMIT = 60;
@@ -103,7 +103,7 @@ public final class SwerveConstants {
 
     public static final class DriverController {
         public static final double DRIVER_MAX_ANGULAR_VELOCITY_RPS = 8;
-        public static final double DRIVER_ACCELERATION_LIMIT_MPS = 4.5;
+        public static final double DRIVER_ACCELERATION_LIMIT_MPS = 12;
         public static final double DRIVER_ANGULAR_ACCELERATION_LIMIT_RPS =  Math.toRadians(720);
         public static final double SENSETIVE_TRANSLATION_MULTIPLIER = 0.3;
         public static final double SENSETIVE_ROTATION_MULTIPLIER = 0.3;
