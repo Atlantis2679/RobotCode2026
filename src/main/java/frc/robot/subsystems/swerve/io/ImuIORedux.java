@@ -5,6 +5,7 @@ import com.reduxrobotics.sensors.canandgyro.Canandgyro;
 import team2679.atlantiskit.logfields.LogFieldsTable;
 
 import static frc.robot.RobotMap.CANBUS.CAN_AND_GYRO_ID;
+import static frc.robot.subsystems.swerve.SwerveConstants.GYRO_CONNECTED_DEBUNCER_SECONDS;
 
 public class ImuIORedux extends ImuIO {
     private final Canandgyro canandgyro = new Canandgyro(CAN_AND_GYRO_ID);
@@ -30,7 +31,7 @@ public class ImuIORedux extends ImuIO {
 
     @Override
     protected boolean getIsConnected() {
-        return canandgyro.isConnected();
+        return canandgyro.isConnected(GYRO_CONNECTED_DEBUNCER_SECONDS) && !canandgyro.isCalibrating();
     }
 
     @Override

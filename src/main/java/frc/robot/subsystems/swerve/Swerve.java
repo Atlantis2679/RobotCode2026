@@ -53,7 +53,7 @@ public class Swerve extends SubsystemBase implements Tunable {
 
   private final ImuIO imuIO = Robot.isReal() ? new ImuIORedux(fieldsTable) : new ImuIOSim(fieldsTable);
 
-  private final Debouncer isGyroConnectedDebouncer = new Debouncer(GYRO_CONNECTED_DEBUNCER_SECONDS, DebounceType.kFalling);
+  private final Debouncer isGyroConnectedDebouncer = new Debouncer(GYRO_CONNECTED_DEBUNCER_SECONDS, DebounceType.kRising);
 
   public Swerve() {
     fieldsTable.update();
