@@ -1,6 +1,5 @@
 package frc.robot.subsystems.poseestimation;
 
-import static frc.robot.subsystems.poseestimation.PoseEstimatorConstants.PRE_MATCH_VISION_TRUST_LEVEL_MULTIPLIER;
 import static edu.wpi.first.units.Units.Seconds;
 import static frc.robot.subsystems.poseestimation.PoseEstimatorConstants.ODOMETRY_POSES_BUFFER_SIZE;
 import static frc.robot.subsystems.poseestimation.PoseEstimatorConstants.ODOMETRY_STD_DEVS;
@@ -26,7 +25,6 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.units.measure.Time;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import frc.robot.RobotContainer;
 import team2679.atlantiskit.helpers.RotationalSensorHelper;
@@ -47,7 +45,6 @@ public class PoseEstimator implements Tunable {
     private final LogFieldsTable fieldsTable = new LogFieldsTable("PoseEstimator");
     
     private TunableTrustLevel odometryTrustLevel = new TunableTrustLevel(ODOMETRY_STD_DEVS);
-    private TunableTrustLevel preMatchVisionTrustLevelMultiplier = new TunableTrustLevel(PRE_MATCH_VISION_TRUST_LEVEL_MULTIPLIER);
 
     private RotationalSensorHelper yawRotationalSensorHelper = new RotationalSensorHelper(0);
     private Optional<Rotation2d> lastGyroAngle = Optional.empty();
@@ -89,15 +86,11 @@ public class PoseEstimator implements Tunable {
     public void addVisionMeasurement(VisionMeasurement measurement) {
         if (measurement.timestamp.lt(lastResetTimestamp)) return;
         try {
-            Time dt = measurement.timestamp.minus(Seconds.of(odometryPosesBuffer.getInternalBuffer().lastKey()));
-            if (dt.gt(ODOMETRY_POSES_BUFFER_SIZE)) {
-                return;
-            }
+            // Reject measurements older than the odometry buffer can interpolate
+            Time lastKey = Seconds.of(odometryPosesBuffer.getInternalBuffer().lastKey());
+            if (lastKey.minus(measurement.timestamp).gt(ODOMETRY_POSES_BUFFER_SIZE)) return;
         } catch (NoSuchElementException ex) {
             return;
-        }
-        if (DriverStation.isDisabled()) {
-            measurement = new VisionMeasurement(measurement.pose, measurement.trustLevel.multiply(preMatchVisionTrustLevelMultiplier.get()), measurement.timestamp);
         }
         Optional<Pose2d> sample = odometryPosesBuffer.getSample(measurement.timestamp().in(Seconds));
         if (sample.isEmpty())
@@ -186,10 +179,13 @@ public class PoseEstimator implements Tunable {
         return odometryPose;
     }
 
+    public boolean hasGyroAngle() {
+        return lastGyroAngle.isPresent();
+    }
+
     @Override
     public void initTunable(TunableBuilder builder) {
         builder.addChild("Odometry trust level", this.odometryTrustLevel);
-        builder.addChild("Pre match vision trust level multiplier", preMatchVisionTrustLevelMultiplier);
     }
 
     public record VisionMeasurement(Pose2d pose, TrustLevel trustLevel, Time timestamp) {
